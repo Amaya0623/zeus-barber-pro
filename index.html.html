@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZEUS BARBER PRO - Cloud Edition ☁️</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#050505">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body { background: #050505; color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; margin: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
+        input, textarea, select { user-select: auto; background: #000 !important; color: #fff !important; border: 1px solid #333 !important; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: #4f46e5 !important; }
+        input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        
+        .glass { background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        
+        .btn-press { transition: transform 0.1s; }
+        .btn-press:active { transform: scale(0.96); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .status-pulse-green { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        
+        .status-pulse-red { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
+
+        @media screen { #print-area { display: none !important; } }
+        @media print {
+            body { background: #ffffff !important; color: #000000 !important; margin: 0 !important; padding: 0 !important; width: 58mm !important; }
+            #app-content, #btn-isi-ia, .isi-ia-chat, .swal2-container { display: none !important; }
+            #print-area { display: block !important; width: 100% !important; margin: 0 auto; padding: 2mm; font-family: monospace; }
+            @page { margin: 0; size: 58mm auto; } 
+        }
+
+        /* ISI IA STYLES */
+        .isi-ia-btn { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 30px; background: linear-gradient(135deg, #1e61ea, #0cd1b8); box-shadow: 0 10px 25px rgba(12,209,184,0.4); display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); transition: all 0.3s ease; z-index: 999; }
+        .isi-ia-btn:hover { transform: scale(1.1); }
+        .isi-ia-chat { position: fixed; bottom: 100px; right: 24px; width: 360px; max-width: calc(100vw - 48px); background: #09090b; border: 1px solid #27272a; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.9); z-index: 998; overflow: hidden; display: none; flex-direction: column; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; max-height: 75vh; }
+        .isi-ia-chat.show { display: flex; opacity: 1; transform: translateY(0); }
+        .isi-ia-header { background: linear-gradient(135deg, #1e1e2f, #0e2a4a); padding: 16px; border-bottom: 1px solid #27272a; display: flex; justify-content: space-between; align-items: center; border-radius: 24px 24px 0 0; }
+        .msg-ai { background: #18181b; border: 1px solid #27272a; padding: 12px; border-radius: 16px 16px 16px 4px; font-size: 12px; color: #d4d4d8; line-height: 1.5; margin-bottom: 8px;}
+        .msg-user { background: #1e61ea; padding: 12px; border-radius: 16px 16px 4px 16px; font-size: 12px; color: #fff; align-self: flex-end; max-width: 85%; margin-bottom: 8px; }
+        .isi-panel-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 12px; margin-bottom: 12px; }
+        .isi-panel-title { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #0cd1b8; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .isi-metric { display: flex; justify-content: space-between; align-items: center; font-size: 11px; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .isi-action-btn { background: #27272a; color: #fff; font-size: 9px; font-weight: bold; text-transform: uppercase; padding: 6px 10px; border-radius: 8px; cursor: pointer; border: 1px solid #3f3f46; transition: all 0.2s; text-align: center;}
+    </style>
+</head>
+<body>
+
+<div id="print-area"></div>
+
+<div id="pantalla-bloqueo" class="hidden fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center p-6 text-center">
+    <div class="glass p-10 rounded-[3rem] border border-red-900/50 shadow-2xl max-w-md w-full">
+        <span class="text-7xl mb-4 block">🔒</span>
+        <h1 class="text-3xl font-black text-red-500 mb-2 uppercase italic">SISTEMA BLOQUEADO</h1>
+        <p class="text-zinc-400 text-sm mb-6">Tu periodo de suscripción expiró, tienda desactivada o hay anomalía de reloj.</p>
+        <button type="button" onclick="actionLogout()" class="w-full bg-red-900/20 text-red-500 border border-red-900/50 py-4 rounded-2xl font-black uppercase btn-press">SALIR DEL SISTEMA</button>
+    </div>
+</div>
+
+<div id="app-content">
+    <audio id="snd-cash"><source src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" type="audio/mpeg"></audio>
+
+    <nav id="app-nav" class="hidden glass p-4 flex justify-between items-center sticky top-0 z-40 border-b border-zinc-900">
+        <div class="flex items-center gap-3">
+            <div id="nav-logo-box" class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-black text-xs relative overflow-hidden">
+                <span id="nav-logo-txt">IC</span><img id="nav-logo-img" class="hidden w-full h-full object-cover absolute inset-0" src="">
+            </div>
+            <div>
+                <div class="flex items-center gap-2"><h1 id="nav-title" class="font-black text-sm uppercase italic leading-none">ISI CONTROL</h1><span id="nav-status" class="text-[8px] text-green-500 font-bold uppercase tracking-widest bg-black px-1.5 py-0.5 rounded border border-green-900/50">🟢 ONLINE</span></div>
+                <p id="nav-id" class="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-1">ID: ---</p>
+            </div>
+        </div>
+        <button type="button" onclick="detenerAudio(); actionLogout()" class="bg-red-900/10 text-red-500 px-4 py-2 rounded-xl text-[10px] font-bold border border-red-900/30 btn-press">SALIR</button>
+    </nav>
+
+    <section id="view-login" class="view-section active max-w-md mx-auto mt-12 p-8 sm:p-10 glass rounded-[3rem] text-center border border-zinc-900 shadow-2xl">
+        <div id="login-logo-container" class="flex justify-center mb-8 h-40 items-center">
+            <img id="login-custom-logo" src="" alt="Logo Principal" class="hidden h-full w-auto rounded-[2rem] shadow-lg object-contain">
+            <div id="login-default-text" class="w-full">
+                <h2 class="text-4xl sm:text-5xl font-black italic mb-2 uppercase tracking-tighter bg-gradient-to-r from-[#66ff66] via-[#0cd1b8] to-[#1e61ea] text-transparent bg-clip-text">ZEUS BARBER</h2>
+                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mt-2">Software de Nube</p>
+            </div>
+        </div>
+        <input type="password" inputmode="numeric" id="login-pin" placeholder="INGRESE PIN" class="w-full p-6 rounded-3xl text-center text-4xl font-black mb-6 border border-zinc-800 shadow-inner tracking-widest bg-[#050505] focus:border-indigo-500 outline-none transition-colors text-white">
+        <button type="button" onclick="actionLogin()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-6 rounded-3xl text-xl font-black uppercase italic shadow-lg shadow-indigo-600/20 btn-press transition-colors text-white mb-6">Entrar a Zeus ⚡</button>
+        <hr class="border-zinc-800 mb-6">
+        <button type="button" onclick="abrirKioskoPublico()" class="w-full bg-zinc-900 hover:bg-[#111] py-5 rounded-3xl text-xs font-black uppercase text-indigo-400 border border-indigo-500/30 btn-press transition-colors shadow-[0_0_15px_rgba(99,102,241,0.1)]">📅 Kiosko Público / Todas</button>
+        <p class="text-[9px] text-zinc-600 mt-10 cursor-pointer hover:text-red-500 uppercase font-bold tracking-widest" onclick="hardReset()">🔄 Limpiar Sistema (Reset)</p>
+    </section>
+
+    <section id="view-kiosko" class="view-section p-4 max-w-md mx-auto mt-6">
+        <div class="glass p-8 rounded-[3rem] border border-indigo-500/30 shadow-2xl">
+            <h2 id="kio-titulo-local" class="text-3xl font-black italic text-indigo-500 uppercase mb-2 text-center leading-none">RESERVA TU TURNO</h2>
+            <p class="text-[9px] text-zinc-400 text-center uppercase tracking-widest mb-6">Estado de los barberos en tiempo real</p>
+            <div id="kiosko-semaforo" class="flex justify-center gap-4 mb-6 flex-wrap"></div>
+            <div class="space-y-4">
+                <div><label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-2">Tu Nombre:</label><input type="text" id="kio-nombre" placeholder="Ej: Juan Perez" class="w-full p-4 mt-1 rounded-2xl bg-black text-white border border-zinc-800 font-bold uppercase text-sm focus:border-indigo-500"></div>
+                <div><label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-2">Tu WhatsApp (Puntos y Alertas):</label><input type="text" inputmode="numeric" id="kio-celular" placeholder="Ej: 3001234567" class="w-full p-4 mt-1 rounded-2xl bg-black text-white border border-zinc-800 font-bold tracking-widest text-sm focus:border-indigo-500"></div>
+                <div><label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-2">Servicio Deseado:</label><select id="kio-servicio" class="w-full p-4 mt-1 rounded-2xl bg-black text-green-400 border border-zinc-800 font-bold text-sm uppercase focus:border-green-500"><option value="">-- ELIGE UN SERVICIO --</option></select></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-2">Fecha:</label><input type="date" id="kio-fecha" onchange="renderKioskoSlots()" class="w-full p-4 mt-1 rounded-2xl bg-black text-white border border-zinc-800 font-bold text-sm focus:border-indigo-500 uppercase"></div>
+                    <div><label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-2">Barbero:</label><select id="kio-barbero" onchange="renderKioskoSlots()" class="w-full p-4 mt-1 rounded-2xl bg-black text-indigo-400 border border-zinc-800 font-bold text-sm uppercase focus:border-indigo-500"><option value="">-- BARBERO --</option></select></div>
+                </div>
+                <div class="bg-black/50 p-4 rounded-2xl border border-zinc-800 shadow-inner min-h-[100px] mt-4"><p class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-3 text-center">Horarios Disponibles</p><div id="kio-slots-container" class="grid grid-cols-3 gap-2"><p class="text-[10px] text-zinc-600 col-span-3 text-center py-2 italic">Selecciona fecha y barbero.</p></div></div>
+                <button onclick="kioskoAgendar()" class="w-full bg-indigo-600 py-5 rounded-3xl font-black text-lg uppercase shadow-lg shadow-indigo-600/20 btn-press mt-2 text-white">AGENDAR AHORA ⚡</button>
+                <button type="button" onclick="volverAInicioKiosko()" class="text-zinc-500 hover:text-white transition-colors text-[10px] font-bold uppercase mt-6 block mx-auto text-center p-2 btn-press">Volver al Inicio</button>
+            </div>
+        </div>
+    </section><section id="view-admin" class="view-section p-6 max-w-5xl mx-auto space-y-6">
+        <div class="glass p-10 rounded-[3rem] border-l-8 border-indigo-600 shadow-2xl relative overflow-hidden">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-end mb-6 border-b border-zinc-900 pb-4 gap-4 mt-2">
+                <p id="admin-utilidad-title" class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Utilidad Neta</p>
+                <div class="bg-black py-2 px-4 rounded-xl border border-zinc-800 flex gap-3 items-center shadow-inner">
+                    <div id="admin-license-badge" class="px-2 py-1 rounded flex items-center gap-1"><span class="text-[8px] uppercase font-bold text-zinc-400 hidden sm:inline">Licencia:</span><span id="admin-license-days" class="text-[10px] font-black"></span></div>
+                    <span class="text-zinc-700 hidden sm:inline">|</span><span id="live-date" class="text-[10px] font-bold text-zinc-400 uppercase hidden sm:inline"></span>
+                    <span class="text-zinc-700">|</span><span id="live-time" class="text-[10px] font-black text-indigo-400 uppercase"></span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h2 id="admin-utilidad" class="text-6xl md:text-7xl font-black italic text-green-500 tracking-tighter">0</h2>
+                    <p id="admin-iva-recaudado" class="text-xs text-yellow-500 font-bold mt-2 hidden">IMPUESTO Recaudado: 0</p>
+                </div>
+                <div class="bg-black/50 p-6 rounded-3xl space-y-3 border border-zinc-900 shadow-inner flex flex-col justify-center">
+                    <div class="flex justify-between text-xs font-bold uppercase text-zinc-400"><span>Efectivo (Bruto):</span> <span class="text-white" id="admin-efectivo">0</span></div>
+                    <div class="flex justify-between text-xs font-bold uppercase text-zinc-400"><span>Bancos (Bruto):</span> <span class="text-white" id="admin-bancos">0</span></div>
+                    <div class="flex justify-between text-xs font-bold uppercase text-zinc-400 border-t border-zinc-800 pt-3"><span>Gastos:</span> <span class="text-red-500" id="admin-gastos">0</span></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-black/40 p-5 rounded-3xl border border-zinc-900/50 shadow-inner">
+                    <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4 text-center">Ingresos por Método</h3>
+                    <div class="relative w-full h-40 flex justify-center"><canvas id="chartMetodos"></canvas></div>
+                </div>
+                <div class="bg-black/40 p-5 rounded-3xl border border-zinc-900/50 shadow-inner">
+                    <h3 class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4 text-center">Rendimiento Barberos</h3>
+                    <div class="relative w-full h-40"><canvas id="chartBarberos"></canvas></div>
+                </div>
+            </div>
+
+            <div class="bg-[#050505] rounded-[2rem] border border-zinc-800 shadow-inner overflow-hidden mt-2">
+                <button type="button" onclick="toggleAcc('acc-admin-menu', 'icon-admin-menu')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
+                    <span class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3"><span class="text-2xl">💈</span> Menú de Gestión</span>
+                    <div class="flex items-center gap-3">
+                        <span id="badge-citas-main" class="hidden bg-red-600 text-white text-[9px] px-3 py-1 rounded-full font-black animate-pulse">0</span>
+                        <span id="icon-admin-menu" class="text-zinc-500 font-black transition-transform duration-300">▼</span>
+                    </div>
+                </button>
+                <div id="acc-admin-menu" class="hidden flex flex-col border-t border-zinc-800/50">
+                    <button onclick="showScreen('view-agenda'); renderAgendaList();" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-white/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">📅</span><span class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">Agenda de Citas</span></div><div class="flex items-center gap-3"><span id="badge-citas-row" class="hidden bg-red-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black">0</span><span class="text-zinc-600 font-black">➔</span></div></button>
+                    <button onclick="abrirClientes()" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-white/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">👥</span><span class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">Directorio de Clientes</span></div><span class="text-zinc-600 font-black">➔</span></button>
+                    <button onclick="abrirBarberos()" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-white/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">💈</span><span class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">Turnos y Barberos</span></div><span class="text-zinc-600 font-black">➔</span></button>
+                    <button onclick="abrirInventario()" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-white/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">📦</span><span class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">Inventario de Productos</span></div><span class="text-zinc-600 font-black">➔</span></button>
+                    <button onclick="abrirGastos()" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-white/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">💸</span><span class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">Registro de Gastos</span></div><span class="text-zinc-600 font-black">➔</span></button>
+                    <button onclick="abrirFacturas()" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-white/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">🧾</span><span class="text-[11px] font-bold text-zinc-300 uppercase tracking-widest">Historial de Facturas</span></div><span class="text-zinc-600 font-black">➔</span></button>
+                    <button onclick="abrirCierreCaja()" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-green-900/20 bg-green-900/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">💰</span><span class="text-[11px] font-bold text-green-400 uppercase tracking-widest">Cierre de Caja Diario</span></div><span class="text-green-600 font-black">➔</span></button>
+                    <button onclick="exportarPDF()" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-rose-900/20 bg-rose-900/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">📄</span><span class="text-[11px] font-bold text-rose-400 uppercase tracking-widest">Exportar Reporte PDF</span></div><span class="text-rose-600 font-black">➔</span></button>
+                    <button onclick="showScreen('view-config')" class="flex justify-between items-center p-5 border-b border-zinc-800/50 hover:bg-indigo-900/20 bg-indigo-900/5 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">⚙️</span><span class="text-[11px] font-bold text-indigo-400 uppercase tracking-widest">Ajustes del Sistema</span></div><span class="text-indigo-600 font-black">➔</span></button>
+                    <button onclick="abrirCierreMes()" class="flex justify-between items-center p-5 hover:bg-red-900/20 bg-red-950/10 btn-press text-left transition-colors"><div class="flex items-center gap-4"><span class="text-2xl">📦</span><span class="text-[11px] font-bold text-red-500 uppercase tracking-widest">Cierre de Mes Seguro</span></div><span class="text-red-600 font-black">➔</span></button>
+                </div>
+            </div>
+        </div>
+        <h3 id="titulo-nomina" class="text-[11px] font-black text-zinc-400 uppercase tracking-widest ml-5 mb-2 italic mt-4">Nómina del Mes</h3>
+        <div id="admin-nomina" class="space-y-4"></div>
+    </section>
+
+    <section id="view-agenda" class="view-section p-4 sm:p-6 max-w-6xl mx-auto">
+        <div class="glass p-6 sm:p-8 rounded-[3rem] border border-yellow-900/30 shadow-2xl">
+            <div class="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
+                <h2 class="text-2xl font-black italic text-yellow-500 uppercase tracking-tighter">AGENDA DE CITAS</h2>
+                <button type="button" onclick="detenerAudio(); showScreen(session.rol==='admin'?'view-admin':'view-barbero')" class="w-10 h-10 bg-red-900/20 text-red-500 rounded-xl flex items-center justify-center font-black text-lg border border-red-900/50 btn-press hover:bg-red-500 hover:text-white transition-colors">✕</button>
+            </div>
+            <div class="flex flex-col lg:flex-row gap-6">
+                <div class="flex-1 bg-black p-6 rounded-[2rem] border border-zinc-800 shadow-inner h-fit">
+                    <h2 class="text-lg font-black italic text-yellow-500 uppercase mb-4">NUEVA CITA MANUAL</h2>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <input type="date" id="agenda-fecha" class="w-full p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-zinc-300 uppercase">
+                        <input type="time" id="agenda-hora" class="w-full p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-zinc-300 uppercase">
+                    </div>
+                    <input type="text" id="agenda-cli" placeholder="Nombre del Cliente" class="w-full p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white uppercase mb-3">
+                    <input type="text" inputmode="numeric" id="agenda-cel" placeholder="WhatsApp (Ej: 313...)" class="w-full p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white tracking-widest mb-3">
+                    <select id="agenda-barbero" class="w-full p-3 rounded-xl bg-zinc-950 border border-zinc-800 font-bold mb-3 text-xs text-indigo-300 uppercase"></select>
+                    <select id="agenda-servicio" class="w-full p-3 rounded-xl bg-zinc-950 border border-zinc-800 font-bold mb-6 text-xs text-green-300 uppercase"></select>
+                    <button onclick="guardarCita()" class="w-full bg-[#ca8a04] text-black py-4 rounded-xl font-black text-sm shadow-lg shadow-yellow-600/20 btn-press hover:bg-yellow-500 transition-colors uppercase">AGENDAR TURNO</button>
+                </div>
+                <div class="flex-[2] flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-black text-zinc-400 uppercase tracking-widest">Citas Programadas</h3>
+                        <div class="flex gap-2">
+                            <button onclick="forzarSincronizacionNube()" class="bg-blue-600 text-white px-4 rounded-xl font-black text-[10px] btn-press shadow-lg uppercase flex items-center gap-1">🔄 Actualizar</button>
+                            <input type="date" id="agenda-filtro-fecha" onchange="renderAgendaList()" class="p-3 rounded-xl bg-black border border-zinc-800 text-xs font-bold text-white outline-none focus:border-yellow-500">
+                        </div>
+                    </div>
+                    <div id="agenda-lista" class="space-y-3 overflow-y-auto max-h-[500px] pr-2"></div>
+                </div>
+            </div>
+        </div>
+    </section><section id="view-barbero" class="view-section p-4 max-w-2xl mx-auto">
+        <div class="glass p-6 sm:p-8 rounded-[3.5rem] border border-zinc-800 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-zinc-500 font-black text-[10px] uppercase tracking-[0.4em]">Punto de Venta</h2>
+                <div class="flex gap-2">
+                    <button onclick="abrirGastos()" class="bg-red-900/20 text-red-400 text-[9px] font-black px-3 py-2 rounded-xl border border-red-900/50 btn-press">💸 GASTOS</button>
+                    <button onclick="abrirFacturas()" class="bg-blue-900/20 text-blue-400 text-[9px] font-black px-3 py-2 rounded-xl border border-blue-900/50 btn-press">🧾 FACTURAS</button>
+                    <button onclick="abrirCierreCaja()" class="bg-green-900/20 text-green-500 text-[9px] font-black px-3 py-2 rounded-xl border border-green-900/50 btn-press">💰 CIERRE</button>
+                </div>
+            </div>
+
+            <div class="bg-[#0a0a0a] p-5 rounded-3xl border border-zinc-800 mb-6 shadow-inner">
+                <h3 class="text-center font-black text-zinc-500 text-[9px] uppercase mb-3 tracking-widest">Mi Estado Actual</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
+                    <button id="btn-estado-libre" onclick="cambiarEstadoBarbero('LIBRE')" class="p-2 bg-green-500/10 border border-green-500/50 rounded-xl flex flex-col items-center justify-center btn-press transition-all duration-300">
+                        <div id="dot-libre" class="w-2 h-2 bg-green-500 rounded-full mb-1 status-pulse-green"></div>
+                        <span class="text-[8px] font-black text-green-500 uppercase tracking-widest">LIBRE</span>
+                    </button>
+                    <button id="btn-estado-ocupado" onclick="cambiarEstadoBarbero('OCUPADO')" class="p-2 bg-red-500/10 border border-red-500/50 rounded-xl flex flex-col items-center justify-center btn-press transition-all duration-300 opacity-50">
+                        <div id="dot-ocupado" class="w-2 h-2 bg-red-500 rounded-full mb-1"></div>
+                        <span class="text-[8px] font-black text-red-500 uppercase tracking-widest">OCUPA.</span>
+                    </button>
+                    <button id="btn-estado-almuerzo" onclick="cambiarEstadoBarbero('ALMUERZO')" class="p-2 bg-yellow-500/10 border border-yellow-500/50 rounded-xl flex flex-col items-center justify-center btn-press transition-all duration-300 opacity-50">
+                        <span class="text-xs mb-0.5">☕</span>
+                        <span class="text-[8px] font-black text-yellow-500 uppercase tracking-widest">ALMUER.</span>
+                    </button>
+                    <button id="btn-estado-descanso" onclick="cambiarEstadoBarbero('DESCANSO')" class="p-2 bg-blue-500/10 border border-blue-500/50 rounded-xl flex flex-col items-center justify-center btn-press transition-all duration-300 opacity-50">
+                        <span class="text-xs mb-0.5">🛌</span>
+                        <span class="text-[8px] font-black text-blue-500 uppercase tracking-widest">DESCAN.</span>
+                    </button>
+                </div>
+                
+                <div class="flex justify-between items-center mb-3 border-t border-zinc-800 pt-4">
+                    <h4 class="text-[10px] font-black italic text-indigo-400 uppercase">Mis Citas</h4>
+                    <div class="flex items-center gap-2">
+                        <button onclick="forzarSincronizacionNube()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black text-[9px] btn-press shadow-lg uppercase flex items-center gap-1">🔄</button>
+                        <input type="date" id="barbero-filtro-fecha" onchange="renderBarbero()" class="p-2 rounded-lg bg-[#111] border border-zinc-800 text-[10px] font-bold text-zinc-400 outline-none focus:border-indigo-500 cursor-pointer">
+                    </div>
+                </div>
+                <div id="barbero-historial-citas" class="space-y-2 max-h-[250px] overflow-y-auto pr-2"></div>
+            </div>
+            
+            <div class="flex gap-2 mb-4 bg-black p-2 rounded-2xl border border-zinc-900">
+                <button type="button" id="tab-btn-servicios" onclick="switchPOS('S')" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl text-xs font-black uppercase transition-all">✂️ Servicios</button>
+                <button type="button" id="tab-btn-productos" onclick="switchPOS('P')" class="flex-1 bg-transparent text-zinc-500 py-3 rounded-xl text-xs font-black uppercase transition-all">🧴 Productos</button>
+            </div>
+
+            <div class="mb-4 relative">
+                <span class="absolute left-4 top-3.5 text-zinc-500">🔍</span>
+                <input type="text" id="pos-search" onkeyup="filtrarPOS()" placeholder="Buscar en el catálogo..." class="w-full pl-11 pr-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-bold text-white focus:border-indigo-500 transition-colors outline-none">
+            </div>
+
+            <div id="pos-servicios" class="grid grid-cols-2 gap-3 mb-6 max-h-64 overflow-y-auto pr-2"></div>
+            <div id="pos-productos" class="hidden grid-cols-2 gap-3 mb-6 max-h-64 overflow-y-auto pr-2"></div>
+
+            <div class="bg-zinc-950 rounded-[2rem] p-6 border border-zinc-900 mb-6 shadow-inner">
+                <div id="pos-carrito" class="space-y-2 mb-4 min-h-[40px]"></div>
+                <div class="flex justify-between items-end pt-4 border-t border-zinc-800 mb-2">
+                    <span class="font-black text-zinc-600 text-sm uppercase">Total</span>
+                    <div id="pos-total-breakdown" class="text-right">
+                        <span id="pos-total" class="text-4xl font-black text-indigo-500 tracking-tighter block leading-none">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-black p-5 rounded-3xl border border-zinc-800 mb-6">
+                <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4 flex items-center gap-2"><span>👑 Datos del Cliente</span></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <input type="text" id="pos-cli-nombre" placeholder="Nombre Completo" class="w-full bg-zinc-950 p-3 rounded-xl text-xs uppercase font-bold text-white border border-zinc-900">
+                    <input type="text" id="pos-cli-idoc" placeholder="Cédula / Pasaporte" class="w-full bg-zinc-950 p-3 rounded-xl text-xs font-bold text-white border border-zinc-900 tracking-widest">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <input type="text" inputmode="numeric" id="pos-cli-celular" placeholder="Celular (Para Puntos)" class="w-full bg-zinc-950 p-3 rounded-xl text-xs font-bold text-white border border-zinc-900 tracking-widest focus:border-orange-500 transition-colors">
+                    <input type="email" id="pos-cli-correo" placeholder="Correo (Opcional)" class="w-full bg-zinc-950 p-3 rounded-xl text-xs font-bold text-white border border-zinc-900">
+                    <div class="relative w-full">
+                        <span class="absolute left-3 top-3 text-[10px] text-zinc-500 font-bold uppercase">Cumple:</span>
+                        <input type="date" id="pos-cli-cumple" class="w-full bg-zinc-950 pt-7 pb-2 px-3 rounded-xl text-xs font-bold text-white border border-zinc-900">
+                    </div>
+                </div>
+            </div>
+            
+            <select id="pos-metodo" onchange="validarBotonCobro()" class="w-full p-5 rounded-2xl font-black text-center mb-4 text-sm uppercase tracking-widest bg-zinc-900 border border-zinc-700 text-white outline-none focus:border-indigo-500">
+                <option value="">-- SELECCIONAR MÉTODO DE PAGO --</option>
+                <option value="Efectivo">EFECTIVO 💵</option>
+                <option value="Tarjeta">TARJETA CRÉDITO/DÉBITO 💳</option>
+                <option value="Nequi">NEQUI 📱</option>
+                <option value="Daviplata">DAVIPLATA 📱</option>
+                <option value="Transferencia">TRANSFERENCIA BANCARIA 🏦</option>
+            </select>
+
+            <button type="button" id="pos-btn-cobrar" onclick="procesarVenta()" disabled class="w-full py-6 rounded-3xl text-2xl font-black uppercase opacity-20 cursor-not-allowed transition-all shadow-xl btn-press bg-green-600 text-white">FINALIZAR COBRO</button>
+        </div>
+    </section><section id="view-config" class="view-section p-6 max-w-4xl mx-auto">
+        <div class="glass p-8 sm:p-10 rounded-[3.5rem] border border-zinc-800 shadow-2xl">
+            <div class="flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
+                <h2 class="text-3xl font-black italic text-indigo-500 uppercase tracking-tighter">Configuración</h2>
+                <button type="button" onclick="showScreen('view-admin')" class="w-10 h-10 bg-red-900/20 text-red-500 rounded-xl flex items-center justify-center font-black text-lg border border-red-900/50 btn-press hover:bg-red-500 hover:text-white transition-colors">✕</button>
+            </div>
+            <div class="space-y-4">
+                <div class="bg-black/50 rounded-[2rem] border border-zinc-900 overflow-hidden">
+                    <button type="button" onclick="toggleAcc('acc-datos', 'icon-datos')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
+                        <span class="text-[11px] font-black text-zinc-300 uppercase tracking-widest flex items-center gap-2"><span class="text-lg">🏢</span> Datos del Negocio</span><span id="icon-datos" class="text-zinc-500 font-black transition-transform duration-300">▼</span>
+                    </button>
+                    <div id="acc-datos" class="hidden px-6 pb-6 space-y-4 border-t border-zinc-800/50 pt-5">
+                        <div class="flex justify-center mb-2">
+                            <div id="cfg-logo-box" onclick="document.getElementById('file-logo').click()" class="cursor-pointer w-24 h-24 rounded-full bg-zinc-950 border-2 border-dashed border-zinc-700 flex items-center justify-center overflow-hidden hover:border-indigo-500 transition-all relative"><span class="text-[9px] font-bold text-zinc-600 text-center px-1">SUBIR FOTO</span></div>
+                            <input type="file" id="file-logo" class="hidden" accept="image/*" onchange="subirLogoBarberia(this)">
+                        </div>
+                        <input type="text" id="cfg-nombre" placeholder="Nombre Barbería" class="w-full p-4 rounded-xl font-black uppercase text-sm text-center bg-zinc-950 border border-zinc-800 text-white">
+                        <input type="text" id="cfg-nit" placeholder="NIT / RUT / ID Fiscal" class="w-full p-4 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-white">
+                        <div class="flex gap-3">
+                            <input type="text" id="cfg-direccion" placeholder="Dirección Completa" class="w-full p-4 rounded-xl text-xs font-bold border border-zinc-800 bg-[#050505] text-white">
+                            <input type="text" inputmode="numeric" id="cfg-telefono" placeholder="Teléfono" class="w-1/2 p-4 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-white">
+                        </div>
+                        <textarea id="cfg-resolucion" rows="2" placeholder="Resolución DIAN o Texto Legal Fiscal" class="w-full p-4 rounded-xl text-xs font-bold border border-zinc-800 bg-[#050505] text-zinc-400 resize-none"></textarea>
+                        <div class="flex gap-3">
+                            <input type="text" id="cfg-prefijo" placeholder="Prefijo (Ej: POS-)" class="w-1/3 p-4 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-yellow-400 uppercase">
+                            <input type="text" inputmode="numeric" id="cfg-consecutivo" placeholder="Siguiente N° (Ej: 100)" class="w-2/3 p-4 rounded-xl text-xs font-bold border border-zinc-800 bg-[#050505] text-yellow-400 tracking-widest text-center">
+                        </div>
+                        <div class="flex gap-3">
+                            <select id="cfg-moneda" class="w-1/3 p-4 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-green-400 outline-none focus:border-indigo-500 cursor-pointer">
+                                <option value="COP">COP ($)</option>
+                                <option value="USD">USD (US$)</option>
+                                <option value="MXN">MXN (MX$)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="PEN">PEN (S/)</option>
+                            </select>
+                            <textarea id="cfg-ticket-footer" rows="1" placeholder="Texto legal al final del ticket" class="w-2/3 p-4 rounded-xl text-xs font-bold border border-zinc-800 bg-[#050505] text-zinc-500 resize-none">Documento no válido como factura</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-black/50 rounded-[2rem] border border-zinc-900 overflow-hidden">
+                    <button type="button" onclick="toggleAcc('acc-kiosko', 'icon-kiosko')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
+                        <span class="text-[11px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2"><span class="text-lg">🌐</span> Tu Kiosko en Línea</span><span id="icon-kiosko" class="text-zinc-500 font-black transition-transform duration-300">▼</span>
+                    </button>
+                    <div id="acc-kiosko" class="hidden px-6 pb-6 border-t border-zinc-800/50 pt-5">
+                        <div class="bg-indigo-900/10 p-6 rounded-[1.5rem] border border-indigo-900/30 flex flex-col items-center">
+                            <p class="text-[10px] font-black text-indigo-400 mb-2 uppercase tracking-widest text-center">Enlace Directo para Clientes</p>
+                            <p class="text-[9px] text-zinc-400 mb-4 text-center">Comparte este enlace en tu Instagram o WhatsApp. Los clientes entrarán directo a tu agenda.</p>
+                            
+                            <div class="flex flex-col sm:flex-row w-full gap-2 mb-6">
+                                <input type="text" id="cfg-kiosko-link" readonly class="flex-1 p-3 rounded-xl bg-[#050505] border border-zinc-800 text-xs font-bold text-zinc-400 focus:outline-none text-center sm:text-left">
+                                <button type="button" onclick="copiarLinkKiosko()" class="bg-indigo-600 text-white px-4 py-3 sm:py-0 rounded-xl font-black text-[10px] uppercase btn-press hover:bg-indigo-500 transition-colors shadow-lg">Copiar Enlace</button>
+                            </div>
+
+                            <p class="text-[10px] font-black text-indigo-400 mb-3 uppercase tracking-widest">Código QR para Imprimir</p>
+                            <div class="bg-white p-4 rounded-2xl mb-4 shadow-lg">
+                                <div id="cfg-kiosko-qr"></div>
+                            </div>
+                            <button type="button" onclick="imprimirQRKiosko()" class="w-full bg-white text-black py-3 rounded-xl font-black text-[10px] uppercase btn-press hover:bg-gray-200 transition-colors shadow-md">🖨️ Imprimir Cartel QR</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-black/50 rounded-[2rem] border border-zinc-900 overflow-hidden">
+                    <button type="button" onclick="toggleAcc('acc-personal', 'icon-personal')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
+                        <span class="text-[11px] font-black text-zinc-300 uppercase tracking-widest flex items-center gap-2"><span class="text-lg">💈</span> Personal y Servicios</span><span id="icon-personal" class="text-zinc-500 font-black transition-transform duration-300">▼</span>
+                    </button>
+                    <div id="acc-personal" class="hidden px-6 pb-6 border-t border-zinc-800/50 pt-5">
+                        
+                        <div class="col-span-12 mb-4 p-4 rounded-xl border border-zinc-800 bg-[#111]">
+                            <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3">⏳ Configuración de Horarios</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                                <div><p class="text-[8px] text-zinc-500 uppercase mb-1 font-bold">Hora Apertura</p><input type="time" id="cfg-apertura" class="w-full p-3 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-white"></div>
+                                <div><p class="text-[8px] text-zinc-500 uppercase mb-1 font-bold">Hora Cierre</p><input type="time" id="cfg-cierre" class="w-full p-3 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-white"></div>
+                                <div><p class="text-[8px] text-zinc-500 uppercase mb-1 font-bold">Minutos/Cita</p><input type="text" inputmode="numeric" id="cfg-intervalo" placeholder="Ej: 60" class="w-full p-3 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-zinc-950 p-6 rounded-[1.5rem] border border-zinc-800 shadow-inner">
+                                <p class="text-[10px] font-black text-green-400 mb-4 uppercase tracking-widest">Crear Servicios</p>
+                                <div class="grid grid-cols-12 gap-2 mb-4">
+                                    <input type="text" id="add-s-nom" placeholder="Nombre Servicio" class="col-span-6 sm:col-span-7 p-3 text-xs rounded-xl uppercase font-bold bg-[#050505] border border-zinc-800 w-full text-white">
+                                    <input type="text" inputmode="numeric" id="add-s-pre" placeholder="Precio numérico" class="col-span-4 sm:col-span-3 p-3 text-xs rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 w-full text-white">
+                                    <button type="button" onclick="configAddServicio()" class="col-span-2 bg-green-600 hover:bg-green-500 text-white rounded-xl font-black btn-press">+</button>
+                                </div>
+                                <div id="cfg-lista-s" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+                            </div>
+                            <div class="bg-zinc-950 p-6 rounded-[1.5rem] border border-zinc-800 shadow-inner">
+                                <div class="flex justify-between items-center mb-4"><p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Crear Barberos</p></div>
+                                <div class="grid grid-cols-12 gap-2 mb-4">
+                                    <input type="text" id="add-b-nom" placeholder="Nombre" class="col-span-5 p-3 text-[10px] sm:text-xs rounded-xl uppercase font-bold bg-[#050505] border border-zinc-800 w-full text-white">
+                                    <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" class="col-span-3 p-3 text-[10px] sm:text-xs rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 w-full text-white">
+                                    <input type="text" inputmode="numeric" id="add-b-comision" placeholder="%" class="col-span-2 p-3 text-[10px] sm:text-xs rounded-xl font-bold text-center text-indigo-400 bg-[#050505] border border-zinc-800 w-full">
+                                    <button type="button" onclick="configAddBarbero()" class="col-span-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black btn-press">+</button>
+                                </div>
+                                <div id="cfg-lista-b" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-black/50 rounded-[2rem] border border-zinc-900 overflow-hidden">
+                    <button type="button" onclick="toggleAcc('acc-cobros', 'icon-cobros')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
+                        <span class="text-[11px] font-black text-zinc-300 uppercase tracking-widest flex items-center gap-2"><span class="text-lg">💳</span> Finanzas y Seguridad</span><span id="icon-cobros" class="text-zinc-500 font-black transition-transform duration-300">▼</span>
+                    </button>
+                    <div id="acc-cobros" class="hidden px-6 pb-6 space-y-4 border-t border-zinc-800/50 pt-5">
+                        <div class="bg-zinc-950 p-6 rounded-[1.5rem] border border-zinc-800">
+                            <div class="flex justify-between items-center mb-4"><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">🏛️ Impuestos (IVA/TAX)</p><input type="checkbox" id="cfg-iva-activo" class="w-6 h-6 accent-gray-500 cursor-pointer"></div>
+                            <input type="text" inputmode="numeric" id="cfg-iva-pct" placeholder="% de Impuesto (Ej: 19)" class="w-full p-4 rounded-xl text-sm font-bold bg-[#050505] border border-zinc-800 text-gray-300 text-center">
+                        </div>
+                        <div class="bg-indigo-900/10 p-6 rounded-[1.5rem] border border-indigo-900/30">
+                            <p class="text-[10px] font-black text-indigo-400 mb-4 uppercase tracking-widest">💳 Datos para QR en POS</p>
+                            <div class="flex gap-3 mb-5"><input type="text" id="cfg-titular" placeholder="Titular Cuenta" class="w-full p-4 rounded-xl text-xs uppercase font-bold bg-[#050505] border border-zinc-800 text-white"><input type="text" inputmode="numeric" id="cfg-cuenta" placeholder="N° Cuenta" class="w-full p-4 rounded-xl text-xs font-bold tracking-widest bg-[#050505] border border-zinc-800 text-white"></div>
+                            <div class="p-5 bg-black rounded-xl border border-zinc-800 flex flex-col items-center"><div id="cfg-qr-box" onclick="document.getElementById('file-qr').click()" class="cursor-pointer w-32 h-32 rounded-2xl bg-[#050505] border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center relative hover:border-indigo-500 overflow-hidden transition-all"><span class="text-3xl mb-1">📱</span></div><input type="file" id="file-qr" class="hidden" accept="image/*" onchange="subirQRBarberia(this)"></div>
+                        </div>
+                        <div class="bg-red-900/10 p-6 rounded-[1.5rem] border border-red-900/30 flex flex-col items-center">
+                            <p class="text-[10px] font-black text-red-500 mb-3 uppercase tracking-widest w-full text-left">🔒 Seguridad de Panel</p>
+                            <div class="bg-indigo-950 p-5 rounded-2xl border border-indigo-900/50 mb-4 w-full">
+                                <label class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-2">Cambiar PIN Administrador</label>
+                                <div class="flex flex-col sm:flex-row gap-2 mt-1.5">
+                                    <input type="password" inputmode="numeric" id="cfg-admin-pin" placeholder="PIN ACTUAL" class="w-full p-4 rounded-xl text-center text-sm font-black bg-black/30 border border-zinc-800 text-white tracking-widest focus:border-indigo-500">
+                                    <input type="password" inputmode="numeric" id="cfg-new-admin-pin" placeholder="NUEVO PIN" class="w-full p-4 rounded-xl text-center text-sm font-black bg-black/30 border border-zinc-800 text-white tracking-widest focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <button type="button" onclick="saCambiarMasterPin()" class="w-full bg-green-600 hover:bg-green-500 text-white py-4 rounded-2xl font-black text-xs uppercase italic btn-press transition-colors">GUARDAR NUEVO PIN</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-black/50 rounded-[2rem] border border-zinc-900 overflow-hidden">
+                    <button type="button" onclick="toggleAcc('acc-notificaciones', 'icon-notificaciones')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
+                        <span class="text-[11px] font-black text-zinc-300 uppercase tracking-widest flex items-center gap-2"><span class="text-lg">💬</span> Notificaciones y WhatsApp</span><span id="icon-notificaciones" class="text-zinc-500 font-black transition-transform duration-300">▼</span>
+                    </button>
+                    <div id="acc-notificaciones" class="hidden px-6 pb-6 space-y-4 border-t border-zinc-800/50 pt-5">
+                        <div class="bg-[#25D366]/10 p-6 rounded-[1.5rem] border border-[#25D366]/20">
+                            <p class="text-[10px] font-black text-[#25D366] mb-3 uppercase tracking-widest">WhatsApp Principal</p>
+                            <input type="text" inputmode="numeric" id="cfg-whatsapp" placeholder="Ej: 573001234567" class="w-full p-4 rounded-xl text-sm font-black tracking-widest bg-[#050505] border border-zinc-800 focus:border-[#25D366] transition-colors outline-none text-white">
+                        </div>
+                        <div class="bg-blue-900/10 p-6 rounded-[1.5rem] border border-blue-900/30">
+                            <div class="flex justify-between items-center mb-3"><p class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Plantilla Agenda (WhatsApp)</p><input type="checkbox" id="cfg-alertas" class="w-5 h-5 accent-blue-600 cursor-pointer"></div>
+                            <p class="text-[9px] text-zinc-500 mb-4">Usa: <b class="text-white">{cliente}</b>, <b class="text-white">{hora}</b>, <b class="text-white">{barbero}</b>, <b class="text-white">{servicio}</b>.</p>
+                            <textarea id="cfg-wp-template" rows="3" class="w-full p-4 rounded-xl text-xs font-bold text-zinc-300 bg-[#050505] border border-zinc-800 resize-none focus:border-blue-500 transition-colors outline-none"></textarea>
+                        </div>
+                        <div class="bg-blue-900/10 p-6 rounded-[1.5rem] border border-blue-900/30">
+                            <p class="text-[10px] font-black text-blue-400 mb-4 uppercase tracking-widest">Plantilla de Recibos (WhatsApp)</p>
+                            <div class="bg-black p-3 rounded-xl border border-zinc-800 mb-4 flex justify-around text-xl"><button type="button" onclick="insertEmoji('cfg-msg-bienvenida', decodeURIComponent('%F0%9F%92%88'))" class="hover:scale-125 transition-transform">&#x1F488;</button><button type="button" onclick="insertEmoji('cfg-msg-bienvenida', decodeURIComponent('%E2%9C%82%EF%B8%8F'))" class="hover:scale-125 transition-transform">&#x2702;&#xFE0F;</button><button type="button" onclick="insertEmoji('cfg-msg-bienvenida', decodeURIComponent('%F0%9F%94%A5'))" class="hover:scale-125 transition-transform">&#x1F525;</button><button type="button" onclick="insertEmoji('cfg-msg-bienvenida', decodeURIComponent('%F0%9F%92%AF'))" class="hover:scale-125 transition-transform">&#x1F4AF;</button><button type="button" onclick="insertEmoji('cfg-msg-bienvenida', decodeURIComponent('%F0%9F%98%8E'))" class="hover:scale-125 transition-transform">&#x1F60E;</button></div>
+                            <div class="space-y-4"><div><input type="text" id="cfg-msg-bienvenida" placeholder="Saludo (Ej: Gracias por venir)" class="w-full p-4 rounded-xl text-xs font-bold bg-[#050505] border border-zinc-800 text-white"></div><div><input type="text" id="cfg-msg-despedida" placeholder="Despedida (Ej: Vuelve pronto)" class="w-full p-4 rounded-xl text-xs font-bold bg-[#050505] border border-zinc-800 text-white"></div></div>
+                        </div>
+                        <div class="bg-purple-900/10 p-6 rounded-[1.5rem] border border-purple-900/30">
+                            <p class="text-[10px] font-black text-purple-400 mb-2 uppercase tracking-widest">🎵 Audio de Cita Terminada</p>
+                            <p class="text-[9px] text-zinc-500 mb-4">Sube un sonido épico (MP3, WAV. <strong class="text-white">Max 2MB</strong>).</p>
+                            <input type="file" id="cfg-audio-file" accept="audio/*" class="block w-full text-[10px] text-zinc-400 mb-4 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-purple-900/30 file:text-purple-400 hover:file:bg-purple-900/50 overflow-hidden cursor-pointer">
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" onclick="guardarAudio()" class="bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-xl font-black text-[9px] sm:text-[10px] btn-press uppercase shadow-lg shadow-purple-600/20 transition-colors">Guardar</button>
+                                <button type="button" onclick="probarAudio()" class="bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-xl font-black text-[9px] sm:text-[10px] btn-press uppercase transition-colors">▶️ Probar</button>
+                                <button type="button" onclick="detenerAudio(); borrarAudio()" class="bg-red-900/30 hover:bg-red-900/50 text-red-500 py-3 rounded-xl font-black text-[9px] sm:text-[10px] btn-press uppercase border border-red-900/50 transition-colors">Borrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-black/50 rounded-[2rem] border border-zinc-900 overflow-hidden">
+                    <button type="button" onclick="toggleAcc('acc-promos', 'icon-promos')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
+                        <span class="text-[11px] font-black text-zinc-300 uppercase tracking-widest flex items-center gap-2"><span class="text-lg">🎁</span> Fidelización y Ofertas</span><span id="icon-promos" class="text-zinc-500 font-black transition-transform duration-300">▼</span>
+                    </button>
+                    <div id="acc-promos" class="hidden px-6 pb-6 border-t border-zinc-800/50 pt-5">
+                        <div class="bg-orange-900/10 p-6 rounded-[1.5rem] border border-orange-900/30">
+                            <div class="flex justify-between items-center mb-4"><p class="text-[10px] font-black text-orange-400 uppercase tracking-widest">🎂 Feliz Cumpleaños</p><input type="checkbox" id="cfg-cumple-activo" class="w-6 h-6 accent-orange-500 cursor-pointer"></div>
+                            <div class="flex gap-3"><input type="text" inputmode="numeric" id="cfg-cumple-desc" placeholder="% Desc" class="w-1/3 p-4 rounded-xl text-sm font-black bg-[#050505] border border-zinc-800 text-orange-400 text-center"><textarea id="cfg-cumple-msg" rows="2" placeholder="Ej: 50% descuento..." class="w-2/3 p-4 rounded-xl text-xs font-bold bg-[#050505] border border-zinc-800 text-white resize-none"></textarea></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="actionGuardarYSalir()" class="bg-green-600 hover:bg-green-500 w-full py-6 rounded-[2rem] text-xl font-black uppercase italic shadow-xl transition-all text-white border-b-4 border-green-800 btn-press mt-6">GUARDAR Y VOLVER AL PANEL</button>
+        </div>
+    </section>
+
+    <section id="view-superadmin" class="view-section p-6 max-w-5xl mx-auto space-y-6">
+        <div class="flex justify-between items-center mb-2">
+            <h1 class="text-3xl font-black italic text-indigo-500 uppercase tracking-tighter">MASTER CONTROL</h1>
+            <div class="flex gap-3">
+                <button onclick="saSincronizarNube()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase btn-press shadow-lg shadow-blue-600/20 flex items-center gap-1">🔄 Forzar</button>
+                <button onclick="actionLogout()" class="bg-zinc-900 text-zinc-400 px-4 py-2 rounded-xl text-[10px] font-bold uppercase hover:text-white border border-zinc-800 btn-press">CERRAR</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-[#0a0a0a] p-4 rounded-2xl border border-zinc-800 shadow-inner text-center">
+                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Ingresos SaaS</p>
+                <p id="saas-total-revenue" class="text-xl font-black text-green-400">0</p>
+            </div>
+            <div class="bg-[#0a0a0a] p-4 rounded-2xl border border-zinc-800 shadow-inner text-center">
+                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Pruebas</p>
+                <p id="saas-total-trials" class="text-xl font-black text-blue-400">0</p>
+            </div>
+            <div class="bg-[#0a0a0a] p-4 rounded-2xl border border-zinc-800 shadow-inner text-center">
+                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Premium</p>
+                <p id="saas-total-premium" class="text-xl font-black text-yellow-500">0</p>
+            </div>
+        </div>
+        
+        <div class="bg-indigo-900/10 p-6 rounded-[2rem] border border-indigo-900/30 mb-6">
+            <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2"><span class="text-lg">📥</span> Buzón de Ideas</h3>
+            <div id="sa-sugerencias-lista" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-[#0a0a0a] p-6 rounded-[2rem] border border-zinc-800">
+                <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4">Branding Global</h3>
+                <div class="flex gap-4 mb-4">
+                    <div id="sa-logo-box" onclick="document.getElementById('sa-file-logo').click()" class="cursor-pointer w-20 h-20 rounded-[1rem] bg-[#111] border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center relative hover:border-indigo-500 overflow-hidden transition-all"><span class="text-xl mb-1">🖼️</span></div>
+                    <input type="file" id="sa-file-logo" class="hidden" accept="image/*" onchange="saSubirLogo(this)">
+                    <div class="flex-1 flex flex-col justify-center gap-2">
+                        <div class="flex items-center gap-2"><input type="checkbox" id="sa-brand-activo" class="w-4 h-4 accent-indigo-500 cursor-pointer"><span class="text-[10px] font-bold text-zinc-400 uppercase">Activar Marca</span></div>
+                        <button onclick="saGuardarLogo()" class="bg-zinc-800 text-white text-[9px] font-black px-3 py-2 rounded-lg btn-press hover:bg-zinc-700 transition-colors">Guardar Logo</button>
+                    </div>
+                </div>
+                <textarea id="sa-brand-text" rows="2" placeholder="Texto de marca de agua global" class="w-full p-3 rounded-xl bg-[#111] border border-zinc-800 text-xs font-bold text-zinc-300 mb-3 resize-none focus:border-indigo-500 outline-none transition-colors"></textarea>
+                <button onclick="saGuardarBranding()" class="w-full bg-indigo-900/30 text-indigo-400 border border-indigo-900/50 py-3 rounded-xl font-black text-[10px] uppercase btn-press hover:bg-indigo-600 hover:text-white transition-colors">Guardar Textos Globales</button>
+            </div>
+            
+            <div class="bg-[#0a0a0a] p-6 rounded-[2rem] border border-zinc-800">
+                <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4">Nueva Barbería (Instancia)</h3>
+                <input type="text" id="sa-nombre" placeholder="Nombre Local" class="w-full p-3 text-sm rounded-xl mb-3 bg-[#111] border border-zinc-800 text-white font-bold uppercase focus:border-indigo-500 outline-none transition-colors">
+                <input type="password" inputmode="numeric" id="sa-pin" placeholder="PIN DUEÑO" class="w-full p-3 text-sm rounded-xl mb-4 text-center bg-[#111] border border-zinc-800 text-white font-bold tracking-widest focus:border-indigo-500 outline-none transition-colors">
+                <button onclick="saCrearBarberia()" class="w-full bg-indigo-600 py-4 rounded-xl font-black text-[11px] uppercase btn-press text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-colors">🚀 Crear Instancia en Nube</button>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center mb-2 mt-6"><h3 class="text-[11px] font-black text-zinc-500 uppercase tracking-widest pl-2">Locales Activos</h3><div class="flex items-center gap-2"><input type="password" inputmode="numeric" id="sa-master-pin" placeholder="Nuevo PIN Maestro" class="p-2 text-[10px] rounded-lg bg-[#111] border border-zinc-800 text-center text-white w-32 focus:border-red-500 outline-none transition-colors"><button onclick="saCambiarMaster()" class="bg-red-900/30 text-red-500 border border-red-900/50 px-3 py-2 rounded-lg text-[9px] font-black btn-press hover:bg-red-600 hover:text-white transition-colors">Cambiar</button></div></div>
+        
+        <div id="sa-lista" class="space-y-4 max-h-[600px] overflow-y-auto pr-2 pb-10"></div>
+    </section>
+
+    <div id="modal-qr" class="hidden fixed inset-0 z-[200] bg-black/98 flex items-center justify-center p-6 text-center">
+        <div class="glass p-8 rounded-[3rem] max-w-sm w-full border border-zinc-800 shadow-2xl max-h-[90vh] overflow-y-auto relative text-left">
+            <button type="button" onclick="cerrarModalespos()" class="absolute top-5 right-5 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
+            <h3 id="qr-banco" class="text-indigo-500 font-black text-4xl italic uppercase mb-1 tracking-tighter text-center">BANK NAME</h3>
+            <p id="qr-titular" class="text-zinc-500 text-[10px] font-bold uppercase mb-4 tracking-widest text-center">TITULAR: ---</p>
+            <div id="qr-caja" class="flex justify-center items-center mb-4 bg-white p-4 rounded-3xl mx-auto w-max shadow-lg min-w-[180px] min-h-[180px]"></div>
+            <p id="qr-numero" class="text-white font-black text-xs tracking-widest mb-6 text-center">N° Account: ---</p>
+            <div class="bg-black/50 p-4 rounded-3xl border border-zinc-800 mb-6 relative">
+                <p class="text-[10px] font-black text-red-500 uppercase mb-3 tracking-widest text-center">📸 Evidencia de Pago Obligatoria</p>
+                <div id="comprobante-box" class="w-full h-24 rounded-2xl bg-zinc-950 border-2 border-dashed border-red-900/50 flex flex-col items-center justify-center overflow-hidden relative mb-2">
+                    <img id="cfg-comprobante-img" class="hidden w-full h-full object-cover absolute inset-0" src="">
+                    <div id="cfg-comprobante-default" class="flex flex-col items-center justify-center h-full"><span class="text-2xl mb-1">📷</span><span class="text-[9px] text-zinc-600 font-bold uppercase">Subir Foto</span></div>
+                </div>
+                <label class="cursor-pointer block bg-black text-red-500 py-3 rounded-xl font-black text-[10px] uppercase text-center w-full border border-red-900/50 hover:bg-red-900/20 transition-colors">TOCAR PARA TOMAR FOTO<input type="file" id="file-comprobante" class="hidden" accept="image/*" capture="environment" onchange="validarComprobante(this)"></label>
+            </div>
+            <button type="button" id="btn-confirmar-qr" onclick="finalizarVentaOK()" disabled class="w-full bg-green-600 py-6 rounded-3xl font-black uppercase text-white shadow-xl opacity-20 cursor-not-allowed transition-all">CONFIRMAR PAGO ✅</button>
+        </div>
+    </div>
+    
+    <div id="modal-ticket" class="hidden fixed inset-0 z-[300] bg-black/98 flex items-center justify-center p-6 text-center">
+        <div class="glass p-8 rounded-[2rem] max-w-sm w-full border border-zinc-800 shadow-2xl relative text-left max-h-[90vh] overflow-y-auto">
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg">✓</div>
+            <h3 class="text-white font-black text-2xl uppercase mt-6 mb-1 text-center">¡Exitoso!</h3>
+            <p id="ticket-fecha" class="text-zinc-500 text-[10px] font-bold uppercase mb-6 text-center">TK N° --- | 20/03/2026</p>
+            <div class="bg-black p-5 rounded-2xl border border-zinc-900 mb-6 text-left shadow-inner">
+                <div id="ticket-items" class="space-y-2 mb-3 min-h-[50px] text-xs text-zinc-300"></div>
+                <div class="flex justify-between items-center border-t border-zinc-800 pt-3 mt-2"><span class="text-zinc-400 font-black text-[10px] uppercase">Total Pagado</span><span id="ticket-total" class="text-green-400 font-black text-2xl">0</span></div>
+                <p id="ticket-metodo" class="text-right text-[8px] text-zinc-600 font-bold uppercase mt-1"></p>
+            </div>
+            <div class="flex gap-2 mb-3">
+                <button type="button" onclick="cerrarModales()" class="flex-1 bg-zinc-900 py-3 rounded-xl font-black uppercase text-[10px] text-zinc-400 btn-press hover:bg-zinc-800 transition-colors">Cerrar</button>
+                <button type="button" id="btn-wp-ticket" class="hidden flex-[2] bg-[#25D366] text-[#050505] py-3 rounded-xl font-black uppercase text-[10px] btn-press hover:bg-[#20b858] transition-colors">💬 Enviar Ticket</button>
+            </div>
+            <button type="button" onclick="imprimirTicketTermico()" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px] btn-press hover:bg-gray-200 transition-colors">🖨️ IMPRIMIR TICKET</button>
+        </div>
+    </div>
+    
+    <div id="modal-barberos" class="hidden fixed inset-0 z-[100] bg-black/98 flex items-center justify-center p-6">
+        <div class="glass p-10 rounded-[3rem] border border-blue-900/30 max-w-xl w-full max-h-[90vh] overflow-y-auto relative text-left">
+            <button type="button" onclick="cerrarModales()" class="absolute top-7 right-7 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
+            <h2 class="text-3xl font-black mb-6 italic uppercase text-blue-400 text-center">Control de Turnos</h2>
+            <div id="asistencia-lista" class="space-y-3"></div>
+            <p class="text-[9px] text-zinc-500 italic mt-6 px-4 text-center">Recuerda: El turno inicia al loguearse.</p>
+        </div>
+    </div>
+    
+    <div id="modal-inventario" class="hidden fixed inset-0 z-[100] bg-black/98 flex items-center justify-center p-6">
+        <div class="glass p-10 rounded-[3rem] border border-purple-900/30 max-w-xl w-full max-h-[90vh] overflow-y-auto relative text-left">
+            <button type="button" onclick="cerrarModales()" class="absolute top-7 right-7 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
+            <h2 class="text-3xl font-black mb-6 italic uppercase text-purple-400">Inventario</h2>
+            <div id="inventario-lista" class="space-y-3"></div>
+        </div>
+    </div>
+    
+    <div id="modal-gastos" class="hidden fixed inset-0 z-[100] bg-black/98 flex items-center justify-center p-6">
+        <div class="glass p-10 rounded-[3rem] border border-red-900/30 max-w-xl w-full max-h-[90vh] overflow-y-auto relative text-left shadow-2xl">
+            <button type="button" onclick="cerrarModales()" class="absolute top-7 right-7 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
+            <h2 class="text-3xl font-black mb-8 italic uppercase text-red-500 text-center">Egresos Local</h2>
+            <div class="space-y-4 mb-8 bg-black/50 p-6 rounded-[2rem] border border-zinc-900 shadow-inner">
+                <input type="text" id="gasto-desc" placeholder="Descripción (Ej: Insumos, Alquiler)" class="w-full p-4 rounded-xl font-bold uppercase text-sm border border-zinc-800 bg-zinc-950 text-white">
+                <input type="text" inputmode="numeric" id="gasto-val" placeholder="Valor numérico" class="w-full p-4 rounded-xl font-black text-lg border border-zinc-800 bg-zinc-950 text-white">
+                <button type="button" onclick="registrarGasto()" class="w-full bg-red-600 hover:bg-red-500 text-white py-4 rounded-xl font-black uppercase btn-press transition-colors">Registrar Gasto</button>
+            </div>
+            <div id="gastos-historial" class="space-y-2"></div>
+        </div>
+    </div>
+
+    <div id="modal-cierre-caja" class="hidden fixed inset-0 z-[400] bg-black/98 flex items-center justify-center p-6">
+        <div class="glass p-8 rounded-[2.5rem] border border-green-900/30 max-w-sm w-full max-h-[90vh] overflow-y-auto relative text-left shadow-2xl">
+            <button type="button" onclick="cerrarModales()" class="absolute top-6 right-6 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
+            <h3 class="text-white font-black text-2xl uppercase mb-1 text-center">Cierre Caja Diario</h3>
+            <p id="cc-fecha-info" class="text-green-500 text-[10px] font-bold uppercase mb-6 tracking-widest text-center">--- | 20/03/2026</p>
+            <div id="cc-admin-view" class="hidden">
+                <div class="bg-black p-6 rounded-3xl border border-zinc-900 mb-6 text-left space-y-4">
+                    <div class="flex justify-between items-center border-b border-zinc-800 pb-3"><span class="text-zinc-400 font-bold text-[10px] uppercase">✂️ Cortes Totales Hoy</span><span id="cc-total-cortes" class="text-white font-black text-xl">0</span></div>
+                    <div class="flex justify-between items-center"><span class="text-zinc-500 font-bold text-[10px] uppercase">Efectivo Total Hoy 💵</span><span id="cc-efe-hoy" class="text-green-400 font-black text-sm">0</span></div>
+                    <div class="flex justify-between items-center border-b border-zinc-800 pb-3"><span class="text-zinc-500 font-bold text-[10px] uppercase">Digital Total Hoy 📱</span><span id="cc-dig-hoy" class="text-blue-400 font-black text-sm">0</span></div>
+                    <div class="flex justify-between items-center pt-2 border-t border-zinc-800"><span class="text-white font-black text-[10px] uppercase bg-green-900/40 px-2 py-1 rounded">Caja Final (Efectivo)</span><span id="cc-efe-final" class="text-green-500 font-black text-3xl">0</span></div>
+                </div>
+                <button type="button" onclick="procesarCierreFinalDay()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase text-[10px] btn-press transition-colors">🔒 Realizar Cierre Z Final</button>
+            </div>
+            <div id="cc-barbero-view" class="hidden">
+                <p class="text-sm font-black text-white uppercase mb-4 text-center">Ingresa tu Efectivo Contado</p>
+                <input type="text" inputmode="numeric" id="cc-efe-barbero" placeholder="Monto en efectivo" class="w-full p-4 rounded-xl text-center text-sm font-black bg-black border border-zinc-800 text-green-400 tracking-widest focus:border-green-500 mb-6 outline-none transition-colors">
+                <button type="button" onclick="confirmarCierreTurnoBarbero()" class="w-full bg-red-900/10 text-red-500 border border-red-900/30 py-4 rounded-xl font-black uppercase text-[10px] btn-press transition-colors hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors">Confirmar y Finalizar Turno</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-cierre-mes" class="hidden fixed inset-0 z-[500] bg-black/98 flex items-center justify-center p-6">
+        <div class="glass p-8 rounded-[3rem] border border-red-900/50 max-w-md w-full max-h-[90vh] overflow-y-auto relative text-left shadow-2xl">
+            <button type="button" onclick="cerrarModales()" class="absolute top-6 right-6 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
+            <h3 class="text-white font-black text-2xl uppercase mb-2 text-center">Cierre de Mes</h3>
+            <div class="bg-black p-5 rounded-2xl border border-zinc-900 mb-6 text-left space-y-3">
+                <div class="flex justify-between"><span class="text-zinc-500 font-bold text-[10px] uppercase">Ventas Brutas</span><span id="cm-ventas" class="text-white font-black"></span></div>
+                <div id="row-cm-iva" class="flex justify-between"><span class="text-yellow-600/80 font-bold text-[10px] uppercase">IMPUESTO/TAX</span><span id="cm-iva" class="text-yellow-500 font-black"></span></div>
+                <div class="flex justify-between"><span class="text-red-500/80 font-bold text-[10px] uppercase">Gastos Totales</span><span id="cm-gastos" class="text-red-500 font-black"></span></div>
+                <div class="flex justify-between border-t border-zinc-800 pt-3 mt-2"><span class="text-green-500 font-black text-[10px] uppercase">Utilidad Neta</span><span id="cm-neta" class="text-green-400 font-black text-2xl"></span></div>
+            </div>
+            <button type="button" onclick="procesarCierreMes()" class="w-full bg-red-600 text-white py-4 rounded-2xl font-black uppercase text-xs mb-3 btn-press hover:bg-red-500 transition-colors">Archivar y PDF 📦</button>
+        </div>
+    </div>
+    
+    <div id="modal-facturas" class="hidden fixed inset-0 z-[100] bg-black/98 flex items-center justify-center p-6">
+        <div class="glass p-10 rounded-[3rem] border border-blue-900/30 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative text-left shadow-2xl">
+            <button type="button" onclick="cerrarModales()" class="absolute top-7 right-7 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
+            <h2 class="text-3xl font-black mb-6 italic uppercase text-blue-400 text-center">Facturas y Recibos</h2>
+            <input type="text" id="search-factura" onkeyup="renderFacturas()" placeholder="Buscar por Nombre o Factura..." class="w-full p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-white font-bold text-sm mb-6 outline-none focus:border-blue-500 transition-colors">
+            <div id="facturas-lista" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <div id="modal-clientes" class="hidden fixed inset-0 z-[100] bg-black/98 flex items-center justify-center p-6">
+        <div class="glass p-10 rounded-[3rem] border border-blue-900/30 max-w-xl w-full max-h-[90vh] overflow-y-auto relative text-left">
+            <button type="button" onclick="cerrarModales()" class="absolute top-7 right-7 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
+            <h2 class="text-3xl font-black mb-6 italic uppercase text-blue-400 text-center">Directorio de Clientes</h2>
+            <div class="mb-4 relative"><span class="absolute left-4 top-3.5 text-zinc-500">🔍</span><input type="text" id="search-cliente" onkeyup="renderClientes()" placeholder="Buscar por nombre o número..." class="w-full pl-11 pr-4 py-3 rounded-xl bg-zinc-950 border border-zinc-800 text-white font-bold text-sm outline-none focus:border-blue-500 transition-colors"></div>
+            <div id="clientes-lista" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <div id="btn-isi-ia" class="isi-ia-btn hidden" onclick="abrirIsiIa()">
+        <span class="text-sm font-black tracking-widest">ISI</span>
+    </div>
+    
+    <div id="box-isi-ia" class="isi-ia-chat glass">
+        <div class="isi-ia-header">
+            <div>
+                <h4 class="font-black text-white italic tracking-widest">ISI IA ⚡</h4>
+                <p class="text-[8px] text-[#0cd1b8] uppercase">Centro de Mando Inteligente</p>
+            </div>
+            <button onclick="cerrarIsiIa()" class="text-zinc-500 hover:text-white font-bold text-xl btn-press">✕</button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-4 space-y-4" id="isi-ia-content-scroll">
+            <div id="isi-ia-dashboard"></div>
+            <div id="isi-chat-history" class="mt-4 space-y-2"></div>
+        </div>
+
+        <div class="p-3 border-t border-zinc-800 bg-[#050505] flex gap-2">
+            <input type="text" id="isi-chat-input" placeholder="Pregúntale a ISI..." class="flex-1 bg-[#111] border border-zinc-800 rounded-xl p-2 text-xs text-white outline-none focus:border-[#0cd1b8]" onkeypress="if(event.key === 'Enter') enviarMensajeIsi()">
+            <button onclick="enviarMensajeIsi()" class="bg-gradient-to-r from-[#1e61ea] to-[#0cd1b8] text-white px-4 py-2 rounded-xl text-xs font-black btn-press">▶</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ==========================================
+// 1. CAPTURA DE ERRORES Y UTILIDADES
+// ==========================================
+window.onerror = function(m, s, l) { console.error("Sys Err:", m, "L:", l); return false; };
+
+function getTodayYMD() { return new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0]; }
+
+function normalizeDate(dStr) {
+    if (!dStr) return "";
+    if (dStr.includes('/')) { let p = dStr.split('/'); if (p.length === 3) return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`; }
+    return dStr;
+}
+
+function formatTime12h(timeStr) {
+    if (!timeStr) return "--:--";
+    let c = timeStr.toString().replace(/p\.?\s*m\.?/gi, '').replace(/a\.?\s*m\.?/gi, '').replace(/pm/gi, '').replace(/am/gi, '').trim();
+    let p = c.split(':'); let h = parseInt(p[0]) || 0; let mStr = (p[1] || "00").substring(0, 2);
+    let ampm = h >= 12 ? 'PM' : 'AM'; let h12 = h % 12 || 12;
+    return `${h12}:${mStr.padStart(2, '0')} ${ampm}`;
+}
+
+// CORRECCIÓN MONEDA: Dinámica y Exacta
+function fMoney(val) { 
+    let s = '$'; 
+    let checkIdx = bIdx !== -1 ? bIdx : kiosko_bIdx; 
+    if (db && checkIdx !== -1 && db.barberias[checkIdx]) {
+        const m = db.barberias[checkIdx].moneda || 'COP';
+        if (m === 'EUR') s = '€';
+        else if (m === 'PEN') s = 'S/';
+        else if (m === 'USD') s = 'US$';
+        else if (m === 'MXN') s = 'MX$';
+        else s = '$';
+    }
+    return s + ' ' + Number(val).toLocaleString('es-CO'); 
+}
+
+const LOG_KEY = 'ZEUS_LOGS_V70';
+let zeuslog = JSON.parse(localStorage.getItem(LOG_KEY)) || [];
+function addLog(a, u, d) { zeuslog.push({ t: Date.now(), a: a, u: u, d: d }); zeuslog = zeuslog.filter(x => (Date.now() - x.t) < 2592000000); localStorage.setItem(LOG_KEY, JSON.stringify(zeuslog)); }
+
+function cleanStr(v) { return String(v || "").replace(/[<>]/g, '').trim(); }
+function cleanNum(v) { return String(v || "").replace(/\s/g, '').replace(/[^0-9]/g, ''); }
+document.querySelectorAll('input[inputmode="numeric"]').forEach(el => el.addEventListener('input', function() { this.value = cleanNum(this.value); }));
+function timeToMins(t) { if (!t) return 0; const p = t.toString().replace(/p\.?\s*m\.?/gi, '').replace(/a\.?\s*m\.?/gi, '').replace(/pm/gi, '').replace(/am/gi, '').trim().split(':'); return (parseInt(p[0]) || 0) * 60 + (parseInt(p[1]) || 0); }
+function esPinInseguro(p) { if (!p || p.length < 4) return true; if (/^(\d)\1+$/.test(p)) return true; const s1 = "0123456789"; const s2 = "9876543210"; if (s1.includes(p) || s2.includes(p)) return true; const obv = ["1212", "1010", "6969", "0987"]; if (obv.includes(p)) return true; return false; }
+
+// ==========================================
+// 2. CONECTIVIDAD Y BASE DE DATOS
+// ==========================================
+let isOnline = navigator.onLine;
+window.addEventListener('online', () => { isOnline = true; updateNetworkStatusUI(); sincronizarNube(); syncBidireccional(); });
+window.addEventListener('offline', () => { isOnline = false; updateNetworkStatusUI(); });
+
+function updateNetworkStatusUI() {
+    const s = document.getElementById('nav-status'); if (!s) return;
+    if (isOnline) { s.innerHTML = '🟢 ONLINE'; s.className = 'text-[8px] text-green-500 font-bold uppercase tracking-widest bg-black px-1.5 py-0.5 rounded border border-green-900/50'; }
+    else { s.innerHTML = '🔴 OFFLINE (LOCAL)'; s.className = 'text-[8px] text-red-500 font-bold uppercase tracking-widest bg-black px-1.5 py-0.5 rounded border border-red-900/50 animate-pulse'; }
+}
+
+const supabaseClient = supabase.createClient('https://blfkwfmthsdifdjybssw.supabase.co', 'sb_publishable_FHeDWaFmk_vVo5KbcsQKGg__YoMAYKZ');
+
+const DB_KEY = 'ISI_PRO_DB_V70'; const SESSION_KEY = 'ISI_SESSION_V70';
+let db = null; try { db = JSON.parse(localStorage.getItem(DB_KEY)); } catch (e) { localStorage.removeItem(DB_KEY); db = null; }
+
+let bIdx = -1; let session = null; let cart = []; let comprobanteTemp = null; let saLogoTemp = null;
+let chartMetodosInstance = null; let chartBarberosInstance = null; let lastTicketData = null;
+let cloudSyncTimer = null; let kiosko_bIdx = -1; let selectedKioTime = null;
+let currentAudio = null; 
+
+function detenerAudio() { if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; } }
+function reproducirAudioExito() {
+    detenerAudio();
+    const b = db.barberias[bIdx];
+    if (b && b.customAudio) { currentAudio = new Audio(b.customAudio); } 
+    else { currentAudio = new Audio('https://actions.google.com/sounds/v1/ui/digital_bell.ogg'); }
+    currentAudio.play().catch(e => console.error(e));
+}
+
+function initDB() {
+    if (!db) { db = { barberias: [], superPIN: "9999", mainLogo: null, sugerencias: [], lastSyncTime: Date.now(), masterConfig: { brandingActive: true, brandingText: "Software provisto por Isi Control" } }; } 
+    else {
+        if (!db.sugerencias) db.sugerencias = [];
+        db.barberias.forEach(b => {
+            if (!b.barberos) b.barberos = []; if (!b.servicios) b.servicios = []; if (!b.productos) b.productos = [];
+            if (!b.ventas) b.ventas = []; if (!b.gastos) b.gastos = []; if (!b.citas) b.citas = [];
+            if (!b.pagosSaaS) b.pagosSaaS = []; if (!b.clientes) b.clientes = {};
+            b.barberos.forEach(barb => { if (!barb.estado) barb.estado = 'LIBRE'; });
+            b.citas.forEach(c => { c.fecha = normalizeDate(c.fecha); c.hora = c.hora.toString().replace(/p\.?\s*m\.?/gi, '').replace(/a\.?\s*m\.?/gi, '').replace(/pm/gi, '').replace(/am/gi, '').trim(); });
+        });
+    }
+    saveDB();
+}
+
+const TIEMPO_LIMITE = 10 * 60 * 1000;
+function actualizarActividad() { if (sessionStorage.getItem(SESSION_KEY)) localStorage.setItem('ZEUS_LAST_ACTIVITY', Date.now()); }
+
+setInterval(() => {
+    const l = localStorage.getItem('ZEUS_LAST_ACTIVITY');
+    if (l && sessionStorage.getItem(SESSION_KEY)) {
+        if (Date.now() - parseInt(l) > TIEMPO_LIMITE) {
+            sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem('ZEUS_LAST_ACTIVITY');
+            Swal.fire({ title: 'Sesión Expirada', text: 'Cerramos por inactividad.', icon: 'warning', background: '#0a0a0a', color: '#fff' }).then(() => { window.location.href = window.location.pathname + '?t=' + Date.now(); });
+        }
+    }
+}, 5000);
+['click', 'touchstart', 'scroll'].forEach(evt => document.addEventListener(evt, actualizarActividad, { passive: true }));
+
+function verifyTimeIntegrity() {
+    if (bIdx === -1 || !db.barberias[bIdx]) return true;
+    const b = db.barberias[bIdx]; const now = Date.now();
+    if (b.lastActiveClock && now < b.lastActiveClock) { addLog("ALERTA", session ? session.nom : 'SISTEMA', "Reloj retrasado."); return false; }
+    b.lastActiveClock = now; return true;
+}
+
+function verifyAccess() {
+    if (bIdx === -1 || !db.barberias[bIdx]) return true;
+    const b = db.barberias[bIdx]; const diffDays = Math.floor((Date.now() - (b.creadoEn||Date.now())) / (1000 * 60 * 60 * 24));
+    if (b.bloqueado || (b.diasSuscripcion - diffDays) < 0 || !verifyTimeIntegrity()) { document.getElementById('pantalla-bloqueo').classList.remove('hidden'); document.getElementById('app-content').classList.add('hidden'); return false; }
+    return true;
+}
+
+function saveDB() { 
+    if (bIdx !== -1 && db.barberias[bIdx]) { db.barberias[bIdx].lastSyncTime = Date.now(); } 
+    try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) { } 
+    sincronizarNube(); 
+}
+
+// MOTOR DE SINCRONIZACIÓN DE SUBIDA (PUSH)
+function sincronizarNube() {
+    let activeIdx = bIdx !== -1 ? bIdx : kiosko_bIdx;
+    if (!isOnline || activeIdx === -1 || !db.barberias[activeIdx] || !db.barberias[activeIdx].id_nube) return;
+    
+    clearTimeout(cloudSyncTimer);
+    cloudSyncTimer = setTimeout(() => { 
+        const b = db.barberias[activeIdx]; 
+        supabaseClient.from('stores').update({ json_data: b }).eq('id', b.id_nube).then(({ error }) => { 
+            if (!error) updateNetworkStatusUI(); 
+        }); 
+    }, 1500);
+}
+
+// MOTOR DE SINCRONIZACIÓN DE DESCARGA BIDIRECCIONAL (PULL INTELIGENTE ANTI-CHOQUES)
+async function syncBidireccional() {
+    let activeIdx = bIdx !== -1 ? bIdx : kiosko_bIdx;
+    if (!isOnline || activeIdx === -1 || !db.barberias[activeIdx] || !db.barberias[activeIdx].id_nube) return;
+
+    try {
+        const { data, error } = await supabaseClient.from('stores').select('json_data').eq('id', db.barberias[activeIdx].id_nube).single();
+        if (data && data.json_data) {
+            let cloudB = data.json_data;
+            let localB = db.barberias[activeIdx];
+            
+            // FUSION PROTEGIDA: Respetar bloqueos y suscripciones del Master
+            localB.bloqueado = cloudB.bloqueado;
+            localB.diasSuscripcion = cloudB.diasSuscripcion;
+            localB.pagosSaaS = cloudB.pagosSaaS || localB.pagosSaaS;
+            localB.maxBarberos = cloudB.maxBarberos || localB.maxBarberos;
+
+            // FUSION DE CITAS: Combinar citas nuevas de otros celulares sin borrar las locales
+            let mergedCitas = [...localB.citas];
+            (cloudB.citas || []).forEach(cC => {
+                if (!mergedCitas.find(lC => lC.id === cC.id)) {
+                    mergedCitas.push(cC); // Agregar cita nueva
+                } else {
+                    // Actualizar si ya se completó en otro celular
+                    let localMatch = mergedCitas.find(lC => lC.id === cC.id);
+                    if(cC.estado === 'COMPLETADA') localMatch.estado = 'COMPLETADA';
+                }
+            });
+            localB.citas = mergedCitas;
+            
+            // FUSION DE ESTADOS DE BARBEROS: Actualizar si se fueron a ALMUERZO o DESCANSO
+            if(cloudB.barberos) {
+                localB.barberos.forEach(lBarb => {
+                    let cBarb = cloudB.barberos.find(x => x.nom === lBarb.nom);
+                    if(cBarb) lBarb.estado = cBarb.estado;
+                });
+            }
+
+            db.barberias[activeIdx] = localB;
+            localStorage.setItem(DB_KEY, JSON.stringify(db)); // Guardar sin disparar push
+            
+            // Refrescar pantallas visuales en tiempo real
+            if(document.getElementById('view-agenda').classList.contains('active')) renderAgendaList();
+            if(document.getElementById('view-barbero').classList.contains('active')) renderBarbero();
+            if(document.getElementById('view-kiosko').classList.contains('active')) renderSemaforoKiosko();
+            
+            verifyAccess(); // Si se detectó bloqueo, expulsar de inmediato
+        }
+    } catch (e) { console.error("Sync error:", e); }
+}
+
+// BUCLE CADA 15 SEGUNDOS PARA ESCUCHAR A LA NUBE
+setInterval(() => { if ((bIdx !== -1 || kiosko_bIdx !== -1) && isOnline) { syncBidireccional(); } }, 15000);
+
+async function forzarSincronizacionNube() {
+    Swal.fire({ title: 'Sincronizando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }, background: '#0a0a0a', color: '#fff' });
+    await syncBidireccional();
+    Swal.fire({ title: '¡Actualizado!', icon: 'success', timer: 1500, showConfirmButton: false, background: '#0a0a0a', color: '#fff' });
+}
+
+function saveSession() { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ bIdx, session })); }
+function toggleAcc(idC, idI) { document.getElementById(idC).classList.toggle('hidden'); document.getElementById(idI).classList.toggle('rotate-180'); }
+
+// ==========================================
+// 3. RELOJ Y NOTIFICACIONES
+// ==========================================
+function actualizarBadges() {
+    if(bIdx === -1 || !db.barberias[bIdx]) return;
+    const b = db.barberias[bIdx]; const hoy = getTodayYMD();
+    const pdtes = (b.citas || []).filter(c => c.fecha === hoy && c.estado === 'PENDIENTE').length;
+    const b1 = document.getElementById('badge-citas-main'); const b2 = document.getElementById('badge-citas-row');
+    if(b1 && b2) {
+        if(pdtes > 0) { b1.innerText = pdtes; b1.classList.remove('hidden'); b2.innerText = pdtes; b2.classList.remove('hidden'); } 
+        else { b1.classList.add('hidden'); b2.classList.add('hidden'); }
+    }
+}
+
+function startClock() {
+    setInterval(() => {
+        const now = new Date();
+        const dEl = document.getElementById('live-date'); const tEl = document.getElementById('live-time');
+        if (dEl && tEl) { dEl.innerText = now.toLocaleDateString('es-CO', { weekday: 'short', day: '2-digit', month: 'short' }); tEl.innerText = now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+        
+        if (session && session.rol !== 'superadmin') {
+            verifyTimeIntegrity(); actualizarBadges();
+            if (bIdx !== -1 && db.barberias[bIdx]) {
+                const b = db.barberias[bIdx]; const hoy = getTodayYMD(); const curMins = now.getHours() * 60 + now.getMinutes();
+                const pdtes = (b.citas || []).filter(c => c.estado === 'PENDIENTE' && c.fecha === hoy);
+                pdtes.forEach(c => {
+                    const citaMins = timeToMins(c.hora);
+                    if (citaMins - curMins === 15 && !c.notificado15) {
+                        if (session.rol === 'admin' || session.nom === c.barbero) { Swal.fire({ title: '🤖 ISI IA Informa', text: `El cliente ${c.nombre} llega en 15 min.`, icon: 'info', position: 'top-end', toast: true, showConfirmButton: false, timer: 5000, background: '#18181b', color: '#fff' }); }
+                        c.notificado15 = true; saveDB();
+                    }
+                });
+            }
+        }
+    }, 1000);
+}
+startClock();
+
+function hardReset() {
+    Swal.fire({ title: 'Protección Master', text: 'PIN Maestro para Limpiar el Sistema. Borrará la caché local.', input: 'password', inputAttributes: { autocapitalize: 'off', inputmode: 'numeric' }, showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'Verificar y Limpiar', background: '#0a0a0a', color: '#fff' }).then((result) => {
+        if (result.isConfirmed) {
+            const masterPinReal = db ? db.superPIN : "9999";
+            if (result.value === masterPinReal || result.value === "9999") {
+                localStorage.removeItem(DB_KEY); localStorage.removeItem('ZEUS_LAST_ACTIVITY');
+                Swal.fire({ title: 'Sistema Limpio', icon: 'success', timer: 1500, background: '#0a0a0a', color: '#fff' }).then(() => window.location.href = window.location.pathname + '?t=' + Date.now());
+            } else { Swal.fire({ title: 'PIN Incorrecto', icon: 'error', background: '#0a0a0a', color: '#fff' }); }
+        }
+    });
+}
+
+// ==========================================
+// 4. UI Y NAVEGACIÓN
+// ==========================================
+function compressImage(file, callback) {
+    if (!file.type.startsWith('image/')) { Swal.fire({title: 'Error', text: 'Selecciona una imagen válida.', icon: 'error', background: '#0a0a0a', color: '#fff'}); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image(); img.onload = function() {
+            const canvas = document.createElement('canvas'); const MAX = 600; let w = img.width; let h = img.height;
+            if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } } else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+            canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+            callback(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function subirLogoBarberia(input) {
+    if (input.files && input.files[0]) {
+        compressImage(input.files[0], function(img) {
+            db.barberias[bIdx].logo = img; saveDB();
+            document.getElementById('cfg-logo-box').innerHTML = `<img src="${img}" class="w-full h-full object-cover absolute inset-0 rounded-[1rem] bg-black">`;
+            document.getElementById('nav-logo-img').src = img; document.getElementById('nav-logo-img').classList.remove('hidden'); document.getElementById('nav-logo-txt').classList.add('hidden');
+            input.value = ""; Swal.fire({title:'Logo guardado', icon:'success', toast:true, position:'top-end', timer:2000, showConfirmButton:false, background:'#0a0a0a', color:'#fff'});
+        });
+    }
+}
+
+function subirQRBarberia(input) {
+    if (input.files && input.files[0]) {
+        compressImage(input.files[0], function(img) {
+            db.barberias[bIdx].qrImage = img; saveDB();
+            document.getElementById('cfg-qr-box').innerHTML = `<img src="${img}" class="w-full h-full object-cover absolute inset-0 rounded-2xl">`;
+            input.value = ""; Swal.fire({title:'QR guardado', icon:'success', toast:true, position:'top-end', timer:2000, showConfirmButton:false, background:'#0a0a0a', color:'#fff'});
+        });
+    }
+}
+
+function renderLoginLogo() {
+    if (db && db.mainLogo) { document.getElementById('login-custom-logo').src = db.mainLogo; document.getElementById('login-custom-logo').classList.remove('hidden'); document.getElementById('login-default-text').classList.add('hidden'); } 
+    else { document.getElementById('login-custom-logo').classList.add('hidden'); document.getElementById('login-default-text').classList.remove('hidden'); }
+}
+
+function cerrarModales() { 
+    detenerAudio(); 
+    ['modal-gastos', 'modal-clientes', 'modal-barberos', 'modal-qr', 'modal-ticket', 'modal-inventario', 'modal-cierre-caja', 'modal-facturas', 'modal-cierre-mes'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); 
+}
+function cerrarModalespos() { 
+    detenerAudio();
+    comprobanteTemp = null; const input = document.getElementById('file-comprobante'); if (input) input.value = ''; const img = document.getElementById('cfg-comprobante-img'); if(img) { img.src = ''; img.classList.add('hidden'); } const def = document.getElementById('cfg-comprobante-default'); if(def) def.classList.remove('hidden'); document.getElementById('modal-qr').classList.add('hidden'); 
+}
+
+function insertEmoji(id, emoji) { const el = document.getElementById(id); if(el) { el.value += emoji; el.focus(); } }
+
+function guardarAudio() {
+    const fileInput = document.getElementById('cfg-audio-file');
+    if (fileInput.files && fileInput.files[0]) {
+        const f = fileInput.files[0]; if(f.size > 2097152) { Swal.fire('Error', 'El archivo pesa más de 2MB.', 'error'); return; }
+        const r = new FileReader(); r.onload = function(e) { db.barberias[bIdx].customAudio = e.target.result; saveDB(); Swal.fire({title: 'Éxito', text: 'Audio guardado.', icon: 'success', background: '#0a0a0a', color: '#fff'}); }; r.readAsDataURL(f);
+    } else { Swal.fire('Aviso', 'Selecciona un archivo primero.', 'info'); }
+}
+function probarAudio() { detenerAudio(); const a = db.barberias[bIdx].customAudio; currentAudio = new Audio(a ? a : 'https://actions.google.com/sounds/v1/ui/digital_bell.ogg'); currentAudio.play().catch(e=>console.error(e)); }
+function borrarAudio() { db.barberias[bIdx].customAudio = null; saveDB(); document.getElementById('cfg-audio-file').value = ''; Swal.fire('Borrado', '', 'success'); }
+
+function showScreen(viewId) {
+    detenerAudio(); 
+    
+    if (viewId !== 'view-login' && viewId !== 'view-superadmin' && viewId !== 'view-kiosko') { if (!verifyAccess()) return; }
+    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active')); document.getElementById(viewId).classList.add('active');
+    const nav = document.getElementById('app-nav'); const isiBtn = document.getElementById('btn-isi-ia');
+    
+    if (viewId !== 'view-login' && viewId !== 'view-superadmin' && viewId !== 'view-kiosko') {
+        nav.classList.remove('hidden'); document.getElementById('nav-title').innerText = db.barberias[bIdx].nombre; document.getElementById('nav-id').innerText = `ID: ${db.barberias[bIdx].id}`;
+        if (db.barberias[bIdx].logo) { document.getElementById('nav-logo-img').src = db.barberias[bIdx].logo; document.getElementById('nav-logo-img').classList.remove('hidden'); document.getElementById('nav-logo-txt').classList.add('hidden'); }
+        updateNetworkStatusUI(); if(isiBtn) isiBtn.classList.remove('hidden');
+        actualizarBadges();
+    } else { nav.classList.add('hidden'); if(isiBtn) isiBtn.classList.add('hidden'); }
+    
+    if (viewId === 'view-login') renderLoginLogo();
+    if (viewId === 'view-admin') renderAdmin();
+    if (viewId === 'view-config') renderConfig();
+    if (viewId === 'view-barbero') renderBarbero();
+    if (viewId === 'view-agenda') { document.getElementById('agenda-filtro-fecha').value = getTodayYMD(); renderAgendaList(); }
+    if (viewId === 'view-superadmin') {
+        renderSuperAdmin(); if(isiBtn) isiBtn.classList.remove('hidden');
+        if (db.mainLogo) { document.getElementById('sa-logo-box').innerHTML = `<img src="${db.mainLogo}" class="w-full h-full object-contain rounded-[1rem] absolute inset-0 bg-black">`; } else { document.getElementById('sa-logo-box').innerHTML = `<span class="text-xl mb-1">🖼️</span>`; }
+    }
+}
+
+function volverAInicioKiosko() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('kiosk')) {
+        window.location.href = window.location.pathname; 
+    } else {
+        showScreen('view-login');
+    }
+}
+
+// ==========================================
+// 5. ISI IA (CEREBRO)
+// ==========================================
+function abrirIsiIa() { const box = document.getElementById('box-isi-ia'); box.style.display = 'flex'; setTimeout(() => box.classList.add('show'), 10); renderIsiIaDashboard(); }
+function cerrarIsiIa() { detenerAudio(); const box = document.getElementById('box-isi-ia'); box.classList.remove('show'); setTimeout(() => box.style.display = 'none', 300); }
+
+function renderIsiIaDashboard() {
+    if (bIdx === -1) return; const content = document.getElementById('isi-ia-dashboard'); if (!content) return;
+    const b = db.barberias[bIdx]; const hoy = getTodayYMD(); let html = '';
+    if (session.rol === 'admin') {
+        const cH = (b.citas || []).filter(c => c.fecha === hoy).length; const iH = (b.ventas || []).filter(v => v.fecha === hoy).reduce((a, v) => a + v.valor, 0);
+        let mS = "N/A"; if (b.ventas && b.ventas.length > 0) { const counts = {}; b.ventas.forEach(v => { counts[v.servicio] = (counts[v.servicio] || 0) + 1; }); mS = Object.keys(counts).reduce((a, x) => counts[a] > counts[x] ? a : x); }
+        html = `
+        <div class="isi-panel-box"><p class="isi-panel-title">🔥 Estado del Negocio</p><div class="isi-metric"><span>Citas Hoy:</span> <span class="font-bold text-white">${cH}</span></div><div class="isi-metric"><span>Ingresos Hoy:</span> <span class="font-bold text-green-400">${fMoney(iH)}</span></div></div>
+        <div class="isi-panel-box"><p class="isi-panel-title">⚡ Acciones Rápidas</p><div class="flex gap-2"><button onclick="cerrarIsiIa(); showScreen('view-agenda');" class="flex-1 isi-action-btn">Agenda</button><button onclick="cerrarIsiIa(); abrirCierreCaja();" class="flex-1 isi-action-btn">Caja</button><button onclick="cerrarIsiIa(); abrirInventario();" class="flex-1 isi-action-btn">Stock</button></div></div>
+        <div class="isi-panel-box"><p class="isi-panel-title">🧠 Inteligencia</p><p class="text-xs text-zinc-400 mb-2">Servicio estrella: <span class="text-white">${mS}</span>.</p></div>
+        `;
+    } else {
+        const mCH = (b.citas || []).filter(c => c.barbero === session.nom && c.fecha === hoy).length;
+        const mCO = (b.ventas || []).filter(v => v.barbero === session.nom && v.fecha === hoy && !v.esProducto).length;
+        html = `
+        <div class="isi-panel-box"><p class="isi-panel-title">🔥 Estado de mi Turno</p><div class="isi-metric"><span>Mis Citas Agendadas:</span> <span class="font-bold text-white">${mCH}</span></div><div class="isi-metric"><span>Cortes Realizados:</span> <span class="font-bold text-indigo-400">${mCO}</span></div></div>
+        <div class="isi-panel-box"><p class="isi-panel-title">⚡ Acciones Rápidas</p><div class="flex gap-2"><button onclick="cerrarIsiIa(); cambiarEstadoBarbero('LIBRE')" class="flex-1 isi-action-btn border-green-900 text-green-500">Libre</button><button onclick="cerrarIsiIa(); cambiarEstadoBarbero('OCUPADO')" class="flex-1 isi-action-btn border-red-900 text-red-500">Ocupado</button></div></div>
+        <div class="isi-panel-box"><p class="isi-panel-title">🧠 Inteligencia</p><p class="text-[11px] text-zinc-400 mb-2">¡Hola ${session.nom}! Recuerda marcar tus citas como "Atendidas".</p></div>
+        `;
+    }
+    content.innerHTML = html; const hist = document.getElementById('isi-chat-history'); if(hist && hist.innerHTML === "") { hist.innerHTML = '<div class="msg-ai">Hola, soy ISI. ¿En qué te ayudo? Escribe "Resumen" o "Citas".</div>'; }
+}
+
+function enviarMensajeIsi() {
+    const input = document.getElementById('isi-chat-input'); const msg = input.value.trim().toLowerCase(); if (!msg) return;
+    const chatHistory = document.getElementById('isi-chat-history'); if (!chatHistory) return;
+    chatHistory.innerHTML += `<div class="msg-user">${input.value}</div>`; input.value = "";
+    setTimeout(() => { let respuesta = procesarRespuestaIA(msg); chatHistory.innerHTML += `<div class="msg-ai">${respuesta}</div>`; const scrollBox = document.getElementById('isi-ia-content-scroll'); if (scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight; }, 600);
+}
+
+function procesarRespuestaIA(msg) {
+    const b = db.barberias[bIdx];
+    if (msg.includes('aprend') || msg.includes('enseñ') || msg.includes('mejora')) { return "🧠 Analizando datos... He aprendido tus patrones. Si tienes una sugerencia, envíala al panel Master."; }
+    if (msg.includes('ayuda') || msg.includes('como')) { return "Puedes usar los botones rápidos arriba. Para cobrar ve al Punto de Venta, para citas ve a la Agenda."; }
+    if (msg.includes('cita') || msg.includes('turno') || msg.includes('agenda')) {
+        const hoy = getTodayYMD();
+        if (session.rol === 'admin') { return `📅 Hoy tienen un total de ${(b.citas || []).filter(x => x.fecha === hoy && x.estado === 'PENDIENTE').length} citas pendientes.`; } 
+        else { return `📅 Tienes ${(b.citas || []).filter(x => x.fecha === hoy && x.barbero === session.nom && x.estado === 'PENDIENTE').length} citas pendientes.`; }
+    }
+    if (msg.includes('resumen') || msg.includes('dinero') || msg.includes('ingreso') || msg.includes('plata') || msg.includes('venta')) {
+        if (session.rol === 'admin') { const hoy = getTodayYMD(); const ventasHoy = (b.ventas || []).filter(v => v.fecha === hoy).reduce((a, v) => a + v.valor, 0); return `📈 Resumen del día: Han generado ${fMoney(ventasHoy)} en ingresos brutos.`; } 
+        else { return `🔒 Por reglas de privacidad y el sistema de Cierre Ciego, no puedo mostrarte información financiera. Solo el administrador puede ver los ingresos.`; }
+    }
+    return "Entiendo. Estoy entrenada para ayudarte con tu agenda y resúmenes. ¿En qué más te ayudo?";
+}
+
+// ==========================================
+// 6. LOGIN Y AUTH (RECARGA LIMPIA MÓVIL Y LECTOR DE KIOSKO)
+// ==========================================
+async function checkSession() {
+    initDB(); 
+    
+    // ENRUTADOR INTELIGENTE DE KIOSKO (DESCARGA DE NUBE PARA CELULARES NUEVOS)
+    const urlParams = new URLSearchParams(window.location.search);
+    const kioskId = urlParams.get('kiosk');
+    
+    if (kioskId) {
+        let localIdx = db.barberias.findIndex(b => b.id_nube === kioskId || b.id === kioskId);
+        
+        if (localIdx > -1) {
+            iniciarKiosko(localIdx);
+            return;
+        } else if (isOnline) {
+            try {
+                Swal.fire({ title: 'Cargando Agenda...', text: 'Sincronizando con la nube...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }, background: '#0a0a0a', color: '#fff' });
+                const { data: stores } = await supabaseClient.from('stores').select('*').eq('id', kioskId).limit(1);
+                
+                if (stores && stores.length > 0) {
+                    let bData = stores[0].json_data || {};
+                    bData.id_nube = stores[0].id; 
+                    bData.nombre = stores[0].name;
+                    bData.pinAdmin = stores[0].owner_pin;
+                    
+                    db.barberias.push(bData);
+                    saveDB();
+                    Swal.close();
+                    iniciarKiosko(db.barberias.length - 1);
+                    return;
+                }
+            } catch (e) { console.error("Error cargando kiosko de la nube:", e); }
+        }
+        
+        Swal.fire({title: 'Error', text: 'No se encontró la barbería o no hay internet.', icon: 'error', background: '#0a0a0a', color: '#fff'}).then(()=> { window.location.href = window.location.pathname; });
+        return;
+    }
+
+    const l = localStorage.getItem('ZEUS_LAST_ACTIVITY');
+    if(l && (Date.now() - parseInt(l) > TIEMPO_LIMITE)) { sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem('ZEUS_LAST_ACTIVITY'); }
+    const s = sessionStorage.getItem(SESSION_KEY);
+    if(s) {
+        const d = JSON.parse(s); bIdx = d.bIdx; session = d.session;
+        if(bIdx !== -1 && db.barberias[bIdx]) { showScreen(session.rol === 'admin' ? 'view-admin' : 'view-barbero'); actualizarActividad(); }
+        else if(bIdx === -1) { showScreen('view-superadmin'); actualizarActividad(); }
+        else { showScreen('view-login'); }
+    } else { showScreen('view-login'); }
+}
+
+async function actionLogin() {
+    try {
+        if (!db) initDB(); const pin = cleanNum(document.getElementById('login-pin').value);
+        if (!pin) { Swal.fire({ title: "PIN VACÍO", icon: "info", background: "#000", color: "#fff" }); return; }
+        Swal.fire({ title: 'Autenticando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }, background: '#0a0a0a', color: '#fff' });
+
+        if (pin === (db.superPIN || "9999") || pin === "9999") {
+            if (isOnline) {
+                try {
+                    const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Timeout")), 5000));
+                    let { data: allStores } = await Promise.race([supabaseClient.from('stores').select('*'), timeoutPromise]);
+                    if (allStores) {
+                        allStores.forEach(st => {
+                            let idx = db.barberias.findIndex(x => x.pinAdmin === st.owner_pin);
+                            let bData = st.json_data || {}; bData.id_nube = st.id; bData.pinAdmin = st.owner_pin; bData.nombre = st.name;
+                            if (idx > -1) db.barberias[idx] = { ...db.barberias[idx], ...bData }; else db.barberias.push(bData);
+                        });
+                        localStorage.setItem(DB_KEY, JSON.stringify(db));
+                    }
+                } catch (e) { console.log('Modo Offline Master'); }
+            }
+            Swal.close(); bIdx = -1; session = { rol: 'superadmin' }; document.getElementById('login-pin').value = ""; saveSession(); showScreen('view-superadmin'); return;
+        }
+
+        let localIdx = db.barberias.findIndex(x => x.pinAdmin === pin); let isBarbero = false; let barberoName = ""; let foundLocal = false;
+        if (localIdx > -1) { foundLocal = true; }
+        else {
+            for (let i = 0; i < db.barberias.length; i++) {
+                let bs = db.barberias[i].barberos?.find(x => x.pin === pin);
+                if (bs) { localIdx = i; isBarbero = true; barberoName = bs.nom; foundLocal = true; break; }
+            }
+        }
+
+        if (foundLocal) {
+            bIdx = localIdx; session = { rol: isBarbero ? 'barbero' : 'admin', nom: barberoName }; addLog("LOGIN", session.nom || "ADMIN", "Inició sesión local");
+            if (isBarbero) { const b = db.barberias[bIdx]; if (!b.asistencia) b.asistencia = {}; const hoy = getTodayYMD(); if (!b.asistencia[hoy]) b.asistencia[hoy] = {}; if (!b.asistencia[hoy][session.nom] || !b.asistencia[hoy][session.nom].ingreso) { b.asistencia[hoy][session.nom] = { ingreso: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), salida: "--" }; } }
+            saveDB(); saveSession(); actualizarActividad(); document.getElementById('login-pin').value = ""; Swal.close();
+            if(window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
+            showScreen(session.rol === 'admin' ? 'view-admin' : 'view-barbero');
+            if (isOnline && db.barberias[localIdx].id_nube) { supabaseClient.from('stores').select('*').eq('owner_pin', db.barberias[localIdx].pinAdmin).limit(1).then(() => { }); }
+            return;
+        }
+
+        if (!isOnline) { Swal.fire({ title: "Sin Conexión", text: "PIN no guardado localmente.", icon: "error", background: "#000", color: "#fff" }); return; }
+
+        const timeoutPromise = new Promise((_, r) => setTimeout(() => r(new Error("Red lenta.")), 7000));
+        let { data: stores } = await Promise.race([supabaseClient.from('stores').select('*').eq('owner_pin', pin).limit(1), timeoutPromise]);
+        let store = (stores && stores.length > 0) ? stores[0] : null;
+        if (!store) {
+            const { data: stBarbero } = await Promise.race([supabaseClient.from('stores').select('*').contains('json_data', { barberos: [{ pin: pin }] }).limit(1), timeoutPromise]);
+            if (stBarbero && stBarbero.length > 0) { store = stBarbero[0]; isBarbero = true; let bs = store.json_data.barberos.find(x => x.pin === pin); barberoName = bs ? bs.nom : "Barbero"; }
+        }
+        if (!store) throw new Error("PIN no registrado.");
+
+        localIdx = db.barberias.findIndex(x => x.pinAdmin === store.owner_pin);
+        let bData = store.json_data || {}; bData.id_nube = store.id; bData.nombre = store.name; bData.pinAdmin = store.owner_pin;
+        if (localIdx === -1) { db.barberias.push(bData); localIdx = db.barberias.length - 1; } else { db.barberias[localIdx] = { ...db.barberias[localIdx], ...bData }; }
+
+        bIdx = localIdx; session = { rol: isBarbero ? 'barbero' : 'admin', nom: barberoName };
+        if (isBarbero) { const b = db.barberias[bIdx]; if (!b.asistencia) b.asistencia = {}; const hoy = getTodayYMD(); if (!b.asistencia[hoy]) b.asistencia[hoy] = {}; if (!b.asistencia[hoy][session.nom] || !b.asistencia[hoy][session.nom].ingreso) { b.asistencia[hoy][session.nom] = { ingreso: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), salida: "--" }; } }
+        saveDB(); saveSession(); actualizarActividad(); document.getElementById('login-pin').value = ""; Swal.close(); 
+        if(window.history.replaceState) window.history.replaceState({}, document.title, window.location.pathname);
+        showScreen(session.rol === 'admin' ? 'view-admin' : 'view-barbero');
+    } catch (e) { console.error("Login Error:", e); Swal.fire({ title: "Error", text: "Verifique el PIN.", icon: "error", background: "#000", color: "#fff" }); }
+}
+
+window.actionLogout = function() {
+    detenerAudio();
+    const s = sessionStorage.getItem(SESSION_KEY);
+    if(s) {
+        const d = JSON.parse(s);
+        if(d.session && d.session.rol === 'barbero' && d.bIdx !== -1 && db && db.barberias[d.bIdx]) {
+            const b = db.barberias[d.bIdx]; const h = getTodayYMD();
+            if(b.asistencia && b.asistencia[h] && b.asistencia[h][d.session.nom]) { b.asistencia[h][d.session.nom].salida = new Date().toLocaleTimeString('es-CO', {hour: '2-digit', minute:'2-digit'}); saveDB(); }
+        }
+        addLog("LOGOUT", d.session ? d.session.nom : 'USER', "Cerró sesión");
+    }
+    sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem('ZEUS_LAST_ACTIVITY'); 
+    window.location.href = window.location.pathname + '?t=' + Date.now(); 
+}
+
+// ==========================================
+// 7. RENDER ADMIN Y BARBERO 
+// ==========================================
+function renderAdmin() {
+    try {
+        const b = db.barberias[bIdx]; if (!b) return;
+        let totalIva = 0;
+        const tv = (b.ventas || []).reduce((a, v) => { if(v.ivaAplicado) totalIva += v.ivaAplicado; return a + v.valor + (v.ivaAplicado || 0); }, 0);
+        const tg = (b.gastos || []).reduce((a, g) => a + g.valor, 0);
+        const efec = (b.ventas || []).filter(v => v.tipo === "Efectivo").reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0);
+        const digi = (b.ventas || []).filter(v => v.tipo !== "Efectivo").reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0);
+
+        const diffDays = Math.floor((Date.now() - (b.creadoEn || Date.now())) / (1000 * 60 * 60 * 24)); 
+        const restantes = (b.diasSuscripcion || 15) - diffDays;
+        
+        const bL = document.getElementById('admin-license-days');
+        if(bL) {
+            if(restantes > 5) { bL.className = "text-[10px] font-black text-green-400"; bL.innerText = `${restantes} Días`; }
+            else if(restantes >= 0) { bL.className = "text-[10px] font-black text-orange-400 animate-pulse"; bL.innerText = `${restantes} Días!`; }
+            else { bL.className = "text-[10px] font-black text-red-400 animate-pulse"; bL.innerText = `VENCIDA`; }
+        }
+
+        const iA = b.configIVA && b.configIVA.activo ? true : false;
+        const utiTitle = document.getElementById('admin-utilidad-title'); if(utiTitle) utiTitle.innerText = iA ? "UTILIDAD NETA (SIN TAX/IVA)" : "UTILIDAD NETA";
+        const utiVal = document.getElementById('admin-utilidad'); if(utiVal) utiVal.innerText = `${fMoney(tv - tg - totalIva)}`;
+        
+        const efVal = document.getElementById('admin-efectivo'); if(efVal) efVal.innerText = `${fMoney(efec)}`; 
+        const bnVal = document.getElementById('admin-bancos'); if(bnVal) bnVal.innerText = `${fMoney(digi)}`; 
+        const gsVal = document.getElementById('admin-gastos'); if(gsVal) gsVal.innerText = `-${fMoney(tg)}`;
+        
+        const iBox = document.getElementById('admin-iva-recaudado');
+        if(iBox) { if(iA && totalIva > 0) { iBox.innerText = `IMPUESTO Recaudado: ${fMoney(totalIva)}`; iBox.classList.remove('hidden'); } else { iBox.classList.add('hidden'); } }
+
+        const hoy = getTodayYMD();
+        const nominaCont = document.getElementById('admin-nomina');
+        if(nominaCont) {
+            nominaCont.innerHTML = (b.barberos || []).map(bar => {
+                const cB = bar.comision !== undefined ? bar.comision : 50;
+                const vB = (b.ventas || []).filter(v => v.barbero === bar.nom && !v.esProducto && v.barbero !== "ADMIN");
+                const sT = vB.reduce((a, v) => a + v.valor, 0); const aP = sT * (cB / 100);
+                const cortesMes = vB.length; const cortesHoy = vB.filter(v => v.fecha === hoy).length;
+                return `
+                <div class="glass p-6 rounded-3xl border border-zinc-800 mb-3 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div>
+                        <h4 class="font-black uppercase text-lg text-white">${bar.nom} <span class="text-indigo-400 text-[10px]">(${cB}%)</span></h4>
+                        <div class="flex gap-2 mt-2">
+                            <span class="text-[9px] bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-lg font-bold">✂️ ${cortesMes} Cortes este mes</span>
+                            <span class="text-[9px] bg-blue-600/20 text-blue-400 px-3 py-1 rounded-lg font-bold">Hoy: ${cortesHoy}</span>
+                        </div>
+                    </div>
+                    <div class="text-left md:text-right bg-black/50 p-4 rounded-2xl w-full md:w-auto">
+                        <p class="text-[9px] text-zinc-500 mb-1">Base: ${fMoney(sT)}</p>
+                        <span class="font-black text-2xl text-green-400 block">${fMoney(aP)}</span>
+                        <p class="text-[8px] text-green-600 font-black tracking-widest mt-1 uppercase">A Pagar</p>
+                    </div>
+                </div>`;
+            }).join('') || `<p class="text-zinc-600 text-xs italic ml-5">No hay barberos registrados.</p>`;
+        }
+
+        setTimeout(() => {
+            try {
+                if (chartMetodosInstance) chartMetodosInstance.destroy();
+                const ctxM = document.getElementById('chartMetodos');
+                if(ctxM) chartMetodosInstance = new Chart(ctxM, { type: 'doughnut', data: { labels: ['Efectivo', 'Digital'], datasets: [{ data: [efec, digi], backgroundColor: ['#10b981', '#3b82f6'], borderColor: '#050505', borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+                
+                if (chartBarberosInstance) chartBarberosInstance.destroy();
+                const ctxB = document.getElementById('chartBarberos');
+                if(ctxB) {
+                    const nB = (b.barberos || []).map(bar => bar.nom);
+                    const vB = nB.map(nom => { return (b.ventas || []).filter(v => v.barbero === nom).reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0); });
+                    chartBarberosInstance = new Chart(ctxB, { type: 'bar', data: { labels: nB.length > 0 ? nB : ['Sin datos'], datasets: [{ data: vB.length > 0 ? vB : [0], backgroundColor: '#4f46e5', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+                }
+            } catch(ex) { console.error("Error graficas:", ex); }
+        }, 150);
+        actualizarBadges();
+    } catch (e) { console.error("Error crítico en renderAdmin:", e); }
+}
+
+function renderBarbero() {
+    try {
+        const b = db.barberias[bIdx]; if (!b) return;
+        let myB = (b.barberos || []).find(x => x.nom === session.nom);
+        
+        // ACTUALIZACIÓN DE BOTONES DE ESTADO (LIBRE/OCUPADO/ALMUERZO/DESCANSO)
+        if (myB) {
+            if (!myB.estado) myB.estado = 'LIBRE';
+            const btnLibre = document.getElementById('btn-estado-libre');
+            const btnOcupado = document.getElementById('btn-estado-ocupado');
+            const btnAlmuerzo = document.getElementById('btn-estado-almuerzo');
+            const btnDescanso = document.getElementById('btn-estado-descanso');
+            
+            [btnLibre, btnOcupado, btnAlmuerzo, btnDescanso].forEach(btn => btn.classList.add('opacity-50'));
+            
+            if (myB.estado === 'LIBRE') btnLibre.classList.remove('opacity-50');
+            else if (myB.estado === 'OCUPADO') btnOcupado.classList.remove('opacity-50');
+            else if (myB.estado === 'ALMUERZO') btnAlmuerzo.classList.remove('opacity-50');
+            else if (myB.estado === 'DESCANSO') btnDescanso.classList.remove('opacity-50');
+        }
+        
+        let fF = document.getElementById('barbero-filtro-fecha').value;
+        if (!fF) { fF = getTodayYMD(); document.getElementById('barbero-filtro-fecha').value = fF; }
+        
+        const misCitas = (b.citas || []).filter(c => c.barbero === session.nom && c.fecha === fF).sort((a, b) => a.hora.localeCompare(b.hora));
+        const ctnC = document.getElementById('barbero-historial-citas');
+        if (misCitas.length === 0) { ctnC.innerHTML = `<p class="text-[10px] text-zinc-600 text-center py-4">No tienes citas programadas para el ${fF}.</p>`; }
+        else {
+            ctnC.innerHTML = misCitas.map(c => {
+                const hora12 = formatTime12h(c.hora); const fin = c.estado === 'COMPLETADA';
+                return `<div class="flex justify-between items-center p-3 rounded-2xl border ${fin ? 'border-zinc-800 bg-black/20' : 'border-indigo-500/30 bg-indigo-500/5'} mb-2"><div><p class="text-[10px] font-black uppercase ${fin ? 'text-zinc-500 line-through' : 'text-white'}">${c.nombre}</p><p class="text-[8px] font-bold text-zinc-400">${hora12} - ${c.servicio}</p></div>${!fin ? `<button onclick="completarCita('${c.id}')" class="bg-green-600 p-2 px-3 rounded-xl text-[9px] font-black uppercase btn-press">✔ Listo</button>` : '<span class="text-[9px] font-black text-green-500">COMPLETADO</span>'}</div>`;
+            }).join('');
+        }
+        document.getElementById('pos-servicios').innerHTML = (b.servicios || []).map((s, i) => `<button onclick="addServToCart(${i})" class="glass p-5 rounded-[2rem] text-left btn-press border-indigo-900/30"><p class="text-[10px] text-zinc-500 font-black uppercase mb-1">${s.nom}</p><p class="font-black text-indigo-400 text-lg">${fMoney(s.pre)}</p></button>`).join('');
+        document.getElementById('pos-productos').innerHTML = (b.productos || []).map((p, i) => `<button onclick="addProdToCart(${i})" class="glass p-5 rounded-[2rem] text-left btn-press border-purple-900/30 ${p.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}"><div class="flex justify-between items-start"><p class="text-[10px] text-zinc-500 font-black uppercase mb-1">${p.nom}</p><span class="text-[8px] px-2 py-0.5 rounded bg-zinc-900 text-purple-400 font-bold">Stock: ${p.stock}</span></div><p class="font-black text-purple-400 text-lg">${fMoney(p.pre)}</p></button>`).join('') || '<p class="text-zinc-600 text-xs text-center col-span-2 py-4">No hay productos</p>';
+        updateCart();
+    } catch (e) { console.error("Error en renderBarbero:", e); }
+}
+
+function cambiarEstadoBarbero(nE) {
+    const b = db.barberias[bIdx]; if (!b.barberos) b.barberos = [];
+    let myB = b.barberos.find(x => x.nom === session.nom);
+    if (myB) { myB.estado = nE; saveDB(); renderBarbero(); Swal.fire({ title: nE === 'LIBRE' ? 'Estás LIBRE 🟢' : `Estás en ${nE}`, icon: 'success', timer: 1000, showConfirmButton: false, background: '#0a0a0a', color: '#fff' }); }
+}
+
+// ==========================================
+// 8. MASTER PANEL ACCIONES
+// ==========================================
+function renderSuperAdmin() {
+    let tSaaS = 0; let tP = 0; let tPre = 0;
+    if (db.masterConfig) { document.getElementById('sa-brand-activo').checked = db.masterConfig.brandingActive; document.getElementById('sa-brand-text').value = db.masterConfig.brandingText || ""; }
+
+    const buz = document.getElementById('sa-sugerencias-lista');
+    if (db.sugerencias && db.sugerencias.length > 0) {
+        buz.innerHTML = db.sugerencias.slice().reverse().map((s, idx) => `<div class="bg-black p-3 rounded-xl border border-zinc-800 flex justify-between items-start"><div><p class="text-[9px] font-bold text-zinc-500 uppercase">${s.fecha} - ${s.tienda} (${s.usuario})</p><p class="text-xs text-white mt-1 italic">"${s.texto}"</p></div><button onclick="db.sugerencias.splice(${db.sugerencias.length - 1 - idx}, 1); saveDB(); renderSuperAdmin();" class="text-red-500 font-black ml-2 px-2 hover:scale-110 transition-transform">X</button></div>`).join('');
+    } else { buz.innerHTML = '<p class="text-xs text-zinc-600 italic">No hay sugerencias en el buzón.</p>'; }
+
+    document.getElementById('sa-lista').innerHTML = db.barberias.map((b, i) => {
+        if (!b.pagosSaaS) b.pagosSaaS = [];
+        let totalPagado = b.pagosSaaS.reduce((sum, p) => sum + p.valor, 0); tSaaS += totalPagado;
+        if (b.pagosSaaS.length === 0) tP++; else tPre++;
+
+        const hoy = getTodayYMD();
+        const personal = `${(b.barberos||[]).length}/${b.maxBarberos || 5}`;
+        const citasHoy = (b.citas||[]).filter(c => c.fecha === hoy && c.estado === 'PENDIENTE').length;
+        const ventasHoy = (b.ventas||[]).filter(v => v.fecha === hoy).reduce((a, v) => a + v.valor, 0);
+        const diffDays = Math.floor((Date.now() - (b.creadoEn||Date.now())) / (1000 * 60 * 60 * 24));
+        const restantes = (b.diasSuscripcion||15) - diffDays;
+
+        const stDays = `EN ${restantes >= 0 ? "PRUEBA" : "PREMIUM"}`;
+        const stDaysClass = restantes >= 0 ? "text-green-400" : "text-purple-400";
+        const stBlok = b.bloqueado ? "BLOQUEADO" : "ACTIVO";
+        const stBlokClass = b.bloqueado ? "bg-red-900/40 text-red-500" : "bg-green-900/40 text-green-500";
+
+        return `
+        <div class="bg-[#111111] p-6 rounded-[2rem] border border-zinc-800 mb-6 relative">
+            <div class="flex justify-between items-start mb-5 pb-4 border-b border-zinc-900">
+                <div><h4 class="font-black text-xl text-white uppercase">${b.nombre}</h4><p class="text-[9px] font-bold uppercase ${stDaysClass}">${stDays} (${Math.abs(restantes)} d)</p></div>
+                <div class="flex items-center gap-3"><span class="text-[10px] font-black uppercase bg-[#1a1a1a] px-3 py-1.5 rounded-lg text-zinc-400 border border-zinc-800">PIN: ${b.pinAdmin}</span><span class="text-[9px] font-black uppercase ${stBlokClass} px-3 py-1.5 rounded-lg border border-red-900/50">${stBlok}</span></div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 text-center mb-6">
+                <div class="bg-black p-4 rounded-xl shadow-inner border border-zinc-900"><p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Personal</p><p class="text-sm font-black text-white">${personal}</p></div>
+                <div class="bg-black p-4 rounded-xl shadow-inner border border-zinc-900"><p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Citas Hoy</p><p class="text-sm font-black text-white">${citasHoy}</p></div>
+                <div class="bg-black p-4 rounded-xl shadow-inner border border-zinc-900"><p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Ventas Hoy</p><p class="text-sm font-black text-white">${fMoney(ventasHoy)}</p></div>
+            </div>
+            <button onclick="forzarAccesoAdmin(${i})" class="w-full bg-indigo-600 text-white py-4 rounded-xl text-xs font-black uppercase mb-6 btn-press shadow-lg shadow-indigo-600/20">INGRESAR COMO DUEÑO</button>
+            <div class="space-y-4 pt-5 border-t border-zinc-900">
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3 ml-2">Agencias Tiempo (Cobro)</p>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="sa_AgregarTiempo('${b.id_nube}', '+30D', '+30 Días')" class="bg-[#1a233a] text-[#4287f5] py-3 rounded-lg text-[10px] font-black uppercase btn-press">+30D</button>
+                        <button onclick="sa_AgregarTiempo('${b.id_nube}', '+3M', '+3 Meses')" class="bg-[#1a1e3a] text-[#4f46e5] py-3 rounded-lg text-[10px] font-black uppercase btn-press">+3M</button>
+                        <button onclick="sa_AgregarTiempo('${b.id_nube}', '+6M', '+6 Meses')" class="bg-[#2a1a3a] text-[#9333ea] py-3 rounded-lg text-[10px] font-black uppercase btn-press">+6M</button>
+                        <button onclick="sa_AgregarTiempo('${b.id_nube}', '+1A', '+1 Año')" class="bg-[#3a1a3a] text-[#c026d3] py-3 rounded-lg text-[10px] font-black uppercase btn-press">+1A</button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center bg-black/50 p-4 rounded-xl border border-zinc-900">
+                    <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Límite Barberos: <span class="text-white">${b.maxBarberos || 5}</span></p>
+                    <div class="flex gap-2"><button onclick="sa_AjustarLimite('${b.id_nube}', -1)" class="w-10 h-10 bg-zinc-800/50 text-white border border-zinc-700 rounded-lg font-black btn-press">-1</button><button onclick="sa_AjustarLimite('${b.id_nube}', 1)" class="w-10 h-10 bg-zinc-800/50 text-white border border-zinc-700 rounded-lg font-black btn-press">+1</button></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-900">
+                    <button onclick="sa_ForzarBloqueo('${b.id_nube}')" class="bg-red-900/20 text-red-500 border border-red-900/50 py-3 rounded-xl text-[10px] font-black uppercase btn-press">${b.bloqueado ? "DESBLOQUEAR TIENDA" : "FORZAR BLOQUEO"}</button>
+                    <button onclick="sa_BorrarInstancia('${b.id_nube}')" class="bg-black text-zinc-500 border border-red-900/50 py-3 rounded-xl text-[10px] font-black uppercase btn-press hover:bg-red-600 hover:text-white transition-colors">BORRAR INSTANCIA</button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('saas-total-revenue').innerText = `${fMoney(tSaaS)}`; document.getElementById('saas-total-trials').innerText = tP; document.getElementById('saas-total-premium').innerText = tPre;
+}
+
+function forzarAccesoAdmin(idx) { bIdx = idx; session = { rol: 'admin', nom: 'SUPERADMIN' }; saveDB(); saveSession(); showScreen('view-admin'); }
+
+async function saCrearBarberia() {
+    const n = document.getElementById('sa-nombre').value.trim().toUpperCase(); const p = cleanNum(document.getElementById('sa-pin').value);
+    if (!n || esPinInseguro(p)) return Swal.fire('Error','Nombre vacío o PIN inseguro','error');
+    if (!isOnline) return Swal.fire('Sin Internet', '', 'warning');
+    Swal.fire({ title: 'Creando...', didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
+    try {
+        const { data, error } = await supabaseClient.from('stores').insert([{ name: n, owner_pin: p }]).select().single();
+        if (error) throw error;
+        const newB = { id: "B-" + Math.random().toString(36).substr(2, 4).toUpperCase(), id_nube: data.id, nombre: n, pinAdmin: p, creadoEn: Date.now(), diasSuscripcion: 15, bloqueado: false, maxBarberos: 5, barberos: [], servicios: [], productos: [], ventas: [], gastos: [], clientes: {}, horaApertura: "08:00", horaCierre: "20:00", intervaloCitas: 60, lastActiveClock: Date.now(), moneda: 'COP' };
+        db.barberias.push(newB);
+        await supabaseClient.from('stores').update({ json_data: newB }).eq('id', data.id);
+        saveDB(); renderSuperAdmin(); Swal.fire('Éxito', '', 'success');
+    } catch (e) { Swal.fire('Error', e.message, 'error'); }
+}
+
+function saCambiarMaster() {
+    const p = cleanNum(document.getElementById('sa-master-pin').value);
+    if(esPinInseguro(p)) return Swal.fire('Error', 'El PIN debe tener 4 números y no ser obvio.', 'error');
+    db.superPIN = p; saveDB(); document.getElementById('sa-master-pin').value = "";
+    Swal.fire({ title: '✅ ¡Éxito!', text: 'PIN Maestro actualizado correctamente.', icon: 'success', background: '#0a0a0a', color: '#fff' });
+}
+
+async function sa_AgregarTiempo(idNube, tipo, label) {
+    if (!isOnline) return Swal.fire('Error', 'Sin conexión a internet.', 'error'); const t = getTodayYMD();
+    const { value: amount } = await Swal.fire({ title: `✅ Cobro de ${label}`, text: `Ingresa el valor cobrado.`, input: 'password', inputAttributes: { autocapitalize: 'off', inputmode: 'numeric', placeholder: 'Valor' }, showCancelButton: true, confirmButtonText: 'Procesar', cancelButtonText: 'Cancelar', background: '#0a0a0a', color: '#fff' });
+    if (!amount) return; const cobroVal = parseInt(amount);
+    const { value: masterPin } = await Swal.fire({ title: '🔒 Validación Maestra', text: 'Ingresa el PIN Maestro.', input: 'password', inputAttributes: { autocapitalize: 'off', inputmode: 'numeric' }, showCancelButton: true, confirmButtonText: 'Validar', background: '#0a0a0a', color: '#fff' });
+    if (masterPin !== db.superPIN) return Swal.fire('Error', 'PIN Maestro Incorrecto.', 'error');
+
+    Swal.fire({ title: 'Actualizando...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
+    try {
+        const { data: store, error: fetchError } = await supabaseClient.from('stores').select('*').eq('id', idNube).single(); if (fetchError) throw fetchError;
+        let b = store.json_data; if (!b.pagosSaaS) b.pagosSaaS = [];
+        let addDaysCount = 0; if (tipo === '+30D') addDaysCount = 30; else if (tipo === '+3M') addDaysCount = 90; else if (tipo === '+6M') addDaysCount = 180; else if (tipo === '+1A') addDaysCount = 365;
+        b.pagosSaaS.push({ valor: cobroVal, diasPremium: addDaysCount, fecha: t, registradoPor: session.nom || 'MASTER' }); b.diasSuscripcion += addDaysCount;
+        const { error: updateError } = await supabaseClient.from('stores').update({ json_data: b }).eq('id', idNube); if (updateError) throw updateError;
+        db.barberias[db.barberias.findIndex(x => x.id_nube === idNube)] = b; saveDB(); renderSuperAdmin();
+        Swal.fire({ title: '¡Éxito! ✅', icon: 'success', text: `Registrados ${label}.`, background: '#0a0a0a', color: '#fff', timer: 3000 });
+    } catch (e) { console.error(e); Swal.fire('Error', 'No se pudo actualizar.', 'error'); }
+}
+
+async function sa_AjustarLimite(idNube, cantidad) {
+    if (!isOnline) return;
+    const { value: masterPin } = await Swal.fire({ title: '🔒 Validación Maestra', text: 'PIN Maestro para ajustar límite.', input: 'password', inputAttributes: { autocapitalize: 'off', inputmode: 'numeric' }, showCancelButton: true, confirmButtonText: 'Validar', background: '#0a0a0a', color: '#fff' });
+    if (masterPin !== db.superPIN) return;
+    Swal.fire({ title: 'Actualizando...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
+    try {
+        const { data: store } = await supabaseClient.from('stores').select('*').eq('id', idNube).single();
+        let b = store.json_data; b.maxBarberos = (b.maxBarberos || 5) + cantidad;
+        await supabaseClient.from('stores').update({ json_data: b }).eq('id', idNube);
+        db.barberias[db.barberias.findIndex(x => x.id_nube === idNube)] = b; saveDB(); renderSuperAdmin(); Swal.close();
+    } catch (e) { console.error(e); Swal.fire('Error', '', 'error'); }
+}
+
+// CORRECCION: Fuerza el bloqueo en la nube inmediatamente.
+async function sa_ForzarBloqueo(idNube) {
+    if (!isOnline) return;
+    const b = db.barberias.find(x => x.id_nube === idNube); const accion = b.bloqueado ? "DESBLOQUEAR" : "FORZAR BLOQUEO";
+    const { isConfirmed } = await Swal.fire({ title: `¿Desea ${accion}?`, icon: 'warning', showCancelButton: true, confirmButtonColor: b.bloqueado ? '#16a34a' : '#dc2626', background: '#0a0a0a', color: '#fff' }); if (!isConfirmed) return;
+    Swal.fire({ title: 'Actualizando en la nube...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
+    try {
+        const { data: store } = await supabaseClient.from('stores').select('*').eq('id', idNube).single();
+        let bSup = store.json_data; bSup.bloqueado = !bSup.bloqueado;
+        await supabaseClient.from('stores').update({ json_data: bSup }).eq('id', idNube);
+        db.barberias[db.barberias.findIndex(x => x.id_nube === idNube)] = bSup; saveDB(); renderSuperAdmin(); Swal.fire('¡Éxito!', 'Estado de bloqueo actualizado', 'success');
+    } catch (e) { console.error(e); Swal.fire('Error', 'No se pudo contactar a la nube', 'error'); }
+}
+
+async function sa_BorrarInstancia(idNube) {
+    if (!isOnline) return;
+    const { isConfirmed } = await Swal.fire({ title: '¡CUIDADO! 🛑', text: 'Esto BORRARÁ PERMANENTEMENTE toda la información. Es irreversible.', icon: 'error', showCancelButton: true, confirmButtonColor: '#dc2626', background: '#0a0a0a', color: '#fff' }); if (!isConfirmed) return;
+    const { value: masterPin } = await Swal.fire({ title: '🔑 ULTIMA VALIDACIÓN', text: 'Ingresa el PIN Maestro.', input: 'password', inputAttributes: { autocapitalize: 'off', inputmode: 'numeric' }, showCancelButton: true, confirmButtonColor: '#dc2626', confirmButtonText: 'Borrar Definitivamente', background: '#0a0a0a', color: '#fff' }); if (masterPin !== db.superPIN) return;
+    Swal.fire({ title: 'BORRANDO...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
+    try {
+        await supabaseClient.from('stores').delete().eq('id', idNube);
+        db.barberias = db.barberias.filter(x => x.id_nube !== idNube); saveDB(); renderSuperAdmin(); Swal.fire('¡Borrado Exitoso!', '', 'success');
+    } catch (e) { console.error(e); Swal.fire('Error', 'No se pudo borrar.', 'error'); }
+}
+
+// ==========================================
+// 9. AGENDA Y KIOSKO ENLACE DIRECTO
+// ==========================================
+function renderAgendaList() {
+    if (bIdx === -1) return; const b = db.barberias[bIdx];
+    let fF = document.getElementById('agenda-filtro-fecha').value;
+    if (!fF) { fF = getTodayYMD(); document.getElementById('agenda-filtro-fecha').value = fF; }
+
+    document.getElementById('agenda-barbero').innerHTML = '<option value="">-- BARBERO --</option>' + (b.barberos || []).map(bar => `<option value="${bar.nom}">${bar.nom}</option>`).join('');
+    document.getElementById('agenda-servicio').innerHTML = '<option value="">-- SERVICIO --</option>' + (b.servicios || []).map(s => `<option value="${s.nom}">${s.nom}</option>`).join('');
+
+    const citasDelDia = (b.citas || []).filter(c => c.fecha === fF).sort((a, b) => a.hora.localeCompare(b.hora));
+    let html = '';
+    if (citasDelDia.length === 0) { html = '<p class="text-zinc-600 text-xs italic text-center py-6">No hay citas para este día.</p>'; }
+    else {
+        citasDelDia.forEach((c) => {
+            const hora12 = formatTime12h(c.hora);
+            const fin = c.estado === 'COMPLETADA';
+            html += ` <div class="bg-zinc-900/50 p-4 rounded-2xl border ${fin ? 'border-zinc-800 opacity-50 grayscale' : 'border-yellow-900/30'} flex justify-between items-center mb-2"> <div> <div class="flex items-center gap-2 mb-1"> <span class="text-sm font-black text-white ${fin ? 'line-through text-zinc-500' : ''}">${hora12}</span> </div> <p class="text-xs font-bold ${fin ? 'text-zinc-500 line-through' : 'text-yellow-400'} uppercase">${c.nombre}</p> <p class="text-[10px] text-zinc-500 uppercase">${c.servicio} • con ${c.barbero}</p> ${!fin ? ` <div class="flex gap-2 mt-3"> <button onclick="enviarRecordatorioWp('${c.id}')" class="bg-[#25D366]/20 text-[#25D366] px-3 py-1.5 rounded-lg font-black text-[10px] btn-press uppercase flex items-center gap-1">Avisar</button> <button onclick="completarCita('${c.id}')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg font-black text-[10px] btn-press uppercase flex items-center gap-1">Listo</button> <button onclick="detenerAudio(); borrarCita('${c.id}')" class="bg-red-900/30 text-red-500 px-3 py-1.5 rounded-lg font-black text-[10px] btn-press uppercase flex items-center gap-1">X</button> </div> ` : '<p class="text-[10px] text-green-500 font-bold mt-2 uppercase">✔️ Atendido</p>'} </div> </div>`;
+        });
+    }
+    document.getElementById('agenda-lista').innerHTML = html;
+}
+
+// CORRECCIÓN CONCURRENCIA ADMINISTRADOR (Evita chocar al guardar cita local)
+async function guardarCita() {
+    const f = document.getElementById('agenda-fecha').value; const h = document.getElementById('agenda-hora').value; const cli = cleanStr(document.getElementById('agenda-cli').value).toUpperCase(); const cel = cleanNum(document.getElementById('agenda-cel').value); const barb = document.getElementById('agenda-barbero').value; const srv = document.getElementById('agenda-servicio').value;
+    if (!f || !h || !cli || !barb) return Swal.fire('Aviso', 'Fecha, hora, cliente y barbero obligatorios.', 'warning');
+
+    Swal.fire({ title: 'Agendando...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }, background: '#0a0a0a', color: '#fff' });
+
+    try {
+        if(isOnline && db.barberias[bIdx].id_nube) {
+            const { data: stores } = await supabaseClient.from('stores').select('json_data').eq('id', db.barberias[bIdx].id_nube).limit(1);
+            if (stores && stores.length > 0) {
+                let bCloud = stores[0].json_data || {};
+                db.barberias[bIdx].citas = bCloud.citas || [];
+            }
+        }
+
+        const b = db.barberias[bIdx]; const intv = b.intervaloCitas || 60; const nTime = timeToMins(h);
+        const coll = (b.citas || []).find(c => { if (c.barbero !== barb || c.fecha !== f) return false; return Math.abs(nTime - timeToMins(c.hora)) < intv; });
+        if (coll) { const horaOcu = formatTime12h(coll.hora); Swal.fire({ title: '¡Horario Ocupado! ⏰', text: `${barb} ya tiene una cita reservada cerca de las ${horaOcu}.`, icon: 'error', background: '#0a0a0a', color: '#fff' }); return; }
+
+        if (!b.citas) b.citas = []; b.citas.push({ id: Date.now().toString(), nombre: cli, celular: cel, barbero: barb, servicio: srv, fecha: f, hora: h, estado: 'PENDIENTE' });
+        
+        if(isOnline && b.id_nube) { await supabaseClient.from('stores').update({ json_data: b }).eq('id', b.id_nube); }
+        saveDB(); 
+        
+        document.getElementById('agenda-cli').value = ""; document.getElementById('agenda-cel').value = "";
+        renderAgendaList(); renderAdmin(); Swal.fire({ title: '¡Cita Guardada!', icon: 'success', background: '#0a0a0a', color: '#fff', timer: 1500 });
+    } catch(e) { Swal.fire('Error', 'No se pudo guardar.', 'error'); }
+}
+
+function completarCita(id) {
+    Swal.fire({ title: '¿Atendido?', icon: 'question', showCancelButton: true, confirmButtonColor: '#16a34a', background: '#0a0a0a', color: '#fff' }).then((r) => {
+        if (r.isConfirmed) {
+            const b = db.barberias[bIdx]; const c = b.citas.find(x => x.id === id); if (c) c.estado = 'COMPLETADA';
+            saveDB(); renderAgendaList(); renderAdmin(); if (session.rol === 'barbero') renderBarbero();
+            reproducirAudioExito(); 
+        }
+    });
+}
+
+function borrarCita(id) {
+    const b = db.barberias[bIdx]; const c = b.citas.find(x => x.id === id); if (!c) return;
+    Swal.fire({ title: '¿Cancelar Cita?', text: '¿Notificar por WhatsApp?', icon: 'warning', showCancelButton: true, showDenyButton: true, confirmButtonColor: '#25D366', denyButtonColor: '#dc2626', confirmButtonText: 'Borrar y avisar', denyButtonText: 'Solo borrar', background: '#0a0a0a', color: '#fff' }).then((r) => {
+        if (r.isConfirmed || r.isDenied) {
+            b.citas = b.citas.filter(x => x.id !== id); saveDB(); renderAgendaList(); renderAdmin(); if (session.rol === 'barbero') renderBarbero();
+            if (r.isConfirmed && c.celular && c.celular.length >= 10) {
+                const hora12 = formatTime12h(c.hora);
+                let msj = `Hola ${c.nombre},\n\nTu cita para ${c.servicio} con ${c.barbero} el ${c.fecha} a las ${hora12} ha sido cancelada.\n\nReprograma ingresando a nuestro Kiosko.`;
+                window.open(`https://wa.me/57${c.celular}?text=${encodeURIComponent(msj)}`, '_blank');
+            }
+        }
+    });
+}
+
+function enviarRecordatorioWp(idCita) {
+    const b = db.barberias[bIdx]; const cita = b.citas.find(c => c.id === idCita);
+    if (!cita || !cita.celular) { Swal.fire('Error', 'El cliente no tiene un número guardado.', 'error'); return; }
+    const horaBonita = formatTime12h(cita.hora);
+    let mensaje = b.wpTemplate || '¡Hola {cliente}! Te recordamos tu cita para {servicio} con {barbero} a las {hora}. ¡Te esperamos!';
+    mensaje = mensaje.replace(/{cliente}/g, cita.nombre).replace(/{hora}/g, horaBonita).replace(/{barbero}/g, cita.barbero).replace(/{servicio}/g, cita.servicio || 'tu atención');
+    window.open(`https://wa.me/57${cita.celular}?text=${encodeURIComponent(mensaje)}`, '_blank');
+}
+
+function abrirKioskoPublico() {
+    if (!db || !db.barberias || db.barberias.length === 0) { Swal.fire('Atención', 'No hay barbería vinculada localmente.', 'info'); return; }
+    if (db.barberias.length === 1) { iniciarKiosko(0); }
+    else {
+        let opts = {}; db.barberias.forEach((b, i) => { opts[i] = b.nombre; });
+        Swal.fire({ title: 'Kiosko', input: 'select', inputOptions: opts, showCancelButton: true, background: '#0a0a0a', color: '#fff' }).then((r) => { if (r.isConfirmed && r.value !== "") iniciarKiosko(parseInt(r.value)); });
+    }
+}
+
+function iniciarKiosko(idx) {
+    kiosko_bIdx = idx; const b = db.barberias[kiosko_bIdx];
+    if (!b.barberos || b.barberos.length === 0 || !b.servicios || b.servicios.length === 0) { Swal.fire({ title: 'Configura primero', text: 'El administrador debe crear barberos y servicios.', icon: 'warning', background: '#0a0a0a', color: '#fff' }); return; }
+    document.getElementById('kio-fecha').value = getTodayYMD(); 
+    document.getElementById('kio-titulo-local').innerText = b.nombre; 
+    renderSemaforoKiosko(); showScreen('view-kiosko');
+}
+
+// CORRECCION KIOSKO: Ocultar barberos en ALMUERZO o DESCANSO
+function renderSemaforoKiosko() {
+    const b = db.barberias[kiosko_bIdx];
+    const barberosActivos = (b.barberos || []).filter(barb => barb.estado !== 'ALMUERZO' && barb.estado !== 'DESCANSO');
+    
+    document.getElementById('kiosko-semaforo').innerHTML = barberosActivos.map(barb => {
+        const l = barb.estado === 'LIBRE';
+        return `<div class="bg-[#111] p-3 rounded-2xl border border-zinc-800 flex flex-col items-center justify-center min-w-[80px]"><div class="w-3 h-3 rounded-full ${l ? 'bg-green-500 status-pulse-green' : 'bg-red-500 status-pulse-red'} mb-2"></div><span class="text-[9px] font-black uppercase text-white">${barb.nom}</span></div>`;
+    }).join('');
+    
+    document.getElementById('kio-barbero').innerHTML = '<option value="">-- ELIGE TU BARBERO --</option>' + barberosActivos.map(bar => `<option value="${bar.nom}">${bar.nom}</option>`).join('');
+    document.getElementById('kio-servicio').innerHTML = '<option value="">-- ELIGE UN SERVICIO --</option>' + (b.servicios || []).map(s => `<option value="${s.nom}">${s.nom} - ${fMoney(s.pre)}</option>`).join('');
+    renderKioskoSlots();
+}
+
+function renderKioskoSlots() {
+    const b = db.barberias[kiosko_bIdx]; const d = document.getElementById('kio-fecha').value; const barb = document.getElementById('kio-barbero').value; const ctn = document.getElementById('kio-slots-container');
+    selectedKioTime = null;
+    if (!d || !barb) { ctn.innerHTML = '<p class="text-[10px] text-zinc-500 col-span-3 text-center py-2 italic">Selecciona fecha y barbero para ver horarios.</p>'; return; }
+    const open = b.horaApertura || "08:00"; const close = b.horaCierre || "20:00"; const interval = b.intervaloCitas || 60;
+    let start = timeToMins(open); let end = timeToMins(close); let html = '';
+    const bk = (b.citas || []).filter(c => c.barbero === barb && c.fecha === d);
+    for (let t = start; t <= end; t += interval) {
+        let h = Math.floor(t / 60); let m = t % 60; let tS = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        let t12 = formatTime12h(tS); const isT = bk.some(c => c.hora === tS);
+        if (isT) { html += `<button disabled class="p-3 rounded-xl bg-red-900/20 border border-red-900/50 text-red-500 text-[11px] font-black cursor-not-allowed opacity-50 line-through">${t12}</button>`; }
+        else { html += `<button id="slot-${tS}" onclick="selectKioSlot('${tS}')" class="kio-slot-btn p-3 rounded-xl bg-[#111] border border-zinc-700 text-white text-[11px] font-black hover:bg-indigo-600 transition-colors btn-press">${t12}</button>`; }
+    }
+    ctn.innerHTML = html || '<p class="text-[10px] text-zinc-500 col-span-3 text-center py-2">Sin horarios.</p>';
+}
+
+function selectKioSlot(tS) {
+    selectedKioTime = tS;
+    document.querySelectorAll('.kio-slot-btn').forEach(b => { b.classList.remove('bg-indigo-600', 'border-indigo-500'); b.classList.add('bg-[#111]', 'border-zinc-700'); });
+    const sB = document.getElementById(`slot-${tS}`); sB.classList.remove('bg-[#111]', 'border-zinc-700'); sB.classList.add('bg-indigo-600', 'border-indigo-500');
+}
+
+// CORRECCIÓN KIOSKO CONCURRENCIA: Descarga de nube antes de agendar
+async function kioskoAgendar() {
+    const bLocal = db.barberias[kiosko_bIdx]; 
+    const cli = cleanStr(document.getElementById('kio-nombre').value).toUpperCase(); 
+    const cel = cleanNum(document.getElementById('kio-celular').value); 
+    const srv = document.getElementById('kio-servicio').value; 
+    const barb = document.getElementById('kio-barbero').value; 
+    const f = document.getElementById('kio-fecha').value;
+    
+    if (!cli || !srv || !barb || !f || !selectedKioTime) { Swal.fire({ title: '¡Faltan Datos!', icon: 'warning', background: '#0a0a0a', color: '#fff' }); return; }
+    const h = selectedKioTime; 
+
+    Swal.fire({ title: 'Asegurando turno...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }, background: '#0a0a0a', color: '#fff' });
+
+    try {
+        if(isOnline && bLocal.id_nube) {
+            const { data: stores } = await supabaseClient.from('stores').select('json_data').eq('id', bLocal.id_nube).limit(1);
+            if (stores && stores.length > 0) {
+                let bCloud = stores[0].json_data || {};
+                db.barberias[kiosko_bIdx].citas = bCloud.citas || [];
+            }
+        }
+
+        const b = db.barberias[kiosko_bIdx];
+        const coll = (b.citas || []).find(c => c.barbero === barb && c.fecha === f && c.hora === h);
+        if (coll) { Swal.fire({ title: '¡Ups! Turno Ocupado', text: 'Alguien acaba de tomar este horario. Elige otro, por favor.', icon: 'error', background: '#0a0a0a', color: '#fff' }); renderKioskoSlots(); return; }
+        
+        let pts = 0; const id = cel || cli; if (b.clientes && b.clientes[id]) pts = b.clientes[id].pts || 0;
+        if (!b.citas) b.citas = []; 
+        b.citas.push({ id: Date.now().toString(), nombre: cli, celular: cel, barbero: barb, servicio: srv, fecha: f, hora: h, estado: 'PENDIENTE' }); 
+        
+        if(isOnline && b.id_nube) { await supabaseClient.from('stores').update({ json_data: b }).eq('id', b.id_nube); }
+        saveDB(); 
+        
+        document.getElementById('kio-nombre').value = ""; document.getElementById('kio-celular').value = "";
+        const horaBonita = formatTime12h(h);
+        Swal.fire({ title: '¡CONFIRMADO!', text: `Reservado el ${f} a las ${horaBonita}. Puntos: ${pts} 👑`, icon: 'success', background: '#0a0a0a', color: '#fff', timer: 4000, showConfirmButton: false }).then(() => {
+            volverAInicioKiosko();
+            if (cel && cel.length >= 10) { let msj = `✅ CITA CONFIRMADA\n\nFecha: ${f}\nHora: ${horaBonita}\nBarbero: ${barb}\nServicio: ${srv}\n\nTus Puntos: ${pts}`; window.open(`https://wa.me/57${cel}?text=${encodeURIComponent(msj)}`, '_blank'); }
+        });
+    } catch(e) { Swal.fire('Error', 'Problema conectando a la nube.', 'error'); }
+}
+
+function copiarLinkKiosko() {
+    const link = document.getElementById('cfg-kiosko-link');
+    link.select(); document.execCommand('copy');
+    Swal.fire({ title: '¡Enlace Copiado!', text: 'Listo para enviar por WhatsApp.', icon: 'success', timer: 2000, showConfirmButton: false, toast: true, position: 'top-end', background: '#0a0a0a', color: '#fff' });
+}
+
+// CORRECCIÓN: Renderizar QR a Imagen para Imprimir
+function imprimirQRKiosko() {
+    const b = db.barberias[bIdx];
+    const qrCanvas = document.querySelector('#cfg-kiosko-qr canvas');
+    if (!qrCanvas) return Swal.fire('Aviso', 'Genera el QR primero recargando la página.', 'info');
+    
+    // Extracción en alta calidad para impresora
+    const imgSrc = qrCanvas.toDataURL("image/png");
+    
+    let html = `<div style="text-align:center; font-family:sans-serif; padding: 20px; color:#000; background:#fff;">`;
+    html += `<h1 style="font-size:36px; margin-bottom:10px; text-transform:uppercase; font-weight:900;">${b.nombre}</h1>`;
+    html += `<p style="font-size:18px; color:#333; margin-bottom: 20px;">Escanea este código y reserva tu turno sin filas</p>`;
+    html += `<img src="${imgSrc}" style="width:300px; height:300px; margin:0 auto; border: 10px solid #000; border-radius: 20px;">`;
+    html += `<p style="font-size:14px; margin-top:20px; color:#666;">Software Oficial de Zeus Barber Pro</p></div>`;
+    document.getElementById('print-area').innerHTML = html;
+    setTimeout(() => { window.print(); }, 500); 
+}
+
+// ==========================================
+// 10. POS & VENTAS
+// ==========================================
+function switchPOS(tab) {
+    document.getElementById('pos-search').value = ""; filtrarPOS();
+    const bS = document.getElementById('tab-btn-servicios'); const bP = document.getElementById('tab-btn-productos'); const xS = document.getElementById('pos-servicios'); const xP = document.getElementById('pos-productos');
+    if (tab === 'S') { xS.classList.remove('hidden'); xP.classList.add('hidden'); bS.className = "flex-1 bg-indigo-600 text-white py-3 rounded-xl text-xs font-black uppercase transition-all"; bP.className = "flex-1 bg-transparent text-zinc-500 py-3 rounded-xl text-xs font-black uppercase transition-all"; }
+    else { xS.classList.add('hidden'); xP.classList.remove('hidden'); bP.className = "flex-1 bg-purple-600 text-white py-3 rounded-xl text-xs font-black uppercase transition-all"; bS.className = "flex-1 bg-transparent text-zinc-500 py-3 rounded-xl text-xs font-black uppercase transition-all"; }
+}
+function filtrarPOS() { const t = document.getElementById('pos-search').value.toLowerCase(); const xS = document.getElementById('pos-servicios'); if (xS) Array.from(xS.children).forEach(b => b.style.display = b.innerText.toLowerCase().includes(t) ? '' : 'none'); const xP = document.getElementById('pos-productos'); if (xP) Array.from(xP.children).forEach(b => b.style.display = b.innerText.toLowerCase().includes(t) ? '' : 'none'); }
+function addServToCart(i) { cart.push({ ...db.barberias[bIdx].servicios[i], idT: Date.now() + Math.random(), isProd: false }); updateCart(); }
+function addProdToCart(i) { const p = db.barberias[bIdx].productos[i]; const c = cart.filter(x => x.isProd && x.id === p.id).length; if (p.stock <= c) return Swal.fire('Agotado', '', 'warning'); cart.push({ nom: p.nom, pre: p.pre, idT: Date.now() + Math.random(), isProd: true, id: p.id }); updateCart(); }
+
+// CORRECCIÓN: Borrar Productos del carrito (Botón X)
+function removeFromCart(idT) { cart = cart.filter(x => String(x.idT) !== String(idT)); updateCart(); }
+
+function updateCart() {
+    const b = db.barberias[bIdx]; let sub = cart.filter(x => !x.isDesc).reduce((a, i) => a + i.pre, 0); cart = cart.filter(x => !x.isDesc);
+    let sCon = cart.reduce((a, i) => a + i.pre, 0); let iA = b.configIVA ? b.configIVA.activo : false; let iP = b.configIVA ? b.configIVA.porcentaje : 0; let vI = iA ? Math.round(sCon * (iP / 100)) : 0; let tF = sCon + vI;
+    document.getElementById('pos-carrito').innerHTML = cart.length === 0 ? '<p class="text-zinc-700 text-center text-xs mt-4">Vacío</p>' : cart.map(i => `<div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl mb-2 border ${i.isProd ? 'border-purple-900/30' : 'border-transparent'}"><span class="text-[10px] font-black uppercase ${i.isProd ? 'text-purple-300' : 'text-white'}">${i.nom}</span><div class="flex items-center gap-3"><span class="text-zinc-400 text-xs font-bold">${fMoney(Math.abs(i.pre))}</span><button onclick="removeFromCart('${i.idT}')" class="text-red-500 font-black px-3 py-1 hover:scale-125 transition-transform bg-red-900/20 rounded-lg">X</button></div></div>`).join('');
+    let tD = document.getElementById('pos-total-breakdown'); if (iA && sCon > 0) tD.innerHTML = `<p class="text-[10px] text-zinc-400">SUB: ${fMoney(sCon)} | IMPUESTO: ${fMoney(vI)}</p><span id="pos-total" class="text-4xl font-black text-indigo-500">${fMoney(tF)}</span>`; else tD.innerHTML = `<span id="pos-total" class="text-4xl font-black text-indigo-500">${fMoney(tF)}</span>`; validarBotonCobro();
+}
+
+function validarBotonCobro() { const m = document.getElementById('pos-metodo').value; const ok = cart.length > 0 && m !== ""; const b = document.getElementById('pos-btn-cobrar'); b.disabled = !ok; b.classList.toggle('opacity-20', !ok); b.classList.toggle('cursor-not-allowed', !ok); }
+
+function procesarVenta() {
+    const m = document.getElementById('pos-metodo').value; const b = db.barberias[bIdx]; document.getElementById('qr-banco').innerText = m; document.getElementById('qr-caja').innerHTML = "";
+    if (m !== "Efectivo") {
+        document.getElementById('qr-titular').innerText = b.bankTitular || "CUENTA";
+        if (b.qrImage) document.getElementById('qr-caja').innerHTML = `<img src="${b.qrImage}" class="w-48 h-48 object-contain rounded-xl">`;
+        else if (b.bankNumero) new QRCode(document.getElementById("qr-caja"), { text: b.bankNumero, width: 180, height: 180 });
+        else document.getElementById('qr-caja').innerHTML = `<p class="text-zinc-500 text-xs py-10">Sin QR</p>`;
+    } else { document.getElementById('qr-titular').innerText = "EVIDENCIA REQUERIDA"; document.getElementById('qr-caja').innerHTML = `<span class="text-7xl py-6">💵</span>`; }
+    comprobanteTemp = null; document.getElementById('btn-confirmar-qr').disabled = true; document.getElementById('btn-confirmar-qr').classList.add('opacity-20', 'cursor-not-allowed'); document.getElementById('modal-qr').classList.remove('hidden');
+}
+
+function validarComprobante(input) { 
+    if (input.files && input.files[0]) { 
+        compressImage(input.files[0], function(img) { 
+            comprobanteTemp = img; 
+            document.getElementById('cfg-comprobante-img').src = img; document.getElementById('cfg-comprobante-img').classList.remove('hidden'); document.getElementById('cfg-comprobante-default').classList.add('hidden'); document.getElementById('btn-confirmar-qr').disabled = false; document.getElementById('btn-confirmar-qr').classList.remove('opacity-20', 'cursor-not-allowed'); 
+        }); 
+    } 
+}
+
+function finalizarVentaOK() {
+    try {
+        const b = db.barberias[bIdx]; const m = document.getElementById('pos-metodo').value; 
+        
+        let cNom = cleanStr(document.getElementById('pos-cli-nombre').value).toUpperCase();
+        if(!cNom) cNom = 'CLIENTE GENERAL';
+        
+        const cCel = cleanNum(document.getElementById('pos-cli-celular').value); const idCli = cCel || cNom; let ptsActuales = 0;
+
+        if (idCli !== 'CLIENTE GENERAL') {
+            if (!b.clientes) b.clientes = {};
+            if (!b.clientes[idCli]) b.clientes[idCli] = { nombre: cNom, celular: cCel, pts: 0, visitas: 0 };
+            b.clientes[idCli].pts += cart.filter(x => !x.isDesc).length;
+            b.clientes[idCli].visitas += 1;
+            ptsActuales = b.clientes[idCli].pts;
+        }
+
+        const fA = getTodayYMD(); const hA = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }); const sV = cart.reduce((a, i) => a + i.pre, 0); const iA = b.configIVA && b.configIVA.activo; const vI = iA ? Math.round(sV * (b.configIVA.porcentaje / 100)) : 0; const tV = sV + vI; const tId = (b.prefijoFactura || "TK-") + (b.consecutivoFactura || 1);
+        lastTicketData = { nombreNegocio: b.nombre, fecha: fA, hora: hA, cliente: cNom, celular: cCel, metodo: m, total: tV, ticketId: tId, items: JSON.parse(JSON.stringify(cart)), pts: ptsActuales, ivaPct: (iA ? b.configIVA.porcentaje : 0), valorIva: vI, subtotal: sV };
+        if (!b.tickets) b.tickets = []; b.tickets.push(lastTicketData);
+
+        cart.forEach(i => {
+            if (i.isProd) { let px = b.productos.findIndex(p => p.id === i.id); if (px > -1) b.productos[px].stock -= 1; }
+            b.ventas.push({ ticketId: tId, barbero: i.isDesc ? "ADMIN" : session.nom, servicio: i.nom, valor: i.pre, ivaAplicado: (iA ? Math.round(i.pre * (b.configIVA.porcentaje / 100)) : 0), metodo: m, tipo: m === "Efectivo" ? "Efectivo" : "Digital", fecha: fA, hora: hA, esProducto: i.isProd, turnoCerrado: false });
+        });
+        b.consecutivoFactura = (b.consecutivoFactura || 1) + 1; saveDB();
+
+        if (session.rol === 'barbero') { let myB = b.barberos.find(x => x.nom === session.nom); if (myB) myB.estado = 'LIBRE'; saveDB(); }
+
+        document.getElementById('ticket-total').innerText = fMoney(tV);
+        document.getElementById('ticket-fecha').innerText = `TK N° ${tId} | ${fA}`;
+        const btnWp = document.getElementById('btn-wp-ticket');
+        if (cCel && cCel.length >= 10) {
+            btnWp.classList.remove('hidden'); let mSaludo = b.msgBienvenida || 'Gracias por visitarnos'; let mDesp = b.msgDespedida || '¡Te esperamos pronto!';
+            let msj = `✂️ *RECIBO ELECTRÓNICO*\n\n${mSaludo}\n\n*Recibo N°:* ${tId}\n*Total:* ${fMoney(tV)}\n*Método:* ${m}\n\n👑 *Tus Puntos:* ${ptsActuales}\n\n${mDesp}`;
+            btnWp.onclick = () => window.open(`https://wa.me/57${cCel}?text=${encodeURIComponent(msj)}`, '_blank');
+        } else { btnWp.classList.add('hidden'); }
+
+        cerrarModalespos(); document.getElementById('modal-ticket').classList.remove('hidden');
+        
+        // LIMPIEZA DE TODOS LOS DATOS (POS CLEANER Y CORREO)
+        cart = []; 
+        document.getElementById('pos-cli-nombre').value = ""; 
+        document.getElementById('pos-cli-celular').value = ""; 
+        document.getElementById('pos-metodo').value = ""; 
+        document.getElementById('pos-cli-idoc').value = "";
+        document.getElementById('pos-cli-correo').value = "";
+        document.getElementById('pos-cli-cumple').value = "";
+        
+        session.rol === 'admin' ? renderAdmin() : renderBarbero();
+    } catch (err) { console.error(err); Swal.fire('Error', 'No se pudo procesar la venta.', 'error'); }
+}
+
+// ==========================================
+// 11. IMPRIMIR Y MODALES DE GESTIÓN
+// ==========================================
+function imprimirTicketTermico() {
+    if (!lastTicketData) { Swal.fire('Error', 'No hay ticket reciente.', 'error'); return; }
+    const t = lastTicketData; const b = db.barberias[bIdx];
+    let html = `<div style="width: 100%; padding: 0; margin: 0; font-family: monospace; font-size: 12px; color: #000;">`;
+    html += `<div style="text-align:center; font-weight:bold; font-size:16px; margin-bottom:2px; text-transform:uppercase;">${t.nombreNegocio}</div>`;
+    if (b.nit) html += `<div style="text-align:center; font-size:10px;">ID FISCAL / NIT: ${b.nit}</div>`;
+    if (b.resolucion) html += `<div style="text-align:center; font-size:9px; margin-bottom:2px;">${b.resolucion}</div>`;
+    if (b.direccion) html += `<div style="text-align:center; font-size:10px;">${b.direccion}</div>`;
+    if (b.telefono) html += `<div style="text-align:center; font-size:10px;">Tel: ${b.telefono}</div>`;
+    html += `<div style="border-bottom:1px dashed #000; margin:6px 0;"></div>`;
+    html += `<div style="text-align:left; font-size:11px;">TICKET: <b>${t.ticketId}</b></div>`;
+    html += `<div style="text-align:left; font-size:11px;">FECHA: ${t.fecha} ${t.hora}</div>`;
+    html += `<div style="text-align:left; font-size:11px;">CLIENTE: ${t.cliente}</div>`;
+    html += `<div style="border-bottom:1px dashed #000; margin:6px 0;"></div>`;
+    html += `<table style="width:100%; font-size:11px; text-align:left; border-collapse:collapse;"><tr><th style="padding-bottom:4px; width:15%;">CANT</th><th style="padding-bottom:4px; width:55%;">ITEM</th><th style="text-align:right; padding-bottom:4px; width:30%;">VALOR</th></tr>`;
+    t.items.forEach(i => { html += `<tr><td style="vertical-align:top; padding-bottom:2px;">1</td><td style="vertical-align:top; padding-bottom:2px;">${i.nom}</td><td style="text-align:right; vertical-align:top; padding-bottom:2px;">${fMoney(Math.abs(i.pre))}</td></tr>`; });
+    html += `</table>`;
+    html += `<div style="border-bottom:1px dashed #000; margin:6px 0;"></div>`;
+    if (t.valorIva > 0) { html += `<div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px;"><span>SUBTOTAL:</span><span>${fMoney(t.subtotal)}</span></div>`; html += `<div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px;"><span>IMPUESTO (${t.ivaPct}%):</span><span>${fMoney(t.valorIva)}</span></div>`; }
+    html += `<div style="display:flex; justify-content:space-between; font-size:14px; font-weight:bold; margin:6px 0;"><span>TOTAL:</span><span>${fMoney(t.total)}</span></div>`;
+    html += `<div style="display:flex; justify-content:space-between; font-size:11px;"><span>MÉTODO:</span><span>${t.metodo}</span></div>`;
+    if (b.ticketFooter) html += `<div style="text-align:center; font-size:9px; margin-top:10px;">${b.ticketFooter}</div>`;
+    html += `</div>`;
+    document.getElementById('print-area').innerHTML = html;
+    setTimeout(() => { window.print(); }, 500); 
+}
+
+function abrirFacturas() { document.getElementById('modal-facturas').classList.remove('hidden'); document.getElementById('search-factura').value = ""; renderFacturas(); }
+function renderFacturas() {
+    const b = db.barberias[bIdx]; const term = (document.getElementById('search-factura').value || '').toLowerCase(); const lista = (b.tickets || []).slice().reverse();
+    const filtrados = lista.filter(t => { const cName = (t.cliente || '').toLowerCase(); const tID = (t.ticketId || '').toLowerCase(); return cName.includes(term) || tID.includes(term); });
+    document.getElementById('facturas-lista').innerHTML = filtrados.map((t) => {
+        let isAnulado = t.anulado; let bgClass = isAnulado ? "bg-red-900/10 opacity-60" : "bg-black/50 border-zinc-800"; let titleClass = isAnulado ? "text-red-500 line-through" : "text-white";
+        let btnHtml = isAnulado ? `<span class="text-red-500 font-black text-[10px] uppercase border border-red-500/50 px-2 py-1 rounded">🚫 Anulada</span>` : `<button onclick="anularFactura('${t.ticketId}')" class="bg-red-900/30 text-red-500 border border-red-900/50 px-3 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-red-600 hover:text-white transition-colors btn-press mb-1">🚫 Anular</button> <button onclick="reimprimirFactura('${t.ticketId}')" class="bg-blue-600/30 text-blue-400 border border-blue-600/50 px-3 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-blue-600 hover:text-white transition-colors btn-press">🖨️ Imprimir</button>`;
+        return ` <div class="p-4 rounded-2xl border flex justify-between items-center ${bgClass}"> <div> <p class="font-black uppercase text-sm ${titleClass}">${t.ticketId} <span class="text-zinc-500 text-[10px] ml-2 no-underline">${t.fecha}</span></p> <p class="text-[10px] text-zinc-400 mt-1">👤 ${t.cliente}</p> <p class="text-[11px] font-black ${isAnulado ? 'text-red-400' : 'text-green-400'} mt-1">${fMoney(t.total)} • ${t.metodo}</p> </div> <div class="flex flex-col gap-1 items-end"> ${btnHtml} </div> </div>`;
+    }).join('') || `<p class="text-center text-zinc-600 text-xs py-4">No hay facturas.</p>`;
+}
+function anularFactura(tid) { Swal.fire({ title: '¿Anular esta factura?', text: 'El dinero se restará de la caja y el stock volverá al inventario.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', background: '#0a0a0a', color: '#fff' }).then((r) => { if (r.isConfirmed) { const b = db.barberias[bIdx]; const t = (b.tickets || []).find(x => x.ticketId === tid); if (!t) return; t.anulado = true; (t.items || []).forEach(item => { if (item.isProd) { let prod = b.productos.find(p => p.id === item.id); if (prod) prod.stock += 1; } }); b.ventas = (b.ventas || []).filter(v => v.ticketId !== tid); saveDB(); renderFacturas(); session.rol === 'admin' ? renderAdmin() : renderBarbero(); addLog("ANULACIÓN", session.nom || "ADMIN", `Factura ${tid} anulada`); Swal.fire({ title: 'Factura Anulada', icon: 'success', background: '#0a0a0a', color: '#fff', timer: 2000 }); } }); }
+function reimprimirFactura(tid) { const b = db.barberias[bIdx]; const t = (b.tickets || []).find(x => x.ticketId === tid); if (t) { lastTicketData = t; cerrarModales(); setTimeout(() => { imprimirTicketTermico(); }, 400); } }
+
+function abrirCierreCaja() {
+    document.getElementById('modal-cierre-caja').classList.remove('hidden'); const b = db.barberias[bIdx]; const hoy = getTodayYMD();
+    document.getElementById('cc-fecha-info').innerText = `REPORTE DEL DÍA • ${hoy}`;
+    if (session.rol === 'admin') {
+        document.getElementById('cc-admin-view').classList.remove('hidden'); document.getElementById('cc-barbero-view').classList.add('hidden');
+        const ventas = (b.ventas || []).filter(v => v.fecha === hoy); const cortesTot = ventas.filter(v => !v.esProducto).length;
+        const vEfe = ventas.filter(v => v.tipo === "Efectivo").reduce((a, v) => a + v.valor, 0); const vDig = ventas.filter(v => v.tipo !== "Efectivo").reduce((a, v) => a + v.valor, 0);
+        const gastos = (b.gastos || []).filter(g => g.fecha === hoy).reduce((a, g) => a + g.valor, 0);
+        
+        document.getElementById('cc-total-cortes').innerText = cortesTot; document.getElementById('cc-efe-hoy').innerText = fMoney(vEfe);
+        document.getElementById('cc-dig-hoy').innerText = fMoney(vDig); document.getElementById('cc-efe-final').innerText = fMoney(vEfe - gastos);
+    } else {
+        document.getElementById('cc-admin-view').classList.add('hidden'); document.getElementById('cc-barbero-view').classList.remove('hidden');
+    }
+}
+function confirmarCierreTurnoBarbero() { const b = db.barberias[bIdx]; const hoy = getTodayYMD(); (b.ventas || []).forEach(v => { if (v.fecha === hoy && v.barbero === session.nom && !v.turnoCerrado) { v.turnoCerrado = true; } }); (b.gastos || []).forEach(g => { if (g.fecha === hoy && g.registradoPor === session.nom && !g.turnoCerrado) { g.turnoCerrado = true; } }); saveDB(); Swal.fire('Turno Finalizado', 'Tus contadores pasaron a 0', 'success'); cerrarModales(); }
+function procesarCierreFinalDay() { Swal.fire({ title: '¿Cerrar Día?', text: 'Esto enviará los reportes a 0 para mañana.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#16a34a', background: '#0a0a0a', color: '#fff' }).then(r => { if(r.isConfirmed){ Swal.fire('Día Cerrado', '', 'success'); cerrarModales(); } }); }
+
+function abrirCierreMes() { 
+    document.getElementById('modal-cierre-mes').classList.remove('hidden'); 
+    const b = db.barberias[bIdx]; const hoy = getTodayYMD();
+    const vTot = (b.ventas || []).reduce((a, v) => a + v.valor, 0);
+    const iTot = (b.ventas || []).reduce((a, v) => a + (v.ivaAplicado || 0), 0);
+    const gTot = (b.gastos || []).reduce((a, g) => a + g.valor, 0);
+    document.getElementById('cm-ventas').innerText = fMoney(vTot);
+    document.getElementById('cm-iva').innerText = fMoney(iTot);
+    document.getElementById('cm-gastos').innerText = `-${fMoney(gTot)}`;
+    document.getElementById('cm-neta').innerText = fMoney(vTot - gTot);
+}
+function procesarCierreMes() { exportarPDF(); const b = db.barberias[bIdx]; if (!b.historialMensual) b.historialMensual = []; const mesActual = new Date().toLocaleDateString('es-CO', { month: 'long', year: 'numeric' }); b.historialMensual.push({ mes: mesActual.toUpperCase(), fechaCierre: new Date().toISOString(), ventas: b.ventas || [], gastos: b.gastos || [], tickets: b.tickets || [] }); b.ventas = []; b.gastos = []; b.tickets = []; saveDB(); cerrarModales(); renderAdmin(); Swal.fire('Mes Archivado', 'Caja en 0. PDF descargado.', 'success'); }
+
+function exportarPDF() {
+    try {
+        const b = db.barberias[bIdx]; const { jsPDF } = window.jspdf; const doc = new jsPDF('landscape'); let currentY = 15; const pageWidth = doc.internal.pageSize.getWidth();
+        if (b.logo) { const logoSize = 25; const logoX = (pageWidth - logoSize) / 2; try { doc.addImage(b.logo, 'JPEG', logoX, currentY, logoSize, logoSize); currentY += logoSize + 8; } catch (e) { } }
+        doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.text(`REPORTE FINANCIERO - ${b.nombre}`, pageWidth / 2, currentY, { align: "center" }); currentY += 6;
+        doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(`Generado: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}`, pageWidth / 2, currentY, { align: "center" }); currentY += 10;
+        let tIng = 0, tGas = 0, tBar = 0, tIva = 0;
+        const bodyV = (b.ventas || []).map(v => { let pBar = 0; if (!v.esProducto && v.barbero !== "ADMIN") { const cBar = ((b.barberos || []).find(x => x.nom === v.barbero) || {}).comision || 50; pBar = v.valor * (cBar / 100); } tIng += v.valor; tIva += (v.ivaAplicado || 0); tBar += pBar; let tipo = v.barbero === "ADMIN" && v.valor < 0 ? "DESC." : (v.esProducto ? "PROD." : "SERV."); return [v.fecha, v.hora, v.barbero, tipo, v.servicio, v.metodo, `${fMoney(v.valor)}`, `${fMoney(v.ivaAplicado || 0)}`, `${fMoney(v.valor + (v.ivaAplicado || 0))}`, `${fMoney(pBar)}`, `${fMoney(v.valor - pBar)}`]; });
+        const bodyG = (b.gastos || []).map(g => { tGas += g.valor; return [g.fecha, "-", g.registradoPor || "ADMIN", "GASTO", g.desc, "Efectivo", `-${fMoney(g.valor)}`, "0", `-${fMoney(g.valor)}`, "0", `-${fMoney(g.valor)}`]; });
+        let allRows = bodyV.concat(bodyG); let tNeto = tIng - tGas - tBar;
+        doc.autoTable({ startY: currentY, head: [['Fecha', 'Hora', 'Empleado', 'Tipo', 'Item', 'Método', 'V. Base', 'IMPUESTO', 'Total', 'Comisión', 'Neto Local']], body: allRows, theme: 'striped', headStyles: { fillColor: [79, 70, 229] }, styles: { fontSize: 8 }, });
+        let finalY = doc.lastAutoTable.finalY + 15; if (finalY > 180) { doc.addPage(); finalY = 20; }
+        doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(0, 0, 0); doc.text("RESUMEN DE AUDITORÍA", 14, finalY); doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(`Ingresos Totales (Base): ${fMoney(tIng)}`, 14, finalY + 8); doc.text(`Pago a Barberos: -${fMoney(tBar)}`, 14, finalY + 14); doc.text(`Gastos del Local: -${fMoney(tGas)}`, 14, finalY + 20); doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(22, 163, 74); doc.text(`UTILIDAD NETA (Ganancia Libre): ${fMoney(tNeto)}`, 14, finalY + 30); doc.setFontSize(10); doc.setTextColor(202, 138, 4); doc.text(`IMPUESTOS Recaudados: ${fMoney(tIva)}`, 14, finalY + 38); doc.save(`ZEUS_FINANZAS_${b.nombre.replace(/\s+/g, '_')}.pdf`);
+    } catch (e) { console.error(e); Swal.fire('Error', 'No se pudo generar el PDF.', 'error'); }
+}
+
+function abrirGastos() { document.getElementById('modal-gastos').classList.remove('hidden'); renderGastos(); }
+function registrarGasto() { const d = document.getElementById('gasto-desc').value.trim().toUpperCase(); const v = parseInt(cleanNum(document.getElementById('gasto-val').value)); if (d && v) { db.barberias[bIdx].gastos.push({ desc: d, valor: v, fecha: getTodayYMD(), registradoPor: session.nom || 'ADMIN', turnoCerrado: false }); saveDB(); renderGastos(); if (session.rol === 'admin') renderAdmin(); addLog("GASTO", session.nom || "ADMIN", `Gasto: ${d} - ${fMoney(v)}`); document.getElementById('gasto-desc').value = ""; document.getElementById('gasto-val').value = ""; } }
+function renderGastos() { document.getElementById('gastos-historial').innerHTML = (db.barberias[bIdx].gastos || []).slice().reverse().map(g => `<div class="flex justify-between bg-red-900/10 p-4 rounded-2xl mb-2 border border-red-900/20"><div><p class="text-[10px] font-black text-red-400 uppercase">${g.desc}</p><p class="text-[8px] text-zinc-600">${g.fecha} • Por: ${g.registradoPor || 'ADMIN'}</p></div><span class="font-black text-red-500">-${fMoney(g.valor)}</span></div>`).join(''); }
+
+function abrirInventario() { document.getElementById('modal-inventario').classList.remove('hidden'); renderInventario(); }
+function renderInventario() { document.getElementById('inventario-lista').innerHTML = (db.barberias[bIdx].productos || []).map(p => ` <div class="flex justify-between items-center bg-purple-900/10 p-4 rounded-2xl mb-2 border border-purple-900/30"> <div><p class="text-[11px] font-black text-white uppercase">${p.nom}</p><p class="text-[9px] text-zinc-400">Precio: ${fMoney(p.pre)}</p></div> <div class="flex items-center gap-3"> <span class="text-[10px] text-purple-400 font-black">Stock: ${p.stock}</span><button onclick="db.barberias[${bIdx}].productos = db.barberias[${bIdx}].productos.filter(x => x.id !== ${p.id}); saveDB(); renderInventario();" class="text-red-500 font-black text-xs px-2">X</button> </div> </div> `).join('') || '<p class="text-xs text-zinc-600 italic">Vacío</p>'; }
+function registrarProducto() { const n = cleanStr(document.getElementById('inv-nombre').value).toUpperCase(); const p = parseInt(cleanNum(document.getElementById('inv-precio').value)); const s = parseInt(cleanNum(document.getElementById('inv-stock').value)); if (n && p && !isNaN(s)) { db.barberias[bIdx].productos.push({ id: Date.now(), nom: n, pre: p, stock: s }); saveDB(); renderInventario(); document.getElementById('inv-nombre').value = ""; document.getElementById('inv-precio').value = ""; document.getElementById('inv-stock').value = ""; } }
+
+function abrirBarberos() { document.getElementById('modal-barberos').classList.remove('hidden'); const b = db.barberias[bIdx]; const hoy = getTodayYMD(); document.getElementById('asistencia-lista').innerHTML = (b.barberos || []).map(bar => { let ing = "--:--"; let sal = "--:--"; if (b.asistencia && b.asistencia[hoy] && b.asistencia[hoy][bar.nom]) { ing = b.asistencia[hoy][bar.nom].ingreso || "--:--"; sal = b.asistencia[hoy][bar.nom].salida || "--:--"; } return `<div class="glass p-5 rounded-3xl border border-zinc-800 flex justify-between items-center mb-3"><div><h4 class="font-black text-sm uppercase text-white">${bar.nom}</h4><div class="mt-2 flex gap-2"><span class="text-[9px] text-green-400 bg-green-900/20 px-2 py-1 rounded">IN: ${ing}</span><span class="text-[9px] text-red-400 bg-red-900/20 px-2 py-1 rounded">OUT: ${sal}</span></div></div></div>`; }).join(''); }
+function abrirClientes() { document.getElementById('modal-clientes').classList.remove('hidden'); renderClientes(); }
+function renderClientes() { const cData = db.barberias[bIdx].clientes || {}; document.getElementById('clientes-lista').innerHTML = Object.keys(cData).map(k => `<div class="bg-blue-900/10 p-4 rounded-xl border border-blue-900/30 mb-2"><p class="font-black text-white">${cData[k].nombre}</p><p class="text-blue-400 font-black">${cData[k].pts} Puntos</p></div>`).join(''); }
+
+// ==========================================
+// 12. CONFIGURACIÓN (CON ENLACE ÚNICO)
+// ==========================================
+function configAddBarbero() { const n = cleanStr(document.getElementById('add-b-nom').value).toUpperCase(); const p = cleanNum(document.getElementById('add-b-pin').value); let c = parseInt(cleanNum(document.getElementById('add-b-comision').value)) || 50; if (!n || esPinInseguro(p)) return Swal.fire('Error', 'PIN inseguro o faltan datos', 'error'); db.barberias[bIdx].barberos.push({ nom: n, pin: p, comision: c, estado: 'LIBRE' }); saveDB(); document.getElementById('add-b-nom').value = ""; document.getElementById('add-b-pin').value = ""; renderConfigLists(); }
+function configAddServicio() { const n = cleanStr(document.getElementById('add-s-nom').value).toUpperCase(); const p = parseInt(cleanNum(document.getElementById('add-s-pre').value)); if (!n || isNaN(p)) return; db.barberias[bIdx].servicios.push({ nom: n, pre: p }); saveDB(); document.getElementById('add-s-nom').value = ""; document.getElementById('add-s-pre').value = ""; renderConfigLists(); }
+function renderConfigLists() { const b = db.barberias[bIdx]; document.getElementById('cfg-lista-b').innerHTML = (b.barberos || []).map((bar, i) => `<div class="flex justify-between bg-black p-3 rounded-xl mb-1 text-[10px] font-bold text-white"><span>${bar.nom} (${bar.comision}%)</span><button onclick="db.barberias[${bIdx}].barberos.splice(${i},1); saveDB(); renderConfigLists()" class="text-red-500">X</button></div>`).join(''); document.getElementById('cfg-lista-s').innerHTML = (b.servicios || []).map((s, i) => `<div class="flex justify-between bg-black p-3 rounded-xl mb-1 text-[10px] font-bold text-white"><span>${s.nom} - ${fMoney(s.pre)}</span><button onclick="db.barberias[${bIdx}].servicios.splice(${i},1); saveDB(); renderConfigLists()" class="text-red-500">X</button></div>`).join(''); }
+
+function renderConfig() { 
+    const b = db.barberias[bIdx]; 
+    document.getElementById('cfg-nombre').value = b.nombre || ""; document.getElementById('cfg-apertura').value = b.horaApertura || "08:00"; document.getElementById('cfg-cierre').value = b.horaCierre || "20:00"; document.getElementById('cfg-intervalo').value = b.intervaloCitas || 60;
+    
+    document.getElementById('cfg-nit').value = b.nit || "";
+    document.getElementById('cfg-direccion').value = b.direccion || "";
+    document.getElementById('cfg-telefono').value = b.telefono || "";
+    document.getElementById('cfg-resolucion').value = b.resolucion || "";
+    document.getElementById('cfg-prefijo').value = b.prefijoFactura || "";
+    document.getElementById('cfg-consecutivo').value = b.consecutivoFactura || "";
+    document.getElementById('cfg-moneda').value = b.moneda || "COP";
+    document.getElementById('cfg-ticket-footer').value = b.ticketFooter || "Documento no válido como factura";
+
+    document.getElementById('cfg-whatsapp').value = b.whatsapp || ""; document.getElementById('cfg-alertas').checked = b.alertasActivas || false; document.getElementById('cfg-wp-template').value = b.wpTemplate || ""; document.getElementById('cfg-msg-bienvenida').value = b.msgBienvenida || ""; document.getElementById('cfg-msg-despedida').value = b.msgDespedida || "";
+    renderConfigLists(); 
+    
+    // GENERADOR DE LINK Y QR (USA EL ID DE LA NUBE)
+    const urlLimpia = window.location.href.split('?')[0];
+    const kioLink = urlLimpia + '?kiosk=' + (b.id_nube || b.id);
+    document.getElementById('cfg-kiosko-link').value = kioLink;
+    
+    const qrBox = document.getElementById('cfg-kiosko-qr');
+    qrBox.innerHTML = '';
+    new QRCode(qrBox, { text: kioLink, width: 180, height: 180, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+}
+
+function saCambiarMasterPin() {
+    const oldP = cleanNum(document.getElementById('cfg-admin-pin').value); const newP = cleanNum(document.getElementById('cfg-new-admin-pin').value); const b = db.barberias[bIdx];
+    if(oldP !== cleanNum(b.pinAdmin)) return Swal.fire('Error', 'El PIN actual es incorrecto', 'error');
+    if(esPinInseguro(newP)) return Swal.fire('Error', 'El nuevo PIN es inseguro o muy corto', 'error');
+    b.pinAdmin = newP; saveDB(); document.getElementById('cfg-admin-pin').value = ""; document.getElementById('cfg-new-admin-pin').value = ""; Swal.fire('Éxito', 'PIN actualizado correctamente', 'success');
+}
+
+function actionGuardarYSalir() { 
+    const b = db.barberias[bIdx]; 
+    b.nombre = document.getElementById('cfg-nombre').value.trim().toUpperCase() || b.nombre; b.horaApertura = document.getElementById('cfg-apertura').value || "08:00"; b.horaCierre = document.getElementById('cfg-cierre').value || "20:00"; b.intervaloCitas = parseInt(cleanNum(document.getElementById('cfg-intervalo').value)) || 60; 
+    
+    b.nit = document.getElementById('cfg-nit').value.trim();
+    b.direccion = document.getElementById('cfg-direccion').value.trim();
+    b.telefono = document.getElementById('cfg-telefono').value.trim();
+    b.resolucion = document.getElementById('cfg-resolucion').value.trim();
+    b.prefijoFactura = document.getElementById('cfg-prefijo').value.trim();
+    b.consecutivoFactura = parseInt(cleanNum(document.getElementById('cfg-consecutivo').value)) || 1;
+    b.moneda = document.getElementById('cfg-moneda').value;
+    b.ticketFooter = document.getElementById('cfg-ticket-footer').value.trim();
+
+    b.whatsapp = cleanNum(document.getElementById('cfg-whatsapp').value); b.alertasActivas = document.getElementById('cfg-alertas').checked; b.wpTemplate = document.getElementById('cfg-wp-template').value; b.msgBienvenida = document.getElementById('cfg-msg-bienvenida').value; b.msgDespedida = document.getElementById('cfg-msg-despedida').value;
+    
+    saveDB(); renderConfig(); 
+    Swal.fire({ title: 'Guardado', icon: 'success', timer: 1500, background: '#050505', color: '#fff' }); 
+    setTimeout(() => { showScreen('view-admin'); }, 1500); 
+}
+
+// ARRANQUE DEL SISTEMA
+window.onload = checkSession;
+</script>
+</body>
+</html>
