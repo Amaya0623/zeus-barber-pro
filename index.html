@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="apple-touch-icon" href="icono.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZEUS BARBER PRO - Cloud Edition ☁️</title>
 
@@ -2216,6 +2219,15 @@ function optimizarBaseDeDatos() {
         saveDB(); // Guardamos la limpieza
     }
 }
+// ACTIVAR INSTALACIÓN COMO APP NATIVA (PWA)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Zeus App Web lista para instalar.', reg))
+          .catch(err => console.error('Error en PWA:', err));
+      });
+    }
+    
     // ARRANQUE DEL SISTEMA
     window.onload = checkSession;
 </script>
