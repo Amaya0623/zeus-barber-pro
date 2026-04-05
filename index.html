@@ -2239,14 +2239,53 @@ function optimizarBaseDeDatos() {
         saveDB(); // Guardamos la limpieza
     }
 }
-// ACTIVAR INSTALACIÓN COMO APP NATIVA (PWA)
+// ==========================================
+    // 🚀 LÓGICA DE INSTALACIÓN PWA (FORZADA)
+    // ==========================================
+    let eventoInstalacion = null;
+
+    // 1. Encendemos el motor PWA
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('Zeus App Web lista para instalar.', reg))
-          .catch(err => console.error('Error en PWA:', err));
-      });
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Zeus App Web lista para instalar.', reg))
+                .catch(err => console.error('Error en PWA:', err));
+        });
     }
+
+    // 2. Interceptamos a Chrome CON FUERZA BRUTA
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Evita que Chrome muestre su barra fea
+        e.preventDefault();
+        eventoInstalacion = e;
+        
+        // Buscamos nuestro botón y lo obligamos a mostrarse
+        const btnInstalar = document.getElementById('btn-instalar-pwa');
+        if (btnInstalar) {
+            btnInstalar.classList.remove('hidden');
+            btnInstalar.style.display = 'flex'; // 🚀 ¡Magia extra! Fuerza bruta para que aparezca sí o sí
+        }
+    });
+
+    // 3. Qué pasa cuando el cliente toca nuestro botón
+    const btnBuscado = document.getElementById('btn-instalar-pwa');
+    if (btnBuscado) {
+        btnBuscado.addEventListener('click', async () => {
+            if (eventoInstalacion) {
+                eventoInstalacion.prompt();
+                const { outcome } = await eventoInstalacion.userChoice;
+                if (outcome === 'accepted') {
+                    btnBuscado.style.display = 'none'; // Lo ocultamos si aceptó
+                }
+                eventoInstalacion = null;
+            }
+        });
+    }
+
+    // 4. Ocultar si ya se instaló
+    window.addEventListener('appinstalled', () => {
+        if (btnBuscado) btnBuscado.style.display = 'none';
+    });
     
     // ARRANQUE DEL SISTEMA
     window.onload = checkSession;
