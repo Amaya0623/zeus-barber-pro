@@ -77,7 +77,8 @@
         <span class="text-7xl mb-4 block">🔒</span>
         <h1 class="text-3xl font-black text-red-500 mb-2 uppercase italic">SISTEMA BLOQUEADO</h1>
         <p class="text-zinc-400 text-sm mb-6">Tu periodo de suscripción expiró, tienda desactivada o hay anomalía de reloj.</p>
-        <button type="button" onclick="actionLogout()" class="w-full bg-red-900/20 text-red-500 border border-red-900/50 py-4 rounded-2xl font-black uppercase btn-press">SALIR DEL SISTEMA</button>
+        
+        <button type="button" onclick="forzarSalidaBloqueo()" class="w-full bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/50 py-4 rounded-2xl font-black uppercase btn-press transition-colors">SALIR DEL SISTEMA</button>
     </div>
 </div>
 
@@ -2182,6 +2183,21 @@ function exportarPDF() {
         }
     }
 }
+    
+// ✅ BOTÓN DE PÁNICO: Salir del sistema cuando está bloqueado
+window.forzarSalidaBloqueo = function() {
+    if (typeof Swal !== 'undefined') Swal.close(); // Cierra el cuadro rojo
+    session = null; // Borra la sesión actual
+    bIdx = -1; // Deselecciona la barbería
+    saveSession(); // Guarda el estado en blanco
+    
+    // Limpia logos por si acaso
+    const loginImg = document.getElementById('login-custom-logo');
+    if(loginImg) loginImg.src = ""; 
+    
+    window.location.reload(); // 🚀 Recarga la página llevándote al inicio limpio
+}
+    
 // ✅ OPTIMIZADOR: Borra citas de días pasados automáticamente (BLINDADO)
 function optimizarBaseDeDatos() {
     if (!db || !db.barberias) return;
