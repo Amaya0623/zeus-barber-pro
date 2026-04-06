@@ -173,7 +173,26 @@
                     <div class="relative w-full h-40"><canvas id="chartBarberos"></canvas></div>
                 </div>
             </div>
-
+            <div class="col-span-12 mt-6 p-6 rounded-[2rem] bg-[#0a0a0a] border border-zinc-800">
+    <div class="flex justify-between items-center mb-6">
+        <h3 class="text-[10px] font-black text-purple-400 uppercase tracking-widest">📊 Ventas de Inventario (Mes Actual)</h3>
+        <span id="total-ventas-productos" class="text-xl font-black text-white">$ 0</span>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-[10px]">
+            <thead class="text-zinc-500 uppercase border-b border-zinc-800">
+                <tr>
+                    <th class="pb-3">Producto</th>
+                    <th class="pb-3 text-center">Cant. Vendida</th>
+                    <th class="pb-3 text-right">Total Bruto</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-reporte-productos" class="divide-y divide-zinc-900">
+                </tbody>
+        </table>
+    </div>
+</div>
             <div class="bg-[#050505] rounded-[2rem] border border-zinc-800 shadow-inner overflow-hidden mt-2">
                 <button type="button" onclick="toggleAcc('acc-admin-menu', 'icon-admin-menu')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
                     <span class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3"><span class="text-2xl">💈</span> Menú de Gestión</span>
@@ -397,13 +416,17 @@
 
                         <div class="col-span-12 mb-4 p-4 rounded-xl border border-zinc-800 bg-[#111]">
                             <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3">⏳ Configuración de Horarios</p>
+                            <div class="mt-4">
+                        <button type="button" onclick="mostrarVista('gestion-productos')" class="w-full bg-indigo-600 p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest btn-press shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2">
+                       📦 GESTIONAR PRODUCTOS E INVENTARIO
+                      </button>
+                      </div>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                                 <div><p class="text-[8px] text-zinc-500 uppercase mb-1 font-bold">Hora Apertura</p><input type="time" id="cfg-apertura" class="w-full p-3 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-white"></div>
                                 <div><p class="text-[8px] text-zinc-500 uppercase mb-1 font-bold">Hora Cierre</p><input type="time" id="cfg-cierre" class="w-full p-3 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-white"></div>
                                 <div><p class="text-[8px] text-zinc-500 uppercase mb-1 font-bold">Minutos/Cita</p><input type="text" inputmode="numeric" id="cfg-intervalo" placeholder="Ej: 60" class="w-full p-3 rounded-xl text-xs font-bold text-center border border-zinc-800 bg-[#050505] text-white"></div>
                             </div>
                         </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="bg-zinc-950 p-6 rounded-[1.5rem] border border-zinc-800 shadow-inner">
                                 <p class="text-[10px] font-black text-green-400 mb-4 uppercase tracking-widest">Crear Servicios</p>
@@ -416,11 +439,20 @@
                             </div>
                             <div class="bg-zinc-950 p-6 rounded-[1.5rem] border border-zinc-800 shadow-inner">
                                 <div class="flex justify-between items-center mb-4"><p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Crear Barberos</p></div>
-                                <div class="grid grid-cols-12 gap-2 mb-4">
-                                    <input type="text" id="add-b-nom" placeholder="Nombre" class="col-span-5 p-3 text-[10px] sm:text-xs rounded-xl uppercase font-bold bg-[#050505] border border-zinc-800 w-full text-white">
-                                    <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" class="col-span-3 p-3 text-[10px] sm:text-xs rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 w-full text-white">
-                                    <input type="text" inputmode="numeric" id="add-b-comision" placeholder="%" class="col-span-2 p-3 text-[10px] sm:text-xs rounded-xl font-bold text-center text-indigo-400 bg-[#050505] border border-zinc-800 w-full">
-                                    <button type="button" onclick="configAddBarbero()" class="col-span-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black btn-press">+</button>
+                                <div class="flex flex-wrap gap-2 mb-4 items-center">
+                                <input type="text" id="add-b-nom" placeholder="NOMBRE" 
+                                 class="flex-[2] min-w-[100px] p-4 text-[10px] sm:text-xs rounded-2xl uppercase font-black bg-[#050505] border border-zinc-800 text-white outline-none focus:border-indigo-500 transition-all">
+    
+                              <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" 
+                              class="w-20 p-4 text-[10px] sm:text-xs rounded-2xl font-black text-center bg-[#050505] border border-zinc-800 text-white outline-none focus:border-indigo-500 transition-all">
+    
+                        <input type="text" inputmode="numeric" id="add-b-comision" placeholder="%" 
+                       class="w-14 p-4 text-[10px] sm:text-xs rounded-2xl font-black text-center text-indigo-400 bg-[#050505] border border-zinc-800 outline-none focus:border-indigo-500 transition-all">
+                            <button type="button" onclick="configAddBarbero()" 
+            class="flex-1 min-w-[45px] h-[48px] bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black btn-press flex items-center justify-center text-xl shadow-lg shadow-indigo-900/20">
+           +
+                                </button>
+                                      </div>
                                 </div>
                                 <div id="cfg-lista-b" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
                             </div>
@@ -1272,135 +1304,173 @@
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('kiosk')) { volverAInicioKiosko(); showScreen('view-kiosko'); } else { document.getElementById('login-pin').value = ''; showScreen('view-login'); }
     }
+// ==========================================
+// 7. RENDER ADMIN Y BARBERO (MEJORADO)
+// ==========================================
 
-    // ==========================================
-    // 7. RENDER ADMIN Y BARBERO
-    // ==========================================
-    function renderAdmin() {
+function renderAdmin() {
+    try {
+        const b = db.barberias[bIdx]; if (!b) return;
+        let totalIva = 0;
+        const tv = (b.ventas || []).reduce((a, v) => { if(v.ivaAplicado) totalIva += v.ivaAplicado; return a + v.valor + (v.ivaAplicado || 0); }, 0);
+        const tg = (b.gastos || []).reduce((a, g) => a + g.valor, 0);
+        const efec = (b.ventas || []).filter(v => v.tipo === "Efectivo").reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0);
+        const digi = (b.ventas || []).filter(v => v.tipo !== "Efectivo").reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0);
+
+        // Lógica de Licencia/Suscripción
+        const diffDays = Math.floor((Date.now() - (b.creadoEn || Date.now())) / (1000 * 60 * 60 * 24));
+        const restantes = (b.diasSuscripcion || 15) - diffDays;
+        const bL = document.getElementById('admin-license-days');
+        if(bL) {
+            if(restantes > 5) { bL.className = "text-[10px] font-black text-green-400"; bL.innerText = `${restantes} Días`; }
+            else if(restantes >= 0) { bL.className = "text-[10px] font-black text-orange-400 animate-pulse"; bL.innerText = `${restantes} Días!`; }
+            else { bL.className = "text-[10px] font-black text-red-400 animate-pulse"; bL.innerText = `VENCIDA`; }
+        }
+
+        // Mostrar Totales en UI
+        const utiVal = document.getElementById('admin-utilidad'); if(utiVal) utiVal.innerText = `${fMoney(tv - tg - totalIva)}`;
+        const efVal = document.getElementById('admin-efectivo'); if(efVal) efVal.innerText = `${fMoney(efec)}`;
+        const bnVal = document.getElementById('admin-bancos'); if(bnVal) bnVal.innerText = `${fMoney(digi)}`;
+        const gsVal = document.getElementById('admin-gastos'); if(gsVal) gsVal.innerText = `-${fMoney(tg)}`;
+
+        // --- SECCIÓN DE GRÁFICOS ---
+        setTimeout(() => {
+            try {
+                if (chartMetodosInstance) chartMetodosInstance.destroy();
+                const ctxM = document.getElementById('chartMetodos');
+                if(ctxM) chartMetodosInstance = new Chart(ctxM, { type: 'doughnut', data: { labels: ['Efectivo', 'Digital'], datasets: [{ data: [efec, digi], backgroundColor: ['#10b981', '#3b82f6'], borderColor: '#050505', borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+
+                if (chartBarberosInstance) chartBarberosInstance.destroy();
+                const ctxB = document.getElementById('chartBarberos');
+                if(ctxB) {
+                    const nB = (b.barberos || []).map(bar => bar.nom);
+                    const vB = nB.map(nom => (b.ventas || []).filter(v => v.barbero === nom).reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0));
+                    chartBarberosInstance = new Chart(ctxB, { type: 'bar', data: { labels: nB.length > 0 ? nB : ['Sin datos'], datasets: [{ data: vB.length > 0 ? vB : [0], backgroundColor: '#4f46e5', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+                }
+            } catch(ex) { console.error("Error graficas:", ex); }
+        }, 150);
+
+        actualizarBadges();
+        renderReporteProductos(); // 🔥 Genera la tabla con alertas de stock bajo
+    } catch (e) { console.error("Error crítico en renderAdmin:", e); }
+}
+
+function renderBarbero() {
+    try {
+        const b = db.barberias[bIdx]; if (!b) return;
+        
+        // Render de servicios desde base local
+        document.getElementById('pos-servicios').innerHTML = (b.servicios || []).map((s, i) => `
+            <button onclick="addServToCart(${i})" class="glass p-5 rounded-[2rem] text-left btn-press border-indigo-900/30">
+                <p class="text-[10px] text-zinc-500 font-black uppercase mb-1">${s.nom}</p>
+                <p class="font-black text-indigo-400 text-lg">${fMoney(s.pre)}</p>
+            </button>
+        `).join('');
+
+        cargarProductosParaVenta(); // 🚀 Carga inventario real desde Supabase
+        updateCart();
+    } catch (e) { console.error("Error en renderBarbero:", e); }
+}
+
+// ==========================================
+// FUNCIONES DE INVENTARIO Y REPORTES
+// ==========================================
+
+function renderReporteProductos() {
+    const b = db.barberias[bIdx];
+    if (!b || !b.ventas) return;
+    
+    const reporte = {};
+    let totalGlobalProd = 0;
+
+    // 1. Filtramos las ventas para sacar solo productos vendidos
+    b.ventas.filter(v => v.esProducto === true).forEach(v => {
+        if (!reporte[v.servicio]) {
+            reporte[v.servicio] = { cantidad: 0, total: 0 };
+        }
+        reporte[v.servicio].cantidad += 1;
+        reporte[v.servicio].total += v.valor;
+        totalGlobalProd += v.valor;
+    });
+
+    const contenedor = document.getElementById('tabla-reporte-productos');
+    const totalContenedor = document.getElementById('total-ventas-productos');
+    
+    if (totalContenedor) totalContenedor.innerText = fMoney(totalGlobalProd);
+    if (!contenedor) return;
+
+    // 2. Generar filas con lógica de STOCK BAJO
+    contenedor.innerHTML = Object.keys(reporte).map(nombre => {
+        const prodOriginal = (b.productos || []).find(p => p.nom === nombre);
+        const stockActual = prodOriginal ? prodOriginal.stock : 0;
+        const stockBajo = stockActual <= 3;
+
+        return `
+            <tr class="border-b border-zinc-900/50">
+                <td class="py-3 font-bold text-zinc-300 uppercase">${nombre}</td>
+                <td class="py-3 text-center">
+                    <span class="font-black ${stockBajo ? 'text-red-500 animate-pulse' : 'text-white'}">
+                        ${reporte[nombre].cantidad}
+                    </span>
+                    ${stockBajo ? `<br><span class="text-[7px] text-red-500 font-bold uppercase">¡REABASTECER!</span>` : ''}
+                </td>
+                <td class="py-3 text-right text-purple-400 font-black">${fMoney(reporte[nombre].total)}</td>
+            </tr>
+        `;
+    }).join('') || '<tr><td colspan="3" class="py-6 text-center text-zinc-600 italic">Sin ventas de productos</td></tr>';
+}
+
+async function cargarProductosParaVenta() {
+    try {
+        const b = db.barberias[bIdx]; if (!b) return;
+        const { data: productos, error } = await supabase
+            .from('inventario')
+            .select('*')
+            .eq('id_barberia', b.id)
+            .gt('stock', 0); // Solo mostramos lo que tiene existencia
+
+        if (error) throw error;
+        const contenedor = document.getElementById('pos-productos');
+        if (!contenedor) return;
+
+        contenedor.innerHTML = productos.map(p => `
+            <button onclick="addProdToCart('${p.id}', '${p.nombre}', ${p.precio})" 
+                    class="glass p-5 rounded-[2rem] text-left btn-press border-purple-900/30 flex flex-col gap-1">
+                <div class="flex justify-between items-start">
+                    <p class="text-[9px] text-zinc-500 font-black uppercase mb-1">${p.nombre}</p>
+                    <span class="text-[8px] px-2 py-0.5 rounded bg-zinc-950 text-purple-400 font-bold border border-purple-900/50">Stock: ${p.stock}</span>
+                </div>
+                <p class="font-black text-purple-400 text-lg">$ ${p.precio.toLocaleString()}</p>
+            </button>
+        `).join('') || '<p class="text-zinc-600 text-[10px] text-center col-span-2 py-4 italic">No hay productos disponibles</p>';
+    } catch (e) { console.error("Error inventario Supabase:", e); }
+}
+
+async function descontarInventario(productosVendidos) {
+    for (const item of productosVendidos) {
         try {
-            const b = db.barberias[bIdx]; if (!b) return;
-            let totalIva = 0;
-            const tv = (b.ventas || []).reduce((a, v) => { if(v.ivaAplicado) totalIva += v.ivaAplicado; return a + v.valor + (v.ivaAplicado || 0); }, 0);
-            const tg = (b.gastos || []).reduce((a, g) => a + g.valor, 0);
-            const efec = (b.ventas || []).filter(v => v.tipo === "Efectivo").reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0);
-            const digi = (b.ventas || []).filter(v => v.tipo !== "Efectivo").reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0);
+            const { data: producto, error: errConsulta } = await supabase
+                .from('inventario')
+                .select('stock')
+                .eq('id', item.id)
+                .single();
 
-            const diffDays = Math.floor((Date.now() - (b.creadoEn || Date.now())) / (1000 * 60 * 60 * 24));
-            const restantes = (b.diasSuscripcion || 15) - diffDays;
+            if (errConsulta) throw errConsulta;
 
-            const bL = document.getElementById('admin-license-days');
-            if(bL) {
-                if(restantes > 5) { bL.className = "text-[10px] font-black text-green-400"; bL.innerText = `${restantes} Días`; }
-                else if(restantes >= 0) { bL.className = "text-[10px] font-black text-orange-400 animate-pulse"; bL.innerText = `${restantes} Días!`; }
-                else { bL.className = "text-[10px] font-black text-red-400 animate-pulse"; bL.innerText = `VENCIDA`; }
-            }
+            const nuevoStock = producto.stock - (item.cantidad || 1);
 
-            const iA = b.configIVA && b.configIVA.activo ? true : false;
-            const utiTitle = document.getElementById('admin-utilidad-title'); if(utiTitle) utiTitle.innerText = iA ? "UTILIDAD NETA (SIN TAX/IVA)" : "UTILIDAD NETA";
-            const utiVal = document.getElementById('admin-utilidad'); if(utiVal) utiVal.innerText = `${fMoney(tv - tg - totalIva)}`;
+            const { error: errUpdate } = await supabase
+                .from('inventario')
+                .update({ stock: nuevoStock })
+                .eq('id', item.id);
 
-            const efVal = document.getElementById('admin-efectivo'); if(efVal) efVal.innerText = `${fMoney(efec)}`;
-            const bnVal = document.getElementById('admin-bancos'); if(bnVal) bnVal.innerText = `${fMoney(digi)}`;
-            const gsVal = document.getElementById('admin-gastos'); if(gsVal) gsVal.innerText = `-${fMoney(tg)}`;
-
-            const iBox = document.getElementById('admin-iva-recaudado');
-            if(iBox) { if(iA && totalIva > 0) { iBox.innerText = `IMPUESTO Recaudado: ${fMoney(totalIva)}`; iBox.classList.remove('hidden'); } else { iBox.classList.add('hidden'); } }
-
-            const hoy = getTodayYMD();
-            const nominaCont = document.getElementById('admin-nomina');
-            if(nominaCont) {
-                nominaCont.innerHTML = (b.barberos || []).map(bar => {
-                    const cB = bar.comision !== undefined ? bar.comision : 50;
-                    const vB = (b.ventas || []).filter(v => v.barbero === bar.nom && !v.esProducto && v.barbero !== "ADMIN");
-                    const sT = vB.reduce((a, v) => a + v.valor, 0); const aP = sT * (cB / 100);
-                    const cortesMes = vB.length; const cortesHoy = vB.filter(v => v.fecha === hoy).length;
-                    return `
-                    <div class="glass p-6 rounded-3xl border border-zinc-800 mb-3 flex flex-col md:flex-row justify-between md:items-center gap-4">
-                        <div>
-                            <h4 class="font-black uppercase text-lg text-white">${bar.nom} <span class="text-indigo-400 text-[10px]">(${cB}%)</span></h4>
-                            <div class="flex gap-2 mt-2">
-                                <span class="text-[9px] bg-indigo-600/20 text-indigo-400 px-3 py-1 rounded-lg font-bold">✂️ ${cortesMes} Cortes este mes</span>
-                                <span class="text-[9px] bg-blue-600/20 text-blue-400 px-3 py-1 rounded-lg font-bold">Hoy: ${cortesHoy}</span>
-                            </div>
-                        </div>
-                        <div class="text-left md:text-right bg-black/50 p-4 rounded-2xl w-full md:w-auto">
-                            <p class="text-[9px] text-zinc-500 mb-1">Base: ${fMoney(sT)}</p>
-                            <span class="font-black text-2xl text-green-400 block">${fMoney(aP)}</span>
-                            <p class="text-[8px] text-green-600 font-black tracking-widest mt-1 uppercase">A Pagar</p>
-                        </div>
-                    </div>`;
-                }).join('') || `<p class="text-zinc-600 text-xs italic ml-5">No hay barberos registrados.</p>`;
-            }
-
-            setTimeout(() => {
-                try {
-                    if (chartMetodosInstance) chartMetodosInstance.destroy();
-                    const ctxM = document.getElementById('chartMetodos');
-                    if(ctxM) chartMetodosInstance = new Chart(ctxM, { type: 'doughnut', data: { labels: ['Efectivo', 'Digital'], datasets: [{ data: [efec, digi], backgroundColor: ['#10b981', '#3b82f6'], borderColor: '#050505', borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-
-                    if (chartBarberosInstance) chartBarberosInstance.destroy();
-                    const ctxB = document.getElementById('chartBarberos');
-                    if(ctxB) {
-                        const nB = (b.barberos || []).map(bar => bar.nom);
-                        const vB = nB.map(nom => { return (b.ventas || []).filter(v => v.barbero === nom).reduce((a, v) => a + v.valor + (v.ivaAplicado || 0), 0); });
-                        chartBarberosInstance = new Chart(ctxB, { type: 'bar', data: { labels: nB.length > 0 ? nB : ['Sin datos'], datasets: [{ data: vB.length > 0 ? vB : [0], backgroundColor: '#4f46e5', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
-                    }
-                } catch(ex) { console.error("Error graficas:", ex); }
-            }, 150);
-            actualizarBadges();
-        } catch (e) { console.error("Error crítico en renderAdmin:", e); }
+            if (errUpdate) throw errUpdate;
+            console.log(`📦 Stock en Nube actualizado: ${item.id} -> ${nuevoStock}`);
+        } catch (error) {
+            console.error("❌ Error actualizando stock en Supabase:", error);
+        }
     }
-
-    function renderBarbero() {
-        try {
-            const b = db.barberias[bIdx]; if (!b) return;
-            let myB = (b.barberos || []).find(x => x.nom === session.nom);
-
-            if (myB) {
-                if (!myB.estado) myB.estado = 'LIBRE';
-                const btnLibre = document.getElementById('btn-estado-libre');
-                const btnOcupado = document.getElementById('btn-estado-ocupado');
-                const btnAlmuerzo = document.getElementById('btn-estado-almuerzo');
-                const btnDescanso = document.getElementById('btn-estado-descanso');
-
-                [btnLibre, btnOcupado, btnAlmuerzo, btnDescanso].forEach(btn => btn.classList.add('opacity-50'));
-
-                if (myB.estado === 'LIBRE') btnLibre.classList.remove('opacity-50');
-                else if (myB.estado === 'OCUPADO') btnOcupado.classList.remove('opacity-50');
-                else if (myB.estado === 'ALMUERZO') btnAlmuerzo.classList.remove('opacity-50');
-                else if (myB.estado === 'DESCANSO') btnDescanso.classList.remove('opacity-50');
-            }
-
-            let fF = document.getElementById('barbero-filtro-fecha').value;
-            if (!fF) { fF = getTodayYMD(); document.getElementById('barbero-filtro-fecha').value = fF; }
-
-            const todasCitas = (b.citas || []).filter(c => c.fecha === fF).sort((a, b) => a.hora.localeCompare(b.hora));
-            const ctnC = document.getElementById('barbero-historial-citas');
-
-            if (todasCitas.length === 0) { ctnC.innerHTML = `<p class="text-[10px] text-zinc-600 text-center py-4">No hay citas programadas en el local para el ${fF}.</p>`; }
-            else {
-                ctnC.innerHTML = todasCitas.map(c => {
-                    const hora12 = formatTime12h(c.hora);
-                    const fin = c.estado === 'COMPLETADA';
-                    const esMia = c.barbero === session.nom;
-                    const badgeMia = esMia ? `<span class="bg-indigo-600 text-white px-1.5 py-0.5 rounded text-[7px] ml-1">MÍA</span>` : `<span class="bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded text-[7px] ml-1">${c.barbero}</span>`;
-
-                    return `<div class="flex justify-between items-center p-3 rounded-2xl border ${fin ? 'border-zinc-800 bg-black/20' : (esMia ? 'border-indigo-500/50 bg-indigo-500/10' : 'border-zinc-700/50 bg-zinc-900/50')} mb-2"><div><p class="text-[10px] font-black uppercase ${fin ? 'text-zinc-500 line-through' : 'text-white'}">${c.nombre} ${badgeMia}</p><p class="text-[8px] font-bold text-zinc-400">${hora12} - ${c.servicio}</p></div>${!fin ? `<button onclick="completarCita('${c.id}')" class="bg-green-600 p-2 px-3 rounded-xl text-[9px] font-black uppercase btn-press">✔ Listo</button>` : '<span class="text-[9px] font-black text-green-500">COMPLETADO</span>'}</div>`;
-                }).join('');
-            }
-
-            document.getElementById('pos-servicios').innerHTML = (b.servicios || []).map((s, i) => `<button onclick="addServToCart(${i})" class="glass p-5 rounded-[2rem] text-left btn-press border-indigo-900/30"><p class="text-[10px] text-zinc-500 font-black uppercase mb-1">${s.nom}</p><p class="font-black text-indigo-400 text-lg">${fMoney(s.pre)}</p></button>`).join('');
-            document.getElementById('pos-productos').innerHTML = (b.productos || []).map((p, i) => `<button onclick="addProdToCart(${i})" class="glass p-5 rounded-[2rem] text-left btn-press border-purple-900/30 ${p.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}"><div class="flex justify-between items-start"><p class="text-[10px] text-zinc-500 font-black uppercase mb-1">${p.nom}</p><span class="text-[8px] px-2 py-0.5 rounded bg-zinc-900 text-purple-400 font-bold">Stock: ${p.stock}</span></div><p class="font-black text-purple-400 text-lg">${fMoney(p.pre)}</p></button>`).join('') || '<p class="text-zinc-600 text-xs text-center col-span-2 py-4">No hay productos</p>';
-            updateCart();
-        } catch (e) { console.error("Error en renderBarbero:", e); }
-    }
-
-    function cambiarEstadoBarbero(nE) {
-        const b = db.barberias[bIdx]; if (!b.barberos) b.barberos = [];
-        let myB = b.barberos.find(x => x.nom === session.nom);
-        if (myB) { myB.estado = nE; saveDB(); renderBarbero(); Swal.fire({ title: nE === 'LIBRE' ? 'Estás LIBRE 🟢' : `Estás en ${nE}`, icon: 'success', timer: 1000, showConfirmButton: false, background: '#0a0a0a', color: '#fff' }); }
-    }
-
+}
     // ==========================================
     // 8. MASTER PANEL ACCIONES
     // ==========================================
@@ -1777,7 +1847,7 @@
         setTimeout(() => { window.print(); }, 500);
     }
 
-    // ==========================================
+// ==========================================
     // 10. POS & VENTAS
     // ==========================================
     function switchPOS(tab) {
@@ -1786,17 +1856,63 @@
         if (tab === 'S') { xS.classList.remove('hidden'); xP.classList.add('hidden'); bS.className = "flex-1 bg-indigo-600 text-white py-3 rounded-xl text-xs font-black uppercase transition-all"; bP.className = "flex-1 bg-transparent text-zinc-500 py-3 rounded-xl text-xs font-black uppercase transition-all"; }
         else { xS.classList.add('hidden'); xP.classList.remove('hidden'); bP.className = "flex-1 bg-purple-600 text-white py-3 rounded-xl text-xs font-black uppercase transition-all"; bS.className = "flex-1 bg-transparent text-zinc-500 py-3 rounded-xl text-xs font-black uppercase transition-all"; }
     }
+
     function filtrarPOS() { const t = document.getElementById('pos-search').value.toLowerCase(); const xS = document.getElementById('pos-servicios'); if (xS) Array.from(xS.children).forEach(b => b.style.display = b.innerText.toLowerCase().includes(t) ? '' : 'none'); const xP = document.getElementById('pos-productos'); if (xP) Array.from(xP.children).forEach(b => b.style.display = b.innerText.toLowerCase().includes(t) ? '' : 'none'); }
+
     function addServToCart(i) { cart.push({ ...db.barberias[bIdx].servicios[i], idT: Date.now() + Math.random(), isProd: false }); updateCart(); }
-    function addProdToCart(i) { const p = db.barberias[bIdx].productos[i]; const c = cart.filter(x => x.isProd && x.id === p.id).length; if (p.stock <= c) return Swal.fire('Agotado', '', 'warning'); cart.push({ nom: p.nom, pre: p.pre, idT: Date.now() + Math.random(), isProd: true, id: p.id }); updateCart(); }
+
+    // ✅ MODIFICADO: Recibe el ID de Supabase para el descuento automático
+    function addProdToCart(idReal, nombre, precio) { 
+        const b = db.barberias[bIdx];
+        // Buscamos el producto en el inventario local para validar stock rápido
+        const pLocal = (b.productos || []).find(p => p.id === idReal);
+        const yaEnCarrito = cart.filter(x => x.isProd && x.id === idReal).length;
+
+        // Si tenemos la info local y no hay stock, avisamos
+        if (pLocal && pLocal.stock <= yaEnCarrito) {
+            return Swal.fire('Agotado', 'No hay más unidades disponibles', 'warning');
+        }
+
+        cart.push({ 
+            nom: nombre, 
+            pre: precio, 
+            idT: Date.now() + Math.random(), 
+            isProd: true, 
+            id: idReal // <--- ID DE SUPABASE
+        }); 
+        updateCart(); 
+    }
 
     function removeFromCart(idT) { cart = cart.filter(x => String(x.idT) !== String(idT)); updateCart(); }
 
     function updateCart() {
-        const b = db.barberias[bIdx]; let sub = cart.filter(x => !x.isDesc).reduce((a, i) => a + i.pre, 0); cart = cart.filter(x => !x.isDesc);
-        let sCon = cart.reduce((a, i) => a + i.pre, 0); let iA = b.configIVA ? b.configIVA.activo : false; let iP = b.configIVA ? b.configIVA.porcentaje : 0; let vI = iA ? Math.round(sCon * (iP / 100)) : 0; let tF = sCon + vI;
-        document.getElementById('pos-carrito').innerHTML = cart.length === 0 ? '<p class="text-zinc-700 text-center text-xs mt-4">Vacío</p>' : cart.map(i => `<div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl mb-2 border ${i.isProd ? 'border-purple-900/30' : 'border-transparent'}"><span class="text-[10px] font-black uppercase ${i.isProd ? 'text-purple-300' : 'text-white'}">${i.nom}</span><div class="flex items-center gap-3"><span class="text-zinc-400 text-xs font-bold">${fMoney(Math.abs(i.pre))}</span><button onclick="removeFromCart('${i.idT}')" class="text-red-500 font-black px-3 py-1 hover:scale-125 transition-transform bg-red-900/20 rounded-lg">X</button></div></div>`).join('');
-        let tD = document.getElementById('pos-total-breakdown'); if (iA && sCon > 0) tD.innerHTML = `<p class="text-[10px] text-zinc-400">SUB: ${fMoney(sCon)} | IMPUESTO: ${fMoney(vI)}</p><span id="pos-total" class="text-4xl font-black text-indigo-500">${fMoney(tF)}</span>`; else tD.innerHTML = `<span id="pos-total" class="text-4xl font-black text-indigo-500">${fMoney(tF)}</span>`; validarBotonCobro();
+        const b = db.barberias[bIdx]; 
+        let sub = cart.filter(x => !x.isDesc).reduce((a, i) => a + i.pre, 0); 
+        // Eliminamos descuentos previos para recalcular
+        cart = cart.filter(x => !x.isDesc);
+        
+        let sCon = cart.reduce((a, i) => a + i.pre, 0); 
+        let iA = b.configIVA ? b.configIVA.activo : false; 
+        let iP = b.configIVA ? b.configIVA.porcentaje : 0; 
+        let vI = iA ? Math.round(sCon * (iP / 100)) : 0; 
+        let tF = sCon + vI;
+
+        document.getElementById('pos-carrito').innerHTML = cart.length === 0 ? '<p class="text-zinc-700 text-center text-xs mt-4">Vacío</p>' : cart.map(i => `
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-2xl mb-2 border ${i.isProd ? 'border-purple-900/30' : 'border-transparent'}">
+                <span class="text-[10px] font-black uppercase ${i.isProd ? 'text-purple-300' : 'text-white'}">${i.nom}</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-zinc-400 text-xs font-bold">${fMoney(Math.abs(i.pre))}</span>
+                    <button onclick="removeFromCart('${i.idT}')" class="text-red-500 font-black px-3 py-1 hover:scale-125 transition-transform bg-red-900/20 rounded-lg">X</button>
+                </div>
+            </div>`).join('');
+
+        let tD = document.getElementById('pos-total-breakdown'); 
+        if (iA && sCon > 0) {
+            tD.innerHTML = `<p class="text-[10px] text-zinc-400">SUB: ${fMoney(sCon)} | IVA (${iP}%): ${fMoney(vI)}</p><span id="pos-total" class="text-4xl font-black text-indigo-500">${fMoney(tF)}</span>`;
+        } else {
+            tD.innerHTML = `<span id="pos-total" class="text-4xl font-black text-indigo-500">${fMoney(tF)}</span>`;
+        }
+        validarBotonCobro();
     }
 
     function validarBotonCobro() { const m = document.getElementById('pos-metodo').value; const ok = cart.length > 0 && m !== ""; const b = document.getElementById('pos-btn-cobrar'); b.disabled = !ok; b.classList.toggle('opacity-20', !ok); b.classList.toggle('cursor-not-allowed', !ok); }
@@ -1821,7 +1937,7 @@
         }
     }
 
-    function finalizarVentaOK() {
+    async function finalizarVentaOK() {
         try {
             const b = db.barberias[bIdx]; const m = document.getElementById('pos-metodo').value;
 
@@ -1847,7 +1963,17 @@
                 b.ventas.push({ ticketId: tId, barbero: i.isDesc ? "ADMIN" : session.nom, servicio: i.nom, valor: i.pre, ivaAplicado: (iA ? Math.round(i.pre * (b.configIVA.porcentaje / 100)) : 0), metodo: m, tipo: m === "Efectivo" ? "Efectivo" : "Digital", fecha: fA, hora: hA, esProducto: i.isProd, turnoCerrado: false });
             });
             b.consecutivoFactura = (b.consecutivoFactura || 1) + 1; saveDB();
+            // 🚀 --- AQUÍ PEGAS EL DESCUENTO DE SUPABASE ---
+            const productosParaDescontar = cart
+                .filter(item => item.isProd === true) 
+                .map(item => ({ id: item.id, cantidad: 1 }));
 
+            if (productosParaDescontar.length > 0) {
+                // Usamos await para que descuente antes de seguir
+                await descontarInventario(productosParaDescontar);
+                // Refrescamos los botones del barbero con el nuevo stock
+                cargarProductosParaVenta();
+            }
             if (session.rol === 'barbero') { let myB = b.barberos.find(x => x.nom === session.nom); if (myB) myB.estado = 'LIBRE'; saveDB(); }
 
             document.getElementById('ticket-total').innerText = fMoney(tV);
@@ -2239,54 +2365,144 @@ function optimizarBaseDeDatos() {
         saveDB(); // Guardamos la limpieza
     }
 }
+
+    // ✅ LIMPIADOR AUTOMÁTICO DE PIN (Para errores)
+// Esta función se encarga de que si el PIN falla, el campo se borre solo.
+function limpiarPinPorError() {
+    const pinInput = document.getElementById('pin-empleado');
+    if (pinInput) {
+        pinInput.value = ''; // Borra lo escrito
+        setTimeout(() => pinInput.focus(), 500); // Devuelve el cursor para reintentar
+    }
+}
+
+// Escuchamos cuando se cierra cualquier alerta de error de SweetAlert
+// para activar la limpieza del PIN automáticamente.
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.removedNodes.length > 0) {
+            mutation.removedNodes.forEach((node) => {
+                if (node.classList && node.classList.contains('swal2-container')) {
+                    // Si se cerró un error, limpiamos el PIN
+                    limpiarPinPorError();
+                }
+            });
+        }
+    });
+});
+
+observer.observe(document.body, { childList: true });
+
+    // ✅ LIMPIADOR PROFESIONAL DE FORMULARIO DE BARBEROS
+document.addEventListener('click', function(e) {
+    // Detectamos el clic en el botón "+" (el que agrega el barbero)
+    if (e.target.closest('button') && e.target.innerText.includes('+')) {
+        
+        // Creamos un vigilante que espere el mensaje de éxito de SweetAlert
+        const checkSuccess = setInterval(() => {
+            const swalTitle = document.querySelector('.swal2-title');
+            
+            // Si el mensaje dice "Creado", "Éxito", "Success" o "OK"
+            if (swalTitle && (
+                swalTitle.innerText.toLowerCase().includes('creado') || 
+                swalTitle.innerText.toLowerCase().includes('exito') || 
+                swalTitle.innerText.toLowerCase().includes('éxito') || 
+                swalTitle.innerText.toLowerCase().includes('success')
+            )) {
+                
+                // 🎯 LIMPIEZA POR IDS REALES (add-b-nom, add-b-pin, add-b-comision)
+                const campos = ['add-b-nom', 'add-b-pin', 'add-b-comision'];
+                
+                campos.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        // Limpiamos nombre y pin. La comisión la reseteamos a 50.
+                        el.value = (id === 'add-b-comision') ? '50' : '';
+                    }
+                });
+
+                console.log('✨ Formulario de Barberos reseteado correctamente');
+                clearInterval(checkSuccess); // Dejamos de vigilar
+            }
+        }, 500);
+
+        // Si después de 5 segundos no hubo éxito, paramos el vigilante para ahorrar batería
+        setTimeout(() => clearInterval(checkSuccess), 5000);
+    }
+});
+   
 // ==========================================
-    // 🚀 LÓGICA DE INSTALACIÓN PWA (FORZADA)
+ // ==========================================
+    // 🚀 LÓGICA DE INSTALACIÓN PWA (UNIFICADA)
     // ==========================================
     let eventoInstalacion = null;
+    const btnInstalar = document.getElementById('btn-instalar-pwa');
 
-    // 1. Encendemos el motor PWA
+    // 1. Registro del Motor (Service Worker)
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Zeus App Web lista para instalar.', reg))
-                .catch(err => console.error('Error en PWA:', err));
+                .then(reg => console.log('Zeus SW: Activo'))
+                .catch(err => console.error('Zeus SW: Error', err));
         });
     }
 
-    // 2. Interceptamos a Chrome CON FUERZA BRUTA
+    // 2. Detectamos el Sistema Operativo
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    // 3. Caso Android/Chrome: Atrapamos la invitación de Google
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Evita que Chrome muestre su barra fea
         e.preventDefault();
         eventoInstalacion = e;
-        
-        // Buscamos nuestro botón y lo obligamos a mostrarse
-        const btnInstalar = document.getElementById('btn-instalar-pwa');
         if (btnInstalar) {
             btnInstalar.classList.remove('hidden');
-            btnInstalar.style.display = 'flex'; // 🚀 ¡Magia extra! Fuerza bruta para que aparezca sí o sí
+            btnInstalar.style.display = 'flex';
         }
     });
 
-    // 3. Qué pasa cuando el cliente toca nuestro botón
-    const btnBuscado = document.getElementById('btn-instalar-pwa');
-    if (btnBuscado) {
-        btnBuscado.addEventListener('click', async () => {
-            if (eventoInstalacion) {
+    // 4. Caso iPhone/Safari: Configuramos el botón manualmente
+    if (isIOS && !window.navigator.standalone) {
+        if (btnInstalar) {
+            btnInstalar.innerHTML = '📲 <span class="text-xs">Instalar en iPhone</span>';
+            btnInstalar.classList.remove('hidden');
+            btnInstalar.style.display = 'flex';
+        }
+    }
+
+    // 5. Acción al presionar el botón (Inteligente)
+    if (btnInstalar) {
+        btnInstalar.addEventListener('click', async () => {
+            if (isIOS) {
+                // Instrucciones para usuarios Apple
+                Swal.fire({
+                    title: 'Instalar Zeus en iPhone',
+                    html: `
+                        <div class="text-left text-sm">
+                            1. Toca el botón <b>Compartir</b> (cuadrado con flecha abajo).<br><br>
+                            2. Desliza y toca en <b>"Agregar al inicio"</b> 📲.<br><br>
+                            3. ¡Listo! Ya tendrás Zeus como una App.
+                        </div>
+                    `,
+                    icon: 'info',
+                    confirmButtonText: 'Entendido'
+                });
+            } else if (eventoInstalacion) {
+                // Disparador oficial para Android
                 eventoInstalacion.prompt();
                 const { outcome } = await eventoInstalacion.userChoice;
                 if (outcome === 'accepted') {
-                    btnBuscado.style.display = 'none'; // Lo ocultamos si aceptó
+                    btnInstalar.style.display = 'none';
                 }
                 eventoInstalacion = null;
             }
         });
     }
 
-    // 4. Ocultar si ya se instaló
+    // 6. Si ya se instaló, borramos el botón de la vista
     window.addEventListener('appinstalled', () => {
-        if (btnBuscado) btnBuscado.style.display = 'none';
+        if (btnInstalar) btnInstalar.style.display = 'none';
     });
-    
+
     // ARRANQUE DEL SISTEMA
     window.onload = checkSession;
 </script>
