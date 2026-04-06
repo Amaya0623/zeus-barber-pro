@@ -606,51 +606,42 @@
         </div>
     </div>
 
-    <div id="modal-barberos" class="hidden fixed inset-0 z-[100] bg-black/98 flex items-center justify-center p-6">
-        <div class="glass p-10 rounded-[3rem] border border-blue-900/30 max-w-xl w-full max-h-[90vh] overflow-y-auto relative text-left">
-            <button type="button" onclick="cerrarModales()" class="absolute top-7 right-7 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
-            <h2 class="text-3xl font-black mb-6 italic uppercase text-blue-400 text-center">Control de Turnos</h2>
-            <div id="asistencia-lista" class="space-y-3"></div>
-            <p class="text-[9px] text-zinc-500 italic mt-6 px-4 text-center">Recuerda: El turno inicia al loguearse.</p>
-        </div>
-    </div>
-
-   <div id="modal-inventario" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md">
-    <div class="glass p-8 rounded-[2.5rem] border border-purple-900/20 max-w-lg w-full max-h-[90vh] overflow-y-auto relative shadow-2xl">
+  <div id="modal-inventario" class="hidden fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="glass p-6 sm:p-10 rounded-[3rem] border border-purple-900/30 max-w-xl w-full max-h-[90vh] overflow-y-auto relative text-left shadow-2xl">
         
-        <button onclick="cerrarModales()" class="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
+        <button type="button" onclick="cerrarModales()" class="absolute top-7 right-7 w-9 h-9 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press hover:text-white transition-colors">✕</button>
+        
+        <h2 class="text-3xl font-black mb-8 italic uppercase text-purple-400 text-center tracking-tighter">Inventario</h2>
 
-        <h2 class="text-3xl font-black mb-8 italic uppercase text-purple-400 tracking-tighter">Inventario</h2>
-
-        <div class="bg-zinc-900/50 p-6 rounded-[2rem] border border-zinc-800/50 mb-8 space-y-4">
-            <div class="space-y-1">
-                <input type="text" id="inv-nombre" placeholder="NOMBRE" 
-                    class="w-full bg-black/40 border border-zinc-800 p-4 rounded-2xl text-xs font-black text-white placeholder:text-zinc-600 focus:border-purple-600 transition-all outline-none">
+        <div class="bg-black/50 p-6 rounded-[2rem] border border-zinc-900 shadow-inner mb-8 space-y-4">
+            <div>
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-2">Nombre del Producto</label>
+                <input type="text" id="inv-nombre" placeholder="EJ: CERA MATTE" class="w-full bg-zinc-950 p-4 rounded-2xl text-xs font-black text-white border border-zinc-800 focus:border-purple-500 outline-none mt-1 uppercase">
             </div>
             
-            <div class="flex gap-3">
-                <input type="number" id="inv-precio" placeholder="Precio $" 
-                    class="w-1/2 bg-black/40 border border-zinc-800 p-4 rounded-2xl text-xs font-black text-white placeholder:text-zinc-600 focus:border-purple-600 transition-all outline-none">
-                
-                <input type="number" id="inv-stock" placeholder="Stock" 
-                    class="w-1/2 bg-black/40 border border-zinc-800 p-4 rounded-2xl text-xs font-black text-white placeholder:text-zinc-600 focus:border-purple-600 transition-all outline-none">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-2">Precio $</label>
+                    <input type="number" id="inv-precio" placeholder="0" class="w-full bg-zinc-950 p-4 rounded-2xl text-xs font-black text-white border border-zinc-800 focus:border-purple-500 outline-none mt-1">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-2">Stock Inicial</label>
+                    <input type="number" id="inv-stock" placeholder="0" class="w-full bg-zinc-950 p-4 rounded-2xl text-xs font-black text-white border border-zinc-800 focus:border-purple-500 outline-none mt-1">
+                </div>
             </div>
 
-            <button onclick="guardarNuevoProducto()" 
-                class="w-full bg-purple-600 hover:bg-purple-500 text-white p-5 rounded-2xl text-sm font-black uppercase tracking-widest transition-all btn-press shadow-xl shadow-purple-900/20">
-                GUARDAR
+            <button type="button" onclick="guardarNuevoProducto()" class="w-full bg-purple-600 hover:bg-purple-500 text-white py-5 rounded-2xl text-sm font-black uppercase tracking-widest transition-all btn-press shadow-lg shadow-purple-900/20 mt-2">
+                GUARDAR PRODUCTO ⚡
             </button>
         </div>
 
         <div id="lista-inventario-modal" class="space-y-3">
             </div>
-
+        
+        <p class="text-[9px] text-zinc-500 italic mt-6 text-center">Gestiona tus productos y stock en tiempo real.</p>
     </div>
 </div>
+
     <div id="modal-gastos" class="hidden fixed inset-0 z-[100] bg-black/98 flex items-center justify-center p-6">
         <div class="glass p-10 rounded-[3rem] border border-red-900/30 max-w-xl w-full max-h-[90vh] overflow-y-auto relative text-left shadow-2xl">
             <button type="button" onclick="cerrarModales()" class="absolute top-7 right-7 w-8 h-8 bg-black border border-zinc-800 text-zinc-500 rounded-full flex items-center justify-center font-bold text-sm btn-press">✕</button>
@@ -2029,98 +2020,117 @@
     function renderGastos() { document.getElementById('gastos-historial').innerHTML = (db.barberias[bIdx].gastos || []).slice().reverse().map(g => `<div class="flex justify-between bg-red-900/10 p-4 rounded-2xl mb-2 border border-red-900/20"><div><p class="text-[10px] font-black text-red-400 uppercase">${g.desc}</p><p class="text-[8px] text-zinc-600">${g.fecha} • Por: ${g.registradoPor || 'ADMIN'}</p></div><span class="font-black text-red-500">-${fMoney(g.valor)}</span></div>`).join(''); }
 
 // ==========================================
-    // NUEVO MOTOR DE INVENTARIO (SUPABASE)
-    // ==========================================
+// NUEVO MOTOR DE INVENTARIO (TABLA: products)
+// ==========================================
 
+// 1. CONEXIÓN (Asegúrate de que esté así al principio del script)
+// NOTA: Recuerda reemplazar 'https://blfkwfmthsdifdjybssw.supabase.co' y 'sb_publishable_FHeDWaFmk_vVo5KbcsQKGg__YoMAYKZ' con tus datos reales de Supabase
+const { createClient } = supabase; 
+const _supabase = createClient('https://blfkwfmthsdifdjybssw.supabase.co', 'sb_publishable_FHeDWaFmk_vVo5KbcsQKGg__YoMAYKZ');
+
+// 2. FUNCIÓN DE INVENTARIO CORREGIDA
 async function abrirModalInventario() {
-    const b = db.barberias[bIdx];
-    
-    // 🚀 La instrucción debe ser continua, sin ";" hasta el final
-    const { data: productos, error } = await supabase
-        .from('inventario')
-        .select('*')
-        .eq('id_barberia', b.id)
-        .order('nombre', { ascending: true });
+    try {
+        console.log("Cargando inventario desde products...");
+        const b = db.barberias[bIdx];
+        
+        const { data: productos, error } = await _supabase
+            .from('products') 
+            .select('*');
 
-    if (error) {
-        console.error("Error Supabase:", error);
-        return Swal.fire('Error', 'No se pudo conectar con la nube', 'error');
-    }
+        if (error) throw error;
 
-    const contenedor = document.getElementById('lista-inventario-modal');
-    if (!contenedor) return;
+        const contenedor = document.getElementById('lista-inventario-modal');
+        if (!contenedor) return;
 
-    contenedor.innerHTML = productos.map(p => `
-        <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl mb-3 border border-zinc-800">
-            <div>
-                <p class="font-black text-white uppercase text-xs">${p.nombre}</p>
-                <p class="text-[10px] text-zinc-500">Precio: $ ${p.precio.toLocaleString()}</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="flex items-center bg-black rounded-lg border border-zinc-700">
-                    <button onclick="cambiarStockModal('${p.id}', -1)" class="px-3 py-1 text-red-500 font-black">-</button>
-                    <span class="px-2 text-xs font-black ${p.stock <= 3 ? 'text-red-500 animate-pulse' : 'text-green-400'}">${p.stock}</span>
-                    <button onclick="cambiarStockModal('${p.id}', 1)" class="px-3 py-1 text-green-500 font-black">+</button>
+        contenedor.innerHTML = productos.map(p => `
+            <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl mb-3 border border-zinc-800">
+                <div>
+                    <p class="font-black text-white uppercase text-xs">${p.name}</p>
+                    <p class="text-[10px] text-zinc-500">Precio: $ ${p.price?.toLocaleString() || 0}</p>
                 </div>
-                <button onclick="eliminarProducto('${p.id}', '${p.nombre}')" class="text-zinc-600 hover:text-red-500 font-black ml-2 px-2">X</button>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center bg-black rounded-lg border border-zinc-700">
+                        <button onclick="cambiarStockModal('${p.id}', -1)" class="px-3 py-1 text-red-500 font-black">-</button>
+                        <span class="px-2 text-xs font-black ${p.stock <= 3 ? 'text-red-500 animate-pulse' : 'text-green-400'}">${p.stock}</span>
+                        <button onclick="cambiarStockModal('${p.id}', 1)" class="px-3 py-1 text-green-500 font-black">+</button>
+                    </div>
+                    <button onclick="eliminarProducto('${p.id}', '${p.name}')" class="text-zinc-600 hover:text-red-500 font-black ml-2 px-2">X</button>
+                </div>
             </div>
-        </div>
-    `).join('') || '<p class="text-center text-zinc-600 py-4 italic text-xs">Inventario vacío</p>';
+        `).join('') || '<p class="text-center text-zinc-600 py-4 italic text-xs">Inventario vacío</p>';
 
-    document.getElementById('modal-inventario').classList.remove('hidden');
+        document.getElementById('modal-inventario').classList.remove('hidden');
+    } catch (err) {
+        console.error("DETALLE TÉCNICO:", err);
+        Swal.fire('Error', 'No se pudo conectar: ' + err.message, 'error');
+    }
 }
 
-    async function guardarNuevoProducto() {
-        const nomInput = document.getElementById('inv-nombre');
-        const preInput = document.getElementById('inv-precio');
-        const stoInput = document.getElementById('inv-stock');
+// 3. FUNCIÓN DE GUARDAR CORREGIDA
+async function guardarNuevoProducto() {
+    const nomInput = document.getElementById('inv-nombre');
+    const preInput = document.getElementById('inv-precio');
+    const stoInput = document.getElementById('inv-stock');
 
-        const nombre = nomInput.value.trim().toUpperCase();
-        const precio = parseInt(preInput.value);
-        const stock = parseInt(stoInput.value);
-        const b = db.barberias[bIdx];
+    const nombre = nomInput.value.trim().toUpperCase();
+    const precio = parseInt(preInput.value);
+    const stock = parseInt(stoInput.value);
+    const b = db.barberias[bIdx];
 
-        if (!nombre || isNaN(precio) || isNaN(stock)) {
-            return Swal.fire({ title: 'Faltan datos', icon: 'warning', background: '#0a0a0a', color: '#fff' });
-        }
-
-        try {
-            const { error } = await supabase
-                .from('inventario')
-                .insert([{ nombre: nombre, precio: precio, stock: stock, id_barberia: b.id }]);
-
-            if (error) throw error;
-
-            Swal.fire({ title: '¡Guardado!', icon: 'success', timer: 1000, showConfirmButton: false, background: '#0a0a0a', color: '#fff' });
-
-            nomInput.value = ""; preInput.value = ""; stoInput.value = "";
-            abrirModalInventario(); 
-            renderAdmin(); 
-
-        } catch (err) {
-            Swal.fire('Error', 'No se pudo guardar', 'error');
-        }
+    if (!nombre || isNaN(precio) || isNaN(stock)) {
+        return Swal.fire({ title: 'Faltan datos', icon: 'warning' });
     }
 
-    async function cambiarStockModal(idProd, cambio) {
-        const { data: p } = await supabase.from('inventario').select('stock').eq('id', idProd).single();
+    try {
+        const { error } = await _supabase
+            .from('products')
+            .insert([{ 
+                name: nombre, 
+                price: precio, 
+                stock: stock, 
+                store_id: String(b.id) 
+            }]);
+
+        if (error) throw error;
+
+        Swal.fire({ title: '¡Guardado!', icon: 'success', timer: 1000, showConfirmButton: false });
+        nomInput.value = ""; preInput.value = ""; stoInput.value = "";
+        abrirModalInventario(); 
+    } catch (err) {
+        Swal.fire('Error', 'No se pudo guardar: ' + err.message, 'error');
+    }
+}
+
+async function cambiarStockModal(idProd, cambio) {
+    try {
+        const { data: p } = await _supabase.from('products').select('stock').eq('id', idProd).single();
         let nuevoStock = (p.stock || 0) + cambio;
         if (nuevoStock < 0) nuevoStock = 0;
-        await supabase.from('inventario').update({ stock: nuevoStock }).eq('id', idProd);
+        
+        await _supabase.from('products').update({ stock: nuevoStock }).eq('id', idProd);
         abrirModalInventario();
-        renderAdmin();
+    } catch (e) { 
+        console.error("Error al cambiar stock:", e); 
     }
+} // <--- ESTA ES LA LLAVE QUE FALTABA
 
-    async function eliminarProducto(idProd, nombre) {
-        const r = await Swal.fire({ title: `¿Eliminar ${nombre}?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', background: '#0a0a0a', color: '#fff' });
-        if (r.isConfirmed) {
-            await supabase.from('inventario').delete().eq('id', idProd);
-            abrirModalInventario();
-            renderAdmin();
-        }
+async function eliminarProducto(idProd, nombre) {
+    const r = await Swal.fire({ 
+        title: `¿Eliminar ${nombre}?`, 
+        icon: 'warning', 
+        showCancelButton: true, 
+        confirmButtonColor: '#d33', 
+        background: '#0a0a0a', 
+        color: '#fff' 
+    });
+    
+    if (r.isConfirmed) {
+        await _supabase.from('products').delete().eq('id', idProd);
+        abrirModalInventario();
     }
-
-    function abrirBarberos() { document.getElementById('modal-barberos').classList.remove('hidden'); const b = db.barberias[bIdx]; const hoy = getTodayYMD(); document.getElementById('asistencia-lista').innerHTML = (b.barberos || []).map(bar => { let ing = "--:--"; let sal = "--:--"; if (b.asistencia && b.asistencia[hoy] && b.asistencia[hoy][bar.nom]) { ing = b.asistencia[hoy][bar.nom].ingreso || "--:--"; sal = b.asistencia[hoy][bar.nom].salida || "--:--"; } return `<div class="glass p-5 rounded-3xl border border-zinc-800 flex justify-between items-center mb-3"><div><h4 class="font-black text-sm uppercase text-white">${bar.nom}</h4><div class="mt-2 flex gap-2"><span class="text-[9px] text-green-400 bg-green-900/20 px-2 py-1 rounded">IN: ${ing}</span><span class="text-[9px] text-red-400 bg-red-900/20 px-2 py-1 rounded">OUT: ${sal}</span></div></div></div>`; }).join(''); }
+}
+  function abrirBarberos() { document.getElementById('modal-barberos').classList.remove('hidden'); const b = db.barberias[bIdx]; const hoy = getTodayYMD(); document.getElementById('asistencia-lista').innerHTML = (b.barberos || []).map(bar => { let ing = "--:--"; let sal = "--:--"; if (b.asistencia && b.asistencia[hoy] && b.asistencia[hoy][bar.nom]) { ing = b.asistencia[hoy][bar.nom].ingreso || "--:--"; sal = b.asistencia[hoy][bar.nom].salida || "--:--"; } return `<div class="glass p-5 rounded-3xl border border-zinc-800 flex justify-between items-center mb-3"><div><h4 class="font-black text-sm uppercase text-white">${bar.nom}</h4><div class="mt-2 flex gap-2"><span class="text-[9px] text-green-400 bg-green-900/20 px-2 py-1 rounded">IN: ${ing}</span><span class="text-[9px] text-red-400 bg-red-900/20 px-2 py-1 rounded">OUT: ${sal}</span></div></div></div>`; }).join(''); }
     function abrirClientes() { document.getElementById('modal-clientes').classList.remove('hidden'); renderClientes(); }
     function renderClientes() { const cData = db.barberias[bIdx].clientes || {}; document.getElementById('clientes-lista').innerHTML = Object.keys(cData).map(k => `<div class="bg-blue-900/10 p-4 rounded-xl border border-blue-900/30 mb-2"><p class="font-black text-white">${cData[k].nombre}</p><p class="text-blue-400 font-black">${cData[k].pts} Puntos</p></div>`).join(''); }
 
@@ -2364,6 +2374,7 @@ function optimizarBaseDeDatos() {
         saveDB(); // Guardamos la limpieza
     }
 }
+    
 // ==========================================
     // 🚀 LÓGICA DE INSTALACIÓN PWA (FORZADA)
     // ==========================================
