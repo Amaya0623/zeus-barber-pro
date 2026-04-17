@@ -1017,15 +1017,34 @@
     }
 
     function saveDB(triggerCloudSync = true) {
-        if (!isLocalStorageBlocked) { try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch (e) { console.error("Error guardando local"); } }
+        // 1. Guardado local seguro
+        if (!isLocalStorageBlocked) { 
+            try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } 
+            catch (e) { console.error("Error guardando local"); } 
+        }
+        
+        // 2. Subida instantánea a la Nube (Sin retrasos)
         if (triggerCloudSync && isOnline) {
-            clearTimeout(cloudSyncTimer);
-            cloudSyncTimer = setTimeout(() => {
-                let idx = bIdx !== -1 ? bIdx : kiosko_bIdx;
-                if (idx !== -1 && db.barberias[idx] && db.barberias[idx].id_nube) {
-                    supabaseClient.from('stores').update({ json_data: db.barberias[idx] }).eq('id', db.barberias[idx].id_nube);
-                }
-            }, 2000);
+            // Detectamos si estamos en el Admin/Barbero o si es un cliente en el Kiosko
+            let idx = bIdx !== -1 ? bIdx : kiosko_bIdx;
+            
+            if (idx !== -1 && db.barberias[idx] && db.barberias[idx].id_nube) {
+                supabaseClient.from('stores')
+                    .update({ json_data: db.barberias[idx] })
+                    .eq('id', db.barberias[idx].id_nube)
+                    .then(({ error }) => {
+                        if (!error) {
+                            console.log("Nube Sincronizada al instante ✅");
+                            // Obligamos a la pantalla a actualizarse para borrar fantasmas
+                            const vistaBarbero = document.getElementById('view-barbero');
+                            if (vistaBarbero && vistaBarbero.classList.contains('active')) {
+                                renderBarbero();
+                            }
+                        } else {
+                            console.error("Error al subir a la nube:", error);
+                        }
+                    });
+            }
         }
     }
 
