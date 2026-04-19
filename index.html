@@ -3271,25 +3271,50 @@
             return "Entiendo. Estoy entrenada para ayudarte con tu agenda y resúmenes. ¿En qué más te ayudo?";
         }
 
+        // --- MOTOR DE INSTALACIÓN PWA ---
         let eventoInstalacion = null;
-        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { }); }); }
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); eventoInstalacion = e;
-            const btnInstalar = document.getElementById('btn-instalar-pwa');
-            if (btnInstalar) { btnInstalar.classList.remove('hidden'); btnInstalar.style.display = 'flex'; }
-        });
 
-        const btnBuscado = document.getElementById('btn-instalar-pwa');
-        if (btnBuscado) {
-            btnBuscado.addEventListener('click', async () => {
-                if (eventoInstalacion) {
-                    eventoInstalacion.prompt();
-                    const { outcome } = await eventoInstalacion.userChoice;
-                    if (outcome === 'accepted') { btnBuscado.style.display = 'none'; }
-                    eventoInstalacion = null;
-                }
+        // Registrar el Service Worker (Vital para que el navegador permita instalar)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('[Zeus SW] Registrado con éxito'))
+                    .catch(err => console.warn('[Zeus SW] Error al registrar:', err));
             });
         }
+
+        // Capturar el evento de instalación
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); // Evita el banner automático feo
+            eventoInstalacion = e;
+            const btnInstalar = document.getElementById('btn-instalar-pwa');
+            if (btnInstalar) {
+                btnInstalar.classList.remove('hidden');
+                btnInstalar.style.display = 'flex';
+            }
+        });
+
+        // Acción al hacer clic en el botón de instalar
+        document.getElementById('btn-instalar-pwa')?.addEventListener('click', async () => {
+            if (eventoInstalacion) {
+                eventoInstalacion.prompt(); // Muestra el cuadro de instalación oficial
+                const { outcome } = await eventoInstalacion.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('El usuario instaló la App');
+                    document.getElementById('btn-instalar-pwa').style.display = 'none';
+                }
+                eventoInstalacion = null;
+            } else {
+                // Si no hay evento (en iOS o si ya se instaló)
+                Swal.fire({
+                    title: '¿Cómo instalar?',
+                    text: 'En iPhone usa el botón "Compartir" y luego "Añadir a pantalla de inicio". En Android, busca "Instalar aplicación" en el menú del navegador.',
+                    icon: 'info',
+                    background: '#111',
+                    color: '#fff'
+                });
+            }
+        });
 
         // ==========================================
         // CIERRE AUTOMÁTICO POR INACTIVIDAD (AHORRO SUPABASE)
