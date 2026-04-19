@@ -1,14 +1,14 @@
-const CACHE_NAME = 'zeus-barber-v3'; // Subimos de versión para forzar actualización
+const CACHE_NAME = 'zeus-barber-pro-v4'; // Subimos de versión para limpiar caché antigua
 
-// Archivos críticos para que la app funcione al 100% OFFLINE
+// Archivos críticos para modo Offline y para que el navegador active la instalación
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icono.png',
-  // Agrega aquí los enlaces de las librerías externas que usas (Tailwind, SweetAlert, etc.) si es posible.
-  // Ejemplo: 'https://cdn.tailwindcss.com',
-  // 'https://cdn.jsdelivr.net/npm/sweetalert2@11'
+  './',
+  './index.html',
+  './manifest.json',
+  './icono.png',
+  './video.gif', // Agregamos el video para que cargue siempre
+  'https://cdn.tailwindcss.com',
+  'https://cdn.jsdelivr.net/npm/sweetalert2@11'
 ];
 
 self.addEventListener('install', e => {
@@ -16,7 +16,8 @@ self.addEventListener('install', e => {
   console.log('[Zeus SW] Instalando Motor Offline Total 🛡️');
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
+      // Usamos cache.addAll pero con un catch por si un archivo falta no rompa todo
+      return cache.addAll(urlsToCache).catch(err => console.warn('Error en precarga de caché:', err));
     })
   );
 });
@@ -32,32 +33,38 @@ self.addEventListener('activate', e => {
           }
         })
       );
-    }).then(() => clients.claim())
+    }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(response => {
-      // 1. Si está en caché, lo servimos de una vez (RÁPIDO Y OFFLINE)
+      // 1. Si está en caché, lo servimos de una vez
       if (response) return response;
 
       // 2. Si no, intentamos buscarlo en la red
       return fetch(e.request).then(networkResponse => {
-        // Si la respuesta es buena, la guardamos en caché para la próxima
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+        // Validamos que sea una respuesta válida para guardar en caché
+        if (!networkResponse || networkResponse.status !== 200) {
           return networkResponse;
         }
+
+        // Clonamos la respuesta para guardarla en caché y que esté disponible offline después
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then(cache => {
-          cache.put(e.request, responseToCache);
+          // No cacheamos peticiones a Supabase para evitar datos viejos
+          if (!e.request.url.includes('supabase.co')) {
+            cache.put(e.request, responseToCache);
+          }
         });
+
         return networkResponse;
       });
     }).catch(() => {
-      // Si falla la red y no está en caché (emergencia)
+      // Si falla la red y no está en caché (emergencia para navegación)
       if (e.request.mode === 'navigate') {
-        return caches.match('/index.html');
+        return caches.match('./index.html');
       }
     })
   );
