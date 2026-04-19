@@ -2058,13 +2058,34 @@
         function checkSession() {
             const urlParams = new URLSearchParams(window.location.search);
             const kioskId = urlParams.get('kiosk');
-            if (kioskId) { let localIdx = db.barberias.findIndex(b => b.id_nube === kioskId || b.id === kioskId); if (localIdx > -1) { iniciarKiosko(localIdx); return; } }
+            if (kioskId) { 
+                let localIdx = db.barberias.findIndex(b => b.id_nube === kioskId || b.id === kioskId); 
+                if (localIdx > -1) { iniciarKiosko(localIdx); return; } 
+            }
 
             let s = null;
             if (!isLocalStorageBlocked) { try { s = sessionStorage.getItem(SESSION_KEY); } catch (e) { } }
             if (s) {
                 const d = JSON.parse(s); bIdx = d.bIdx; session = d.session;
-                if (bIdx !== -1 && db.barberias[bIdx]) { showScreen(session.rol === 'admin' ? 'view-admin' : 'view-barbero'); forzarSincronizacionNube(true); }
+                
+                // 🛑 ESCUDO AL RESTAURAR SESIÓN GUARDADA
+                if (bIdx !== -1 && db.barberias[bIdx] && session.rol !== 'superadmin') {
+                    const bVerif = db.barberias[bIdx];
+                    const diffDays = Math.floor((Date.now() - (bVerif.creadoEn || Date.now())) / (1000 * 60 * 60 * 24));
+                    
+                    if ((bVerif.lastActiveClock && Date.now() < bVerif.lastActiveClock) || (bVerif.diasSuscripcion || 15) - diffDays < 0 || bVerif.bloqueado) {
+                        sessionStorage.removeItem(SESSION_KEY); // Borramos la sesión para evitar bucles
+                        bIdx = -1;
+                        session = null;
+                        document.getElementById('pantalla-bloqueo').classList.remove('hidden'); 
+                        document.getElementById('app-content').classList.add('hidden'); 
+                        return;
+                    }
+                    
+                    // Si pasó el escudo, lo dejamos entrar
+                    showScreen(session.rol === 'admin' ? 'view-admin' : 'view-barbero'); 
+                    forzarSincronizacionNube(true); 
+                }
                 else if (bIdx === -1 && session && session.rol === 'superadmin') { showScreen('view-superadmin'); }
                 else { showScreen('view-login'); }
             } else { showScreen('view-login'); }
@@ -2088,6 +2109,15 @@
             }
 
             if (foundLocal) {
+                // 🛑 ESCUDO EN EL LOGIN (Acceso Local con Anti-Abejas)
+                const bVerif = db.barberias[localIdx];
+                const diffDays = Math.floor((Date.now() - (bVerif.creadoEn || Date.now())) / (1000 * 60 * 60 * 24));
+                
+                // Si la fecha es menor a la última registrada o si expiró/bloqueado
+                if ((bVerif.lastActiveClock && Date.now() < bVerif.lastActiveClock) || (bVerif.diasSuscripcion || 15) - diffDays < 0 || bVerif.bloqueado) {
+                    Swal.close(); document.getElementById('pantalla-bloqueo').classList.remove('hidden'); document.getElementById('app-content').classList.add('hidden'); pinInput.value = ""; return;
+                }
+
                 bIdx = localIdx; session = { rol: isBarbero ? 'barbero' : 'admin', nom: barberoName };
                 if (isBarbero) { const b = db.barberias[bIdx]; if (!b.asistencia) b.asistencia = {}; const hoy = getTodayYMD(); if (!b.asistencia[hoy]) b.asistencia[hoy] = {}; if (!b.asistencia[hoy][session.nom] || !b.asistencia[hoy][session.nom].ingreso) { b.asistencia[hoy][session.nom] = { ingreso: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), salida: "--" }; } }
                 saveDB(false); saveSession(); pinInput.value = ""; Swal.close(); showScreen(session.rol === 'admin' ? 'view-admin' : 'view-barbero'); forzarSincronizacionNube(true); return;
@@ -2108,6 +2138,15 @@
                 localIdx = db.barberias.findIndex(x => x.pinAdmin === store.owner_pin);
                 let bData = store.json_data || {}; bData.id_nube = store.id; bData.nombre = store.name; bData.pinAdmin = store.owner_pin;
                 if (localIdx === -1) { db.barberias.push(bData); localIdx = db.barberias.length - 1; } else { db.barberias[localIdx] = { ...db.barberias[localIdx], ...bData }; }
+
+                // 🛑 ESCUDO EN EL LOGIN (Acceso Nube con Anti-Abejas)
+                const bVerifCloud = db.barberias[localIdx];
+                const diffDaysCloud = Math.floor((Date.now() - (bVerifCloud.creadoEn || Date.now())) / (1000 * 60 * 60 * 24));
+                
+                // Si la fecha es menor a la última registrada o si expiró/bloqueado
+                if ((bVerifCloud.lastActiveClock && Date.now() < bVerifCloud.lastActiveClock) || (bVerifCloud.diasSuscripcion || 15) - diffDaysCloud < 0 || bVerifCloud.bloqueado) {
+                    Swal.close(); document.getElementById('pantalla-bloqueo').classList.remove('hidden'); document.getElementById('app-content').classList.add('hidden'); pinInput.value = ""; return;
+                }
 
                 bIdx = localIdx; session = { rol: isBarbero ? 'barbero' : 'admin', nom: barberoName };
                 if (isBarbero) { const b = db.barberias[bIdx]; if (!b.asistencia) b.asistencia = {}; const hoy = getTodayYMD(); if (!b.asistencia[hoy]) b.asistencia[hoy] = {}; if (!b.asistencia[hoy][session.nom] || !b.asistencia[hoy][session.nom].ingreso) { b.asistencia[hoy][session.nom] = { ingreso: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), salida: "--" }; } }
@@ -2621,6 +2660,17 @@
         // ==========================================
         function iniciarKiosko(idx) {
             kiosko_bIdx = idx; const b = db.barberias[kiosko_bIdx];
+            
+            // 🛑 ESCUDO DEL KIOSKO (Con Anti-Abejas 🐝)
+            // Impide que los clientes agenden si el local no ha pagado o si intentan engañar el reloj
+            const diffDays = Math.floor((Date.now() - (b.creadoEn || Date.now())) / (1000 * 60 * 60 * 24));
+            
+            if ((b.lastActiveClock && Date.now() < b.lastActiveClock) || (b.diasSuscripcion || 15) - diffDays < 0 || b.bloqueado) {
+                document.getElementById('pantalla-bloqueo').classList.remove('hidden');
+                document.getElementById('app-content').classList.add('hidden');
+                return; // Corta la ejecución, no carga el kiosko
+            }
+
             if (!b.barberos || b.barberos.length === 0 || !b.servicios || b.servicios.length === 0) return Swal.fire('Local Incompleto', 'El administrador debe configurar barberos y servicios.', 'warning');
             document.getElementById('kio-fecha').value = getTodayYMD(); document.getElementById('kio-titulo-local').innerText = b.nombre;
             tempServicios = []; renderServiciosTemp('kio'); renderSemaforoKiosko(); 
