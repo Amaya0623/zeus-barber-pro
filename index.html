@@ -315,115 +315,78 @@
 
 <body>
 
-    <div id="splash-screen"
-        class="flex items-center justify-center h-screen w-screen fixed inset-0 z-[9999] bg-[#050505]">
-
-        <div
-            class="relative w-64 mx-auto rounded-[2.5rem] overflow-hidden shadow-[0_0_30px_rgba(12,209,184,0.15)] border border-zinc-800">
-
+    <div id="splash-screen" class="flex items-center justify-center h-screen w-screen fixed inset-0 z-[9999] bg-[#050505]">
+        <div class="relative w-64 mx-auto rounded-[2.5rem] overflow-hidden shadow-[0_0_30px_rgba(12,209,184,0.15)] border border-zinc-800">
             <img src="video.gif" alt="Iniciando Zeus Barber..." class="w-full h-auto block pointer-events-none">
-
             <div class="absolute bottom-0 right-0 w-14 h-8 bg-[#181820] z-10 rounded-br-[2.5rem]"></div>
-
         </div>
-
-    <div id="contenedor-instalar-pwa" class="hidden fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-indigo-600 border border-indigo-400/50 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.5)] flex items-center pr-1 pl-5 py-1 gap-2">
-        <button id="btn-instalar-pwa" class="text-white font-black text-xs uppercase flex items-center gap-2 btn-press">
-            <span class="text-lg">📲</span> INSTALAR APP
-        </button>
-        <button onclick="document.getElementById('contenedor-instalar-pwa').style.display='none'" class="bg-indigo-800 text-indigo-300 hover:text-white w-8 h-8 rounded-full font-black flex items-center justify-center btn-press ml-2 border border-indigo-900">X</button>
     </div>
-
 
     <div id="print-area"></div>
 
-    <div id="pantalla-bloqueo"
-        class="hidden fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center p-6 text-center">
+    <div id="pantalla-bloqueo" class="hidden fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center p-6 text-center">
         <div class="glass p-10 rounded-[3rem] border border-red-900/50 shadow-2xl max-w-md w-full">
             <span class="text-7xl mb-4 block">🔒</span>
             <h1 class="text-3xl font-black text-red-500 mb-2 uppercase italic">SISTEMA BLOQUEADO</h1>
-            <p class="text-zinc-400 text-sm mb-6">Tu periodo de suscripción expiró, tienda desactivada o hay anomalía de
-                reloj.</p>
-            <button type="button" onclick="window.location.reload()"
-                class="w-full bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/50 py-4 rounded-2xl font-black uppercase btn-press transition-colors">ACTUALIZAR
-                ESTADO</button>
+            <p class="text-zinc-400 text-sm mb-6">Tu periodo de suscripción expiró, tienda desactivada o hay anomalía de reloj.</p>
+            <button type="button" onclick="window.location.reload()" class="w-full bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/50 py-4 rounded-2xl font-black uppercase btn-press transition-colors">ACTUALIZAR ESTADO</button>
         </div>
     </div>
 
     <div id="app-content">
-        <audio id="snd-cash">
-            <source src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="snd-alerta">
-            <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/mpeg">
-        </audio>
+        <audio id="snd-cash"><source src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" type="audio/mpeg"></audio>
+        <audio id="snd-alerta"><source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/mpeg"></audio>
 
-        <nav id="app-nav"
-            class="hidden glass p-4 flex justify-between items-center sticky top-0 z-40 border-b border-zinc-900">
+        <nav id="app-nav" class="hidden glass p-4 flex justify-between items-center sticky top-0 z-40 border-b border-zinc-900">
             <div class="flex items-center gap-3">
-                <div id="nav-logo-box"
-                    class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-black text-xs relative overflow-hidden">
-                    <span id="nav-logo-txt">IC</span><img id="nav-logo-img"
-                        class="hidden w-full h-full object-cover absolute inset-0" src="">
+                <div id="nav-logo-box" class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-black text-xs relative overflow-hidden">
+                    <span id="nav-logo-txt">IC</span><img id="nav-logo-img" class="hidden w-full h-full object-cover absolute inset-0" src="">
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 id="nav-title" class="font-black text-sm uppercase italic leading-none">ISI CONTROL</h1>
-                        <span id="nav-status"
-                            class="text-[8px] text-green-500 font-bold uppercase tracking-widest bg-black px-1.5 py-0.5 rounded border border-green-900/50">🟢
-                            ONLINE</span>
+                        <span id="nav-status" class="text-[8px] text-green-500 font-bold uppercase tracking-widest bg-black px-1.5 py-0.5 rounded border border-green-900/50">🟢 ONLINE</span>
                     </div>
                     <p id="nav-id" class="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-1">ID: ---</p>
                 </div>
             </div>
-            <button type="button" onclick="detenerAudio(); actionLogout()"
-                class="bg-red-900/10 text-red-500 px-4 py-2 rounded-xl text-[10px] font-bold border border-red-900/30 btn-press">SALIR</button>
+            <button type="button" onclick="detenerAudio(); actionLogout()" class="bg-red-900/10 text-red-500 px-4 py-2 rounded-xl text-[10px] font-bold border border-red-900/30 btn-press">SALIR</button>
         </nav>
 
-        <section id="view-login"
-            class="view-section active max-w-md mx-auto mt-4 sm:mt-12 p-8 sm:p-10 glass rounded-[3rem] text-center border border-zinc-900 shadow-2xl min-h-[85vh] flex flex-col justify-center relative">
+        <section id="view-login" class="view-section active max-w-md mx-auto mt-4 sm:mt-12 p-8 sm:p-10 glass rounded-[3rem] text-center border border-zinc-900 shadow-2xl min-h-[85vh] flex flex-col justify-center relative">
+            
+            <div id="contenedor-instalar-pwa" class="hidden w-full flex justify-center mb-6">
+                <button id="btn-instalar-pwa" class="bg-indigo-600 text-white px-6 py-3 rounded-full font-black text-xs uppercase shadow-[0_0_15px_rgba(79,70,229,0.5)] border border-indigo-400/50 flex items-center gap-2 hover:bg-indigo-500 transition-all btn-press">
+                    <span class="text-lg">📲</span> INSTALAR ZEUS APP
+                </button>
+            </div>
+
             <div id="login-logo-container" class="flex justify-center mb-8 h-40 items-center">
-                <img id="login-custom-logo" src="" alt="Logo Principal"
-                    class="hidden h-full w-auto rounded-[2rem] shadow-lg object-contain">
+                <img id="login-custom-logo" src="" alt="Logo Principal" class="hidden h-full w-auto rounded-[2rem] shadow-lg object-contain">
                 <div id="login-default-text" class="w-full">
-                    <h2
-                        class="text-4xl sm:text-5xl font-black italic mb-2 uppercase tracking-tighter bg-gradient-to-r from-[#66ff66] via-[#0cd1b8] to-[#1e61ea] text-transparent bg-clip-text">
-                        ZEUS BARBER</h2>
+                    <h2 class="text-4xl sm:text-5xl font-black italic mb-2 uppercase tracking-tighter bg-gradient-to-r from-[#66ff66] via-[#0cd1b8] to-[#1e61ea] text-transparent bg-clip-text">ZEUS BARBER</h2>
                     <p class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mt-2">Software de Nube</p>
                 </div>
             </div>
 
             <div class="mt-auto mb-auto">
-                <input type="password" inputmode="numeric" id="login-pin" placeholder="INGRESE PIN"
-                    class="w-full p-6 rounded-3xl text-center text-4xl font-black mb-6 border border-zinc-800 shadow-inner tracking-widest bg-[#050505] focus:border-indigo-500 outline-none transition-colors text-white">
-                <button type="button" onclick="actionLogin()"
-                    class="w-full bg-indigo-600 hover:bg-indigo-500 py-6 rounded-3xl text-xl font-black uppercase italic shadow-lg shadow-indigo-600/20 btn-press transition-colors text-white mb-6">Entrar
-                    a Zeus ⚡</button>
+                <input type="password" inputmode="numeric" id="login-pin" placeholder="INGRESE PIN" class="w-full p-6 rounded-3xl text-center text-4xl font-black mb-6 border border-zinc-800 shadow-inner tracking-widest bg-[#050505] focus:border-indigo-500 outline-none transition-colors text-white">
+                <button type="button" onclick="actionLogin()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-6 rounded-3xl text-xl font-black uppercase italic shadow-lg shadow-indigo-600/20 btn-press transition-colors text-white mb-6">Entrar a Zeus ⚡</button>
 
                 <hr class="border-zinc-800 mb-6">
 
-                <button type="button" onclick="crearCuentaNueva()"
-                    class="w-full bg-gradient-to-r from-green-500 to-emerald-600 py-5 rounded-3xl text-sm font-black uppercase text-white shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] btn-press transition-all mb-4">🚀
-                    Crear Mi Barbería</button>
+                <button type="button" onclick="crearCuentaNueva()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 py-5 rounded-3xl text-sm font-black uppercase text-white shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] btn-press transition-all mb-4">🚀 Crear Mi Barbería</button>
 
                 <div class="grid grid-cols-2 gap-3 mt-4">
-                    <button type="button" onclick="abrirKioskoPublico()"
-                        class="w-full glass bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-black uppercase text-indigo-400 border border-indigo-500/30 btn-press transition-all duration-300 shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]">📅
-                        Kiosko</button>
-
-                    <button type="button" onclick="abrirMapaLocales()"
-                        class="w-full glass bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-black uppercase text-blue-400 border border-blue-500/30 btn-press transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]">📍
-                        Locales</button>
+                    <button type="button" onclick="abrirKioskoPublico()" class="w-full glass bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-black uppercase text-indigo-400 border border-indigo-500/30 btn-press transition-all duration-300 shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]">📅 Kiosko</button>
+                    <button type="button" onclick="abrirMapaLocales()" class="w-full glass bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-black uppercase text-blue-400 border border-blue-500/30 btn-press transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]">📍 Locales</button>
                 </div>
+            </div>
+            
+            <p class="text-[9px] text-zinc-600 mt-10 cursor-pointer hover:text-red-500 uppercase font-bold tracking-widest transition-colors" onclick="hardReset()">🔄 Limpiar Sistema (Reset)</p>
 
-            </div> <p class="text-[9px] text-zinc-600 mt-10 cursor-pointer hover:text-red-500 uppercase font-bold tracking-widest transition-colors"
-                onclick="hardReset()">
-                🔄 Limpiar Sistema (Reset)
-            </p>
+            <a href="https://amaya0623.github.io/zeus-barber-pro/privacidad.html" target="_blank" class="text-[8px] text-zinc-500 mt-4 block hover:text-indigo-400 font-bold uppercase tracking-widest transition-colors">📄 Política de Privacidad y Datos</a>
 
-            <a href="https://amaya0623.github.io/zeus-barber-pro/privacidad.html" target="_blank" class="text-[8px] text-zinc-500 mt-4 block hover:text-indigo-400 font-bold uppercase tracking-widest transition-colors">
-                📄 Política de Privacidad y Datos
-            </a>
         </section>
 
         <section id="view-kiosko" class="view-section p-4 max-w-md mx-auto mt-6">
@@ -3494,17 +3457,15 @@
             });
         }
 
-        // Capturar el evento de instalación
+        // Capturar el evento de instalación (Al final del archivo)
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Evita el banner automático
+            e.preventDefault(); 
             eventoInstalacion = e;
             const ctnInstalar = document.getElementById('contenedor-instalar-pwa');
             if (ctnInstalar) {
                 ctnInstalar.classList.remove('hidden');
-                ctnInstalar.style.display = 'flex';
             }
         });
-
 
         // Acción al hacer clic en el botón de instalar
         document.getElementById('btn-instalar-pwa')?.addEventListener('click', async () => {
@@ -3585,5 +3546,4 @@
         });
     </script>
 </body>
-</html>
-        
+</html>    
