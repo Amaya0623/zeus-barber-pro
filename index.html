@@ -327,11 +327,13 @@
 
         </div>
 
+    <div id="contenedor-instalar-pwa" class="hidden fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-indigo-600 border border-indigo-400/50 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.5)] flex items-center pr-1 pl-5 py-1 gap-2">
+        <button id="btn-instalar-pwa" class="text-white font-black text-xs uppercase flex items-center gap-2 btn-press">
+            <span class="text-lg">📲</span> INSTALAR APP
+        </button>
+        <button onclick="document.getElementById('contenedor-instalar-pwa').style.display='none'" class="bg-indigo-800 text-indigo-300 hover:text-white w-8 h-8 rounded-full font-black flex items-center justify-center btn-press ml-2 border border-indigo-900">X</button>
     </div>
-    <button id="btn-instalar-pwa"
-        class="hidden fixed bottom-6 left-6 z-[9999] bg-indigo-600 text-white px-6 py-3 rounded-full font-black shadow-[0_0_15px_rgba(79,70,229,0.5)] border border-indigo-400/50 flex items-center gap-2 hover:bg-indigo-500 transition-all transform hover:scale-105 btn-press">
-        <span class="text-xl">📲</span> INSTALAR APP
-    </button>
+
 
     <div id="print-area"></div>
 
@@ -3494,14 +3496,15 @@
 
         // Capturar el evento de instalación
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Evita el banner automático feo
+            e.preventDefault(); // Evita el banner automático
             eventoInstalacion = e;
-            const btnInstalar = document.getElementById('btn-instalar-pwa');
-            if (btnInstalar) {
-                btnInstalar.classList.remove('hidden');
-                btnInstalar.style.display = 'flex';
+            const ctnInstalar = document.getElementById('contenedor-instalar-pwa');
+            if (ctnInstalar) {
+                ctnInstalar.classList.remove('hidden');
+                ctnInstalar.style.display = 'flex';
             }
         });
+
 
         // Acción al hacer clic en el botón de instalar
         document.getElementById('btn-instalar-pwa')?.addEventListener('click', async () => {
