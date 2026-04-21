@@ -2653,13 +2653,25 @@
             kiosko_bIdx = idx; const b = db.barberias[kiosko_bIdx];
             
             // 🛑 ESCUDO DEL KIOSKO (Con Anti-Abejas 🐝)
-            // Impide que los clientes agenden si el local no ha pagado o si intentan engañar el reloj
             const diffDays = Math.floor((Date.now() - (b.creadoEn || Date.now())) / (1000 * 60 * 60 * 24));
             
             if ((b.lastActiveClock && Date.now() < b.lastActiveClock) || (b.diasSuscripcion || 15) - diffDays < 0 || b.bloqueado) {
                 document.getElementById('pantalla-bloqueo').classList.remove('hidden');
                 document.getElementById('app-content').classList.add('hidden');
                 return; // Corta la ejecución, no carga el kiosko
+            }
+
+            // 🔒 CANDADO DE PLANES ISI CONTROL (Solo PRO y ELITE pueden usarlo)
+            if (b.plan === 'BASICO') {
+                return Swal.fire({
+                    title: 'Función Premium ⚡', 
+                    text: 'Tu Plan BÁSICO no incluye el Kiosko Virtual 24/7. Contacta a Isi Control para mejorar tu plan al nivel PRO.', 
+                    icon: 'info', 
+                    background: '#0a0a0a', 
+                    color: '#fff',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#4f46e5'
+                });
             }
 
             if (!b.barberos || b.barberos.length === 0 || !b.servicios || b.servicios.length === 0) return Swal.fire('Local Incompleto', 'El administrador debe configurar barberos y servicios.', 'warning');
@@ -3009,9 +3021,24 @@
 
         function exportarPDF() {
             try {
+                const b = db.barberias[bIdx]; 
+
+                // 🔒 CANDADO DE PLANES ISI CONTROL (Solo ELITE puede exportar)
+                if (b.plan !== 'ELITE') {
+                    return Swal.fire({
+                        title: 'Plan Élite Requerido 👑', 
+                        text: 'La exportación avanzada de auditorías en PDF es exclusiva del Plan ÉLITE. Contacta a Isi Control para subir de nivel.', 
+                        icon: 'warning', 
+                        background: '#0a0a0a', 
+                        color: '#fff',
+                        confirmButtonText: 'Cerrar',
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+
                 Swal.fire({ title: 'Generando Reporte...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
 
-                const b = db.barberias[bIdx]; const { jsPDF } = window.jspdf; const doc = new jsPDF('landscape'); let currentY = 15; const pageWidth = doc.internal.pageSize.getWidth();
+                const { jsPDF } = window.jspdf; const doc = new jsPDF('landscape'); let currentY = 15; const pageWidth = doc.internal.pageSize.getWidth();
                 if (b.logo) { const logoSize = 25; const logoX = (pageWidth - logoSize) / 2; try { doc.addImage(b.logo, 'JPEG', logoX, currentY, logoSize, logoSize); currentY += logoSize + 8; } catch (e) { } }
                 doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.text(`REPORTE FINANCIERO - ${b.nombre}`, pageWidth / 2, currentY, { align: "center" }); currentY += 6;
                 doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(`Generado: ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}`, pageWidth / 2, currentY, { align: "center" }); currentY += 10;
@@ -3216,6 +3243,10 @@
                     </div>
                     
                     <button type="button" onclick="forzarAccesoAdmin(${i})" class="w-full bg-indigo-600 text-white py-4 rounded-xl text-xs font-black uppercase mb-4 btn-press shadow-lg shadow-indigo-600/20">INGRESAR COMO DUEÑO</button>
+
+
+
+
                     
                     <div class="bg-black/50 p-4 rounded-2xl border border-zinc-800 mb-4">
                         <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Agencias Tiempo (Cobro)</p>
@@ -3225,6 +3256,16 @@
                             <button type="button" onclick="sa_AgregarDias('${b.id_nube}', 180)" class="bg-purple-900/20 text-purple-400 border border-purple-900/50 py-2 rounded-lg text-[10px] font-black btn-press">+6M</button>
                             <button type="button" onclick="sa_AgregarDias('${b.id_nube}', 365)" class="bg-pink-900/20 text-pink-400 border border-pink-900/50 py-2 rounded-lg text-[10px] font-black btn-press">+1A</button>
                         </div>
+                        
+                        <div class="flex justify-between items-center bg-[#050505] p-3 rounded-xl border border-zinc-900 mb-2">
+                            <span class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Plan Actual:</span>
+                            <select onchange="sa_CambiarPlan('${b.id_nube}', this.value)" class="bg-zinc-800 text-white font-black text-[9px] p-2 rounded-lg uppercase outline-none cursor-pointer border border-zinc-700 focus:border-indigo-500">
+                                <option value="BASICO" ${b.plan === 'BASICO' ? 'selected' : ''}>BÁSICO (3 Barb)</option>
+                                <option value="PRO" ${(!b.plan || b.plan === 'PRO') ? 'selected' : ''}>PRO (6 Barb)</option>
+                                <option value="ELITE" ${b.plan === 'ELITE' ? 'selected' : ''}>ÉLITE (Ilimitado)</option>
+                            </select>
+                        </div>
+
                         <div class="flex justify-between items-center bg-[#050505] p-3 rounded-xl border border-zinc-900">
                             <span class="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Límite Barberos: <span class="text-white">${b.maxBarberos || 5}</span></span>
                             <div class="flex gap-2">
@@ -3233,6 +3274,11 @@
                             </div>
                         </div>
                     </div>
+
+
+
+
+
 
                     <div class="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-900">
                         <button type="button" onclick="sa_ForzarBloqueo('${b.id_nube}')" class="bg-red-900/20 text-red-500 py-3 rounded-xl text-[10px] font-black uppercase btn-press">${b.bloqueado ? "DESBLOQUEAR" : "FORZAR BLOQUEO"}</button>
@@ -3404,12 +3450,45 @@
         // ==========================================
         // 15. ISI IA Y PWA
         // ==========================================
+        // ==========================================
+        // 14.5 GESTIÓN DE PLANES (MASTER CONTROL)
+        // ==========================================
+        async function sa_CambiarPlan(idNube, nuevoPlan) {
+            if (!isOnline) return Swal.fire('Error', 'Sin conexión a internet', 'error');
+
+            Swal.fire({ title: 'Actualizando Plan...', didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
+            try {
+                const { data: store } = await supabaseClient.from('stores').select('*').eq('id', idNube).single();
+                let bSup = store.json_data; 
+                
+                bSup.plan = nuevoPlan;
+                
+                // Ajustamos el límite de barberos automáticamente según el plan
+                if(nuevoPlan === 'BASICO') bSup.maxBarberos = 3;
+                else if(nuevoPlan === 'PRO') bSup.maxBarberos = 6;
+                else if(nuevoPlan === 'ELITE') bSup.maxBarberos = 99; // Ilimitado
+
+                await supabaseClient.from('stores').update({ json_data: bSup }).eq('id', idNube);
+                db.barberias[db.barberias.findIndex(x => x.id_nube === idNube)] = bSup; 
+                saveDB(true); 
+                renderSuperAdmin();
+                
+                Swal.fire({title:'Plan Actualizado', text: `Cambiado a Plan ${nuevoPlan}`, icon:'success', toast:true, position:'top-end', timer:2000, showConfirmButton:false, background: '#0a0a0a', color: '#fff'});
+            } catch (e) { 
+                Swal.fire('Error', 'No se pudo contactar a la nube', 'error'); 
+            }
+        }
+
+        // ==========================================
+        // 15. ISI IA Y PWA
+        // ==========================================
         function abrirIsiIa() {
             const box = document.getElementById('box-isi-ia');
             box.style.display = 'flex';
             setTimeout(() => box.classList.add('show'), 10);
             renderIsiIaDashboard();
         }
+
         function cerrarIsiIa() {
             const box = document.getElementById('box-isi-ia');
             box.classList.remove('show');
@@ -3464,6 +3543,7 @@
             const ctnInstalar = document.getElementById('contenedor-instalar-pwa');
             if (ctnInstalar) {
                 ctnInstalar.classList.remove('hidden');
+                ctnInstalar.classList.add('flex');
             }
         });
 
@@ -3474,7 +3554,7 @@
                 const { outcome } = await eventoInstalacion.userChoice;
                 if (outcome === 'accepted') {
                     console.log('El usuario instaló la App');
-                    document.getElementById('btn-instalar-pwa').style.display = 'none';
+                    document.getElementById('contenedor-instalar-pwa').style.display = 'none';
                 }
                 eventoInstalacion = null;
             } else {
@@ -3546,4 +3626,5 @@
         });
     </script>
 </body>
-</html>    
+</html>
+        
