@@ -302,15 +302,27 @@
         }
 
         @media print {
-            #print-area {
-                display: block !important;
-                width: 100% !important;
-                margin: 0 auto;
-                padding: 2mm;
-                font-family: monospace;
+            body * {
+                visibility: hidden;
             }
-        }
-    </style>
+            #print-area, #print-area * {
+                visibility: visible;
+                color: #000 !important;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100% !important;
+                margin: 0;
+                padding: 0;
+                background: #fff !important;
+            }
+            /* Esconder modales oscuros forzosamente para que no manchen la hoja */
+            .fixed, #app-nav, #app-content, #splash-screen {
+                display: none !important;
+            }
+        }    </style>
 </head>
 
 <body>
@@ -2146,7 +2158,13 @@
         }
 
         function saveSession() { if (!isLocalStorageBlocked) try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ bIdx, session })); } catch (e) { } }
-        function actionLogout() { if (!isLocalStorageBlocked) try { sessionStorage.removeItem(SESSION_KEY); } catch (e) { } location.reload(); }
+        function actionLogout() { 
+            if (!isLocalStorageBlocked) {
+                try { sessionStorage.removeItem(SESSION_KEY); } catch (e) { } 
+            }
+            // Método infalible para salir en APKs:
+            window.location.replace(window.location.pathname); 
+        }
 
         function toggleAcc(idC, idI) { document.getElementById(idC).classList.toggle('hidden'); document.getElementById(idI).classList.toggle('rotate-180'); }
         function cerrarModales() { detenerAudio(); document.querySelectorAll('.fixed').forEach(m => { if (m.id !== 'splash-screen' && m.id !== 'offline-banner' && m.id !== 'pantalla-bloqueo') m.classList.add('hidden'); }); }
@@ -3009,15 +3027,23 @@
         }
 
         function procesarCierreMes() {
-            exportarPDF(); const b = db.barberias[bIdx];
-            if (!b.historialMensual) b.historialMensual = [];
-            const mesActual = new Date().toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
-            b.historialMensual.push({ mes: mesActual.toUpperCase(), fechaCierre: new Date().toISOString(), ventas: b.ventas || [], gastos: b.gastos || [], tickets: b.tickets || [] });
-            b.ventas = []; b.gastos = []; b.tickets = [];
-            saveDB(true); cerrarModales(); renderAdmin(); Swal.fire('Mes Archivado', 'Caja en 0. Reporte guardado y descargado.', 'success');
+            exportarPDF(); 
+            
+            // Le damos 2 segundos de respiro a la APK para que termine de crear y guardar el PDF
+            setTimeout(() => {
+                const b = db.barberias[bIdx];
+                if (!b.historialMensual) b.historialMensual = [];
+                const mesActual = new Date().toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+                
+                b.historialMensual.push({ mes: mesActual.toUpperCase(), fechaCierre: new Date().toISOString(), ventas: b.ventas || [], gastos: b.gastos || [], tickets: b.tickets || [] });
+                b.ventas = []; b.gastos = []; b.tickets = [];
+                
+                saveDB(true); 
+                cerrarModales(); 
+                renderAdmin(); 
+                Swal.fire('Mes Archivado', 'Caja en 0. El reporte se guardó en la carpeta "Descargas" de tu celular.', 'success');
+            }, 2000);
         }
-
-
 
         function exportarPDF() {
             try {
