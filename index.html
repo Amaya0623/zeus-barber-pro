@@ -2327,24 +2327,79 @@
             renderKioskoSlots();
         }
 
+
+
         function renderKioskoSlots() {
-            const b = db.barberias[kiosko_bIdx]; const d = document.getElementById('kio-fecha').value; const barb = document.getElementById('kio-barbero').value; const ctn = document.getElementById('kio-slots-container');
-            selectedKioTime = null;
-            if (!d || !barb) { ctn.innerHTML = '<p class="text-[10px] text-zinc-500 col-span-3 text-center py-2 italic">Selecciona fecha y barbero para ver horarios.</p>'; return; }
+            const fEl = document.getElementById('kio-fecha');
+            const bEl = document.getElementById('kio-barbero');
+            const ctn = document.getElementById('kio-slots-container');
+            if(!fEl || !bEl || !ctn) return;
 
-            const open = b.horaApertura || "09:00"; const close = b.horaCierre || "20:00"; const interval = parseInt(b.intervaloCitas) || 60;
-            let start = timeToMins(open); let end = timeToMins(close); let html = '';
+            const fecha = fEl.value;
+            const barbero = bEl.value;
+            ctn.innerHTML = '';
 
-            const bk = (b.citas || []).filter(c => c.barbero === barb && c.fecha === d && c.estado !== 'CANCELADA');
-            for (let t = start; t < end; t += interval) {
-                let h = Math.floor(t / 60); let m = t % 60; let tS = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                let t12 = formatTime12h(tS);
-                const isT = bk.some(c => Math.abs(t - timeToMins(c.hora)) < interval);
-                if (isT) { html += `<button type="button" disabled class="p-3 rounded-xl bg-red-900/20 border border-red-900/50 text-red-500 text-[11px] font-black cursor-not-allowed opacity-50 line-through">${t12}</button>`; }
-                else { html += `<button type="button" id="slot-${tS}" onclick="selectKioSlot('${tS}')" class="kio-slot-btn p-3 rounded-xl bg-[#111] border border-zinc-700 text-white text-[11px] font-black hover:bg-indigo-600 transition-colors btn-press">${t12}</button>`; }
+            if(!fecha || !barbero) {
+                ctn.innerHTML = '<p class="text-[10px] text-zinc-600 col-span-3 text-center py-2 italic">Selecciona fecha y barbero.</p>';
+                selectedKioTime = null;
+                return;
             }
-            ctn.innerHTML = html || '<p class="text-[10px] text-zinc-500 col-span-3 text-center py-2">Fuera de horario laboral.</p>';
+
+            const b = db.barberias[kiosko_bIdx];
+            
+            // 🚀 AQUÍ ESTÁ LA MAGIA: Buscamos las citas de ese día y ese barbero, PERO IGNORAMOS LAS CANCELADAS
+            const citasDia = (b.citas || []).filter(c => c.fecha === fecha && c.barbero === barbero && c.estado !== 'CANCELADA');
+
+            let act = timeToMins(b.horaApertura || "08:00");
+            const fin = timeToMins(b.horaCierre || "20:00");
+            const int = b.intervaloCitas || 60;
+
+            let html = '';
+            const ahora = new Date();
+            const esHoy = fecha === getTodayYMD();
+            const minAhora = ahora.getHours() * 60 + ahora.getMinutes();
+
+            while(act < fin) {
+                let h = Math.floor(act / 60); let m = act % 60;
+                let horaStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                
+                // Ocultamos las horas que ya pasaron si el cliente está agendando para "hoy mismo"
+                if (!(esHoy && act <= minAhora)) {
+                    
+                    // 🔍 VERIFICAMOS SI LA HORA ESTÁ OCUPADA
+                    let ocupado = citasDia.some(c => c.hora === horaStr);
+                    
+                    // Si NO está ocupada, dibujamos el botón para que el cliente la pueda elegir
+                    if (!ocupado) {
+                        html += `<button type="button" onclick="seleccionarHoraKio('${horaStr}', this)" class="kio-slot-btn p-3 rounded-xl border border-zinc-800 text-zinc-400 font-black text-xs hover:border-indigo-500 hover:text-indigo-400 transition-colors">${formatTime12h(horaStr)}</button>`;
+                    }
+                }
+                act += int;
+            }
+
+            // Si todos los horarios están ocupados o ya pasaron
+            if(html === '') {
+                html = '<p class="text-[10px] text-red-500 col-span-3 text-center py-2 font-bold uppercase tracking-widest">Agenda Llena 🚫</p>';
+            }
+            
+            ctn.innerHTML = html;
+            selectedKioTime = null;
         }
+
+        // Función auxiliar para que el botón de la hora cambie de color al tocarlo
+        function seleccionarHoraKio(hora, btn) {
+            selectedKioTime = hora;
+            document.querySelectorAll('.kio-slot-btn').forEach(b => {
+                b.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+                b.classList.add('border-zinc-800', 'text-zinc-400');
+            });
+            btn.classList.remove('border-zinc-800', 'text-zinc-400');
+            btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+        }
+
+
+
+
 
         function selectKioSlot(tS) {
             selectedKioTime = tS;
@@ -2887,8 +2942,10 @@
          // --- RECUPERAR BARBEROS Y SERVICIOS EN CONFIGURACIÓN ---
         function renderConfigLists() {
             const b = db.barberias[bIdx]; if(!b) return;
-            const listB = document.getElementById('cfg-list-barberos');
-            const listS = document.getElementById('cfg-list-servicios');
+            
+            // 🚀 CORRECCIÓN: Nombres exactos de las cajas de tu HTML
+            const listB = document.getElementById('cfg-lista-b');
+            const listS = document.getElementById('cfg-lista-s');
             
             // Renderizar Barberos
             if (listB) {
@@ -2896,7 +2953,7 @@
                 (b.barberos || []).forEach((barb, idx) => {
                     listB.innerHTML += `
                     <div class="flex justify-between items-center bg-[#050505] border border-zinc-800 p-3 rounded-xl mb-2">
-                        <span class="text-xs font-bold text-white uppercase">${barb.nombre || barb.nom}</span>
+                        <span class="text-xs font-bold text-white uppercase">${barb.nombre || barb.nom} <span class="text-zinc-500">(${barb.comision || 50}%)</span></span>
                         <div class="flex gap-2">
                             <button type="button" onclick="editarBarbero(${idx})" class="text-blue-400 hover:text-blue-300 font-bold text-[10px] uppercase">Editar</button>
                             <button type="button" onclick="db.barberias[bIdx].barberos.splice(${idx},1); saveDB(true); renderConfigLists()" class="text-red-500 hover:text-red-400 font-bold text-[10px] uppercase">Eliminar</button>
@@ -2914,7 +2971,7 @@
                     <div class="flex justify-between items-center bg-[#050505] border border-zinc-800 p-3 rounded-xl mb-2">
                         <div class="flex flex-col">
                             <span class="text-xs font-bold text-white uppercase">${serv.nombre || serv.nom} ${serv.esPremium || serv.premium ? '👑' : ''}</span>
-                            <span class="text-[10px] font-black text-green-400">${b.moneda || '$'} ${serv.precio || serv.pre}</span>
+                            <span class="text-[10px] font-black text-green-400">${fMoney(serv.precio || serv.pre)}</span>
                         </div>
                         <div class="flex gap-2 items-center">
                             <button type="button" onclick="editarServicio(${idx})" class="text-blue-400 hover:text-blue-300 font-bold text-[10px] uppercase">Editar</button>
@@ -2925,6 +2982,7 @@
                 listS.innerHTML = sListHtml || '<p class="text-zinc-500 text-[10px] uppercase tracking-widest text-center py-2">No hay servicios</p>';
             }
         }
+
 
         /// --- CONTROL DE PANTALLA COMPLETA ---
         function toggleFullScreenTV() {
@@ -3630,6 +3688,7 @@
 
             if (typeof actualizarSmartTVUI === 'function') actualizarSmartTVUI();
 
+            // Motor del reloj (cada 1 segundo)
             if (!window.relojTVInterval) {
                 window.relojTVInterval = setInterval(() => {
                     const hEl = document.getElementById('tv-reloj');
@@ -3641,6 +3700,25 @@
                         hEl.innerHTML = `${h12}:${m} <span class="text-xl sm:text-2xl text-zinc-500">${ampm}</span>`;
                     }
                 }, 1000);
+            }
+
+            // 🚀 NUEVO: MOTOR SILENCIOSO DE AUTO-REFRESCO PARA LA TV (CADA 10 SEGUNDOS)
+            if (!window.syncTVInterval) {
+                window.syncTVInterval = setInterval(async () => {
+                    if (navigator.onLine && typeof supabaseClient !== 'undefined' && db.barberias[bIdx]) {
+                        try {
+                            const b = db.barberias[bIdx];
+                            const { data, error } = await supabaseClient.from('stores').select('json_data').eq('id', b.id_nube || b.id).single();
+                            if (!error && data && data.json_data) {
+                                // Solo actualiza en memoria y refresca la pantalla, sin molestar
+                                db.barberias[bIdx] = { ...db.barberias[bIdx], ...data.json_data };
+                                if (typeof actualizarSmartTVUI === 'function') actualizarSmartTVUI();
+                            }
+                        } catch(e) {
+                            // Si el internet parpadea, no hace nada, vuelve a intentar en 10 seg.
+                        }
+                    }
+                }, 30000); // 10000 milisegundos = 10 segundos
             }
         }
 
@@ -3942,6 +4020,73 @@
             }
             if (typeof startClock === 'function') startClock();
         }
+        // ==========================================
+        // 17. SISTEMA DE NOTIFICACIONES Y PUNTOS ROJOS
+        // ==========================================
+        function actualizarBadgesCitas() {
+            if (typeof bIdx === 'undefined' || bIdx === -1 || !db.barberias[bIdx]) return;
+            const b = db.barberias[bIdx];
+            
+            // Obtenemos la fecha de hoy
+            const hoy = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            
+            // Contamos cuántas citas están PENDIENTES para hoy
+            const citasPendientes = (b.citas || []).filter(c => c.fecha === hoy && c.estado === 'PENDIENTE').length;
+            
+            const badgeMain = document.getElementById('badge-citas-main');
+            const badgeRow = document.getElementById('badge-citas-row');
+            
+            if (citasPendientes > 0) {
+                if (badgeMain) { badgeMain.innerText = citasPendientes; badgeMain.classList.remove('hidden'); }
+                if (badgeRow) { badgeRow.innerText = citasPendientes; badgeRow.classList.remove('hidden'); }
+            } else {
+                if (badgeMain) badgeMain.classList.add('hidden');
+                if (badgeRow) badgeRow.classList.add('hidden');
+            }
+        }
+
+        // Motor silencioso para el Administrador (Busca citas nuevas cada 10 segundos)
+        if (!window.notifCitasInterval) {
+            window.notifCitasInterval = setInterval(async () => {
+                // Solo si eres admin, tienes internet y tienes el panel abierto
+                if (typeof bIdx !== 'undefined' && bIdx > -1 && session && session.rol === 'admin' && isOnline && typeof supabaseClient !== 'undefined') {
+                    try {
+                        const b = db.barberias[bIdx];
+                        const { data, error } = await supabaseClient.from('stores').select('json_data').eq('id', b.id_nube || b.id).single();
+                        
+                        if (!error && data && data.json_data) {
+                            const citasNube = data.json_data.citas || [];
+                            const citasLocales = b.citas || [];
+                            const hoy = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                            
+                            const pendNube = citasNube.filter(c => c.fecha === hoy && c.estado === 'PENDIENTE').length;
+                            const pendLocal = citasLocales.filter(c => c.fecha === hoy && c.estado === 'PENDIENTE').length;
+                            
+                            // Si la nube tiene más citas pendientes que tu compu ¡Suena la alarma! 🔔
+                            if (pendNube > pendLocal) {
+                                const snd = document.getElementById('snd-alerta');
+                                if(snd) { snd.play().catch(e => console.log("Audio bloqueado por el navegador")); }
+                            }
+                            
+                            // Actualizamos la memoria silenciosamente
+                            db.barberias[bIdx].citas = citasNube;
+                            if (typeof saveDB === 'function') saveDB(false);
+                            
+                            // Si tienes abierta la agenda en la pantalla, la redibuja para que veas la nueva cita
+                            const vistaAgenda = document.getElementById('view-agenda');
+                            if (vistaAgenda && vistaAgenda.classList.contains('active') && typeof renderAgendaList === 'function') {
+                                renderAgendaList();
+                            }
+                        }
+                    } catch(e) { } // Si falla el internet un segundo, lo ignora y sigue
+                }
+                
+                // Siempre actualiza los botones rojos visualmente
+                actualizarBadgesCitas();
+            }, 30000); // 10000ms = 10 segundos
+        }
+
+
 
         // Ejecutar inmediatamente
         arrancarZeus();
