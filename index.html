@@ -3533,14 +3533,38 @@
         }
 
         function iniciarSmartTVDescentralizado() {
-            // 🚨 LIMPIEZA TOTAL
-            document.body.innerHTML = ''; 
+            // 🚀 SOLUCIÓN NUBE: En vez de destruir, solo ocultamos el panel
+            const ac = document.getElementById('app-content'); if(ac) ac.style.display = 'none';
+            const pb = document.getElementById('pantalla-bloqueo'); if(pb) pb.style.display = 'none';
+            let tvV = document.getElementById('view-smart-tv'); if(tvV) tvV.remove();
+
+            // 🔊 Función para desbloquear el audio en Tablets y Celulares
+            window.unlockAudioTV = function() {
+                const synth = window.speechSynthesis;
+                if (synth) { let msg = new SpeechSynthesisUtterance(''); msg.volume = 0; synth.speak(msg); }
+                const snd = document.getElementById('snd-alerta');
+                if(snd) { snd.play().then(() => snd.pause()).catch(()=>{}); }
+                
+                const unlockScreen = document.getElementById('tv-audio-unlock');
+                if(unlockScreen) {
+                    unlockScreen.style.opacity = '0';
+                    setTimeout(() => unlockScreen.style.display = 'none', 500);
+                }
+                
+                let elem = document.documentElement;
+                if (!document.fullscreenElement) { elem.requestFullscreen().catch(err => {}); }
+            };
 
             let tv = document.createElement('div');
             tv.id = 'view-smart-tv';
             tv.className = 'fixed inset-0 bg-[#050508] text-white flex flex-col z-[999999] overflow-hidden font-sans p-4 sm:p-5';
             
             tv.innerHTML = `
+                <div id="tv-audio-unlock" onclick="unlockAudioTV()" class="absolute inset-0 z-[9999999] bg-black/95 flex flex-col items-center justify-center cursor-pointer backdrop-blur-md transition-opacity duration-500">
+                    <span class="text-7xl mb-6 animate-pulse drop-shadow-[0_0_20px_rgba(6,182,212,0.8)]">🔊</span>
+                    <h2 class="text-3xl sm:text-5xl font-black text-white uppercase tracking-widest text-center">Toca la pantalla<br><span class="text-cyan-400 text-lg sm:text-2xl mt-4 block">Para activar la TV y el Sonido</span></h2>
+                </div>
+
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/10 via-[#050508] to-[#030305] pointer-events-none"></div>
                 
                 <div class="flex justify-between items-center mb-4 relative z-10 border-b border-zinc-800/50 pb-3">
@@ -3654,6 +3678,24 @@
                             </div>
                         </div>
 
+
+<div class="bg-indigo-900/10 border border-indigo-500/30 rounded-[1.5rem] p-3 flex flex-col shadow-[0_0_15px_rgba(99,102,241,0.15)] shrink-0 overflow-hidden min-h-[160px]">
+                            <div class="flex justify-between items-center mb-3 border-b border-indigo-900/50 pb-2">
+                                <div class="flex flex-col">
+                                    <p class="text-[7px] text-indigo-400 font-black uppercase tracking-widest">LIBERTAD DE PAGO</p>
+                                    <p class="text-[9px] font-black uppercase mt-0.5 leading-tight text-white">PAGA AQUÍ RÁPIDO Y SEGURO</p>
+                                </div>
+                                <span class="text-xs">🔒🌐</span>
+                            </div>
+                            <div id="tv-contenedor-pagos-dinamico" class="flex-1 grid gap-2 items-center justify-center text-center">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
                         <div class="bg-indigo-900/10 border border-indigo-500/30 rounded-[1.5rem] p-3 flex flex-col xl:flex-row items-center gap-3 shadow-[0_0_15px_rgba(99,102,241,0.15)] shrink-0 text-center xl:text-left">
                             <div class="bg-white p-1 rounded-xl shrink-0">
                                 <div id="tv-qr-pago" class="w-12 h-12 bg-gray-200 flex items-center justify-center text-[7px] text-black font-bold">QR</div>
@@ -3666,6 +3708,9 @@
                         </div>
                     </div>
                 </div>
+
+
+
 
                 <div class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-r from-[#020202] via-[#050505] to-[#020202] border-t border-indigo-900/50 flex justify-between items-center px-6 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.8)]">
                     <div class="flex items-center gap-3 h-full">
@@ -3702,7 +3747,7 @@
                 }, 1000);
             }
 
-            // 🚀 NUEVO: MOTOR SILENCIOSO DE AUTO-REFRESCO PARA LA TV (CADA 10 SEGUNDOS)
+            // 🚀 MOTOR SILENCIOSO DE AUTO-REFRESCO PARA LA TV (CADA 30 SEGUNDOS)
             if (!window.syncTVInterval) {
                 window.syncTVInterval = setInterval(async () => {
                     if (navigator.onLine && typeof supabaseClient !== 'undefined' && db.barberias[bIdx]) {
@@ -3710,17 +3755,14 @@
                             const b = db.barberias[bIdx];
                             const { data, error } = await supabaseClient.from('stores').select('json_data').eq('id', b.id_nube || b.id).single();
                             if (!error && data && data.json_data) {
-                                // Solo actualiza en memoria y refresca la pantalla, sin molestar
                                 db.barberias[bIdx] = { ...db.barberias[bIdx], ...data.json_data };
                                 if (typeof actualizarSmartTVUI === 'function') actualizarSmartTVUI();
                             }
-                        } catch(e) {
-                            // Si el internet parpadea, no hace nada, vuelve a intentar en 10 seg.
-                        }
+                        } catch(e) {}
                     }
-                }, 30000); // 10000 milisegundos = 10 segundos
+                }, 30000); 
             }
-        }
+        } // FIN DE LA FUNCIÓN iniciarSmartTVDescentralizado
 
         function actualizarSmartTVUI() {
             const b = db.barberias[bIdx]; if(!b) return;
@@ -3782,23 +3824,6 @@
             if(document.getElementById('tv-promo-title')) document.getElementById('tv-promo-title').innerText = (b.tvData && b.tvData.promoTitle) ? b.tvData.promoTitle : 'CORTES Y BARBA';
             if(document.getElementById('tv-promo-price')) document.getElementById('tv-promo-price').innerText = (b.tvData && b.tvData.promoPrice) ? b.tvData.promoPrice : '$0';
             if(document.getElementById('tv-promo-desc')) document.getElementById('tv-promo-desc').innerText = (b.tvData && b.tvData.promoDesc) ? b.tvData.promoDesc : 'Pregunta en recepción';
-
-            // QR DE PAGO (SOLUCIONADO TAMAÑO Y CONTENEDOR)
-            const qrPagoCtn = document.getElementById('tv-qr-pago');
-            const bancoText = document.getElementById('tv-banco-nombre');
-            if(qrPagoCtn && bancoText) {
-                qrPagoCtn.innerHTML = '';
-                if(b.qrImage) {
-                    qrPagoCtn.innerHTML = `<img src="${b.qrImage}" class="w-full h-full object-cover rounded-lg">`;
-                    bancoText.innerText = b.titularCuenta || "BANCO / NEQUI";
-                } else if(b.numeroCuenta) {
-                    new QRCode(qrPagoCtn, { text: b.numeroCuenta, width: 48, height: 48, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.L });
-                    bancoText.innerText = b.titularCuenta || "BANCO / NEQUI";
-                } else {
-                    qrPagoCtn.innerHTML = '<span class="text-xl opacity-20">💰</span>';
-                    bancoText.innerText = "EFECTIVO";
-                }
-            }
 
             // 🚀 REDES SOCIALES QR AUTOMÁTICOS
             const socialQRsCtn = document.getElementById('tv-social-qrs');
@@ -3874,8 +3899,43 @@
                 let kioLink = window.location.href.split('?')[0] + '?kiosk=' + (b.id_nube || b.id);
                 new QRCode(qrCtn, { text: kioLink, width: 80, height: 80, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.L });
             }
-        }
 
+            // 🚀 NUEVO MOTOR NEÓN DE PAGOS PARA LA TV
+            const ctnPagos = document.getElementById('tv-contenedor-pagos-dinamico');
+            if (b && ctnPagos) {
+                let tipo = b.bancoTipo || 'GENERICO';
+                let color = 'text-indigo-400'; let border = 'border-indigo-500/50'; let nombre = 'Transferencia';
+                
+                if (tipo === 'NEQUI') { color = 'text-[#ff00ff]'; border = 'border-[#ff00ff]/50'; nombre = 'Nequi'; }
+                if (tipo === 'DAVIPLATA') { color = 'text-[#ff0000]'; border = 'border-[#ff0000]/50'; nombre = 'Daviplata'; }
+                if (tipo === 'BANCOLOMBIA') { color = 'text-[#ffff00]'; border = 'border-[#ffff00]/50'; nombre = 'Bancolombia'; }
+
+                if (b.qrImage || b.numeroCuenta) {
+                    ctnPagos.innerHTML = `
+                        <div class="flex flex-col items-center justify-center p-2 bg-black/60 rounded-[1rem] border ${border} w-full shadow-[0_0_15px_currentColor] ${color}">
+                            <p class="text-[10px] font-black uppercase tracking-widest mb-2">${nombre}</p>
+                            <div class="bg-white p-1 rounded-xl w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center overflow-hidden relative shadow-lg">
+                                <div id="tv-qr-dinamico" class="w-full h-full flex items-center justify-center"></div>
+                            </div>
+                            <p class="text-[7px] text-zinc-300 mt-2 uppercase font-bold tracking-widest bg-white/10 px-2 py-0.5 rounded-full">${b.titularCuenta || 'Escanea para pagar'}</p>
+                        </div>
+                    `;
+
+                    setTimeout(() => {
+                        const qrBox = document.getElementById('tv-qr-dinamico');
+                        if (qrBox) {
+                            if (b.qrImage) {
+                                qrBox.innerHTML = `<img src="${b.qrImage}" class="w-full h-full object-contain">`;
+                            } else if (b.numeroCuenta) {
+                                new QRCode(qrBox, { text: b.numeroCuenta, width: 80, height: 80, colorDark: "#000", colorLight: "#fff", correctLevel: QRCode.CorrectLevel.L });
+                            }
+                        }
+                    }, 200);
+                } else {
+                    ctnPagos.innerHTML = '<p class="text-[9px] text-zinc-600 col-span-3 text-center py-2 italic">Configura tu pago en Ajustes</p>';
+                }
+            }
+        }
 
 
 
