@@ -4151,34 +4151,35 @@
          // ==========================================
         // 🛡️ TRAMPA ANTI-ESCAPE (BOTÓN ATRÁS DEL CELULAR)
         // ==========================================
+        // ==========================================
+        // 🛡️ TRAMPA ANTI-ESCAPE (VERSIÓN BLINDADA)
+        // ==========================================
         function activarTrampaBotonAtras() {
-            // Empujamos un estado "falso" al historial nada más abrir la app
+            // 1. Candado inicial por si acaso
             window.history.pushState({ noEscape: true }, null, window.location.href);
 
-            // Escuchamos si el usuario presiona el botón físico de "Atrás"
+            // 2. MAGIA: Apenas el usuario toque la pantalla 1 vez, aseguramos el candado
+            document.body.addEventListener('click', function() {
+                if (!window.history.state || !window.history.state.noEscape) {
+                    window.history.pushState({ noEscape: true }, null, window.location.href);
+                }
+            });
+
+            // 3. Cuando intentan usar el botón Atrás del celular
             window.addEventListener('popstate', function(event) {
-                // Volvemos a empujar el estado falso para que no se pueda salir
+                // Le devolvemos el candado a la fuerza
                 window.history.pushState({ noEscape: true }, null, window.location.href);
-                
-                // Opcional: Aquí podemos hacer que si presiona atrás, se cierren ventanas modales 
-                // o se regrese a la vista principal en lugar de salirse de la app.
                 
                 const panelKiosko = document.getElementById('view-kiosko');
                 const panelAdmin = document.getElementById('view-admin');
                 const panelAgenda = document.getElementById('view-agenda');
-                const panelLogin = document.getElementById('view-login');
 
-                // Si está en el kiosko y presiona atrás, que no pase NADA.
                 if (panelKiosko && panelKiosko.classList.contains('active')) {
                     console.log("Bloqueo de salida en Kiosko");
-                    return;
-                }
-
-                // Si está en alguna vista del admin, podemos regresarlo al dashboard
-                if (panelAgenda && panelAgenda.classList.contains('active')) {
+                } else if (panelAgenda && panelAgenda.classList.contains('active')) {
+                    // Si estaba en la agenda y le dio atrás, lo mandamos al inicio del admin
                     if (typeof showView === 'function') showView('view-admin');
                 } else if (panelAdmin && panelAdmin.classList.contains('active')) {
-                    // Si ya está en el dashboard del admin, lo mantenemos ahí
                     console.log("Bloqueo de salida en Admin");
                 }
             });
