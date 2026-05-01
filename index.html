@@ -8,6 +8,9 @@
     <link rel="apple-touch-icon" href="icono.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZEUS BARBER PRO - Cloud Edition ☁️</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -4145,6 +4148,80 @@
                 actualizarBadgesCitas();
             }, 30000); // 10000ms = 10 segundos
         }
+         // ==========================================
+        // 🛡️ TRAMPA ANTI-ESCAPE (BOTÓN ATRÁS DEL CELULAR)
+        // ==========================================
+        function activarTrampaBotonAtras() {
+            // Empujamos un estado "falso" al historial nada más abrir la app
+            window.history.pushState({ noEscape: true }, null, window.location.href);
+
+            // Escuchamos si el usuario presiona el botón físico de "Atrás"
+            window.addEventListener('popstate', function(event) {
+                // Volvemos a empujar el estado falso para que no se pueda salir
+                window.history.pushState({ noEscape: true }, null, window.location.href);
+                
+                // Opcional: Aquí podemos hacer que si presiona atrás, se cierren ventanas modales 
+                // o se regrese a la vista principal en lugar de salirse de la app.
+                
+                const panelKiosko = document.getElementById('view-kiosko');
+                const panelAdmin = document.getElementById('view-admin');
+                const panelAgenda = document.getElementById('view-agenda');
+                const panelLogin = document.getElementById('view-login');
+
+                // Si está en el kiosko y presiona atrás, que no pase NADA.
+                if (panelKiosko && panelKiosko.classList.contains('active')) {
+                    console.log("Bloqueo de salida en Kiosko");
+                    return;
+                }
+
+                // Si está en alguna vista del admin, podemos regresarlo al dashboard
+                if (panelAgenda && panelAgenda.classList.contains('active')) {
+                    if (typeof showView === 'function') showView('view-admin');
+                } else if (panelAdmin && panelAdmin.classList.contains('active')) {
+                    // Si ya está en el dashboard del admin, lo mantenemos ahí
+                    console.log("Bloqueo de salida en Admin");
+                }
+            });
+        }
+
+        // Activamos la trampa cuando cargue la página
+        window.addEventListener('load', activarTrampaBotonAtras);
+         // ==========================================
+        // 🔄 VIGILANTE DE ACTUALIZACIONES AUTOMÁTICAS
+        // ==========================================
+        function activarVigilanteActualizaciones() {
+            // 1. Forzar recarga si el Service Worker detecta cambios (PWA)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.onupdatefound = () => {
+                            const installingWorker = registration.installing;
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log("¡Nueva versión de Zeus detectada! Actualizando en silencio...");
+                                    // Forzamos la actualización de la página limpiando la caché
+                                    setTimeout(() => window.location.reload(true), 1500);
+                                }
+                            };
+                        };
+                    }
+                });
+            }
+
+            // 2. Comprobador de versión cada vez que el cliente vuelve a abrir la app (después de minimizarla)
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') {
+                    // Si el usuario regresa a la app, verificamos si hay internet. 
+                    // Si lo hay, le damos un micro-refresco invisible para asegurar datos frescos.
+                    if (navigator.onLine && typeof actualizarBadgesCitas === 'function') {
+                        actualizarBadgesCitas();
+                    }
+                }
+            });
+        }
+
+        // Encendemos el vigilante al iniciar
+        window.addEventListener('load', activarVigilanteActualizaciones);
 
 
 
