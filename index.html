@@ -511,6 +511,10 @@
                         <button type="button" onclick="toggleAcc('acc-personal', 'icon-personal')" class="w-full flex justify-between items-center p-6 text-left hover:bg-white/5 transition-colors btn-press">
                             <span class="text-[11px] font-black text-zinc-300 uppercase tracking-widest flex items-center gap-2"><span class="text-lg">💈</span> Personal y Servicios</span><span id="icon-personal" class="text-zinc-500 font-black transition-transform duration-300">▼</span>
                         </button>
+
+
+
+
                         <div id="acc-personal" class="hidden px-6 pb-6 border-t border-zinc-800/50 pt-5">
                             <div class="col-span-12 mb-4 p-4 rounded-xl border border-zinc-800 bg-[#111]">
                                 <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3">⏳ Horarios</p>
@@ -544,11 +548,18 @@
                                             <input type="file" id="add-b-foto" class="hidden" accept="image/*" onchange="previewFotoBarbero(this)">
                                             <input type="text" id="add-b-nom" placeholder="NOMBRE BARBERO" class="w-full bg-transparent text-xs font-bold uppercase text-white outline-none">
                                         </div>
+
+
                                         <div class="grid grid-cols-12 gap-2">
-                                            <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" class="col-span-5 p-3 text-[10px] sm:text-xs rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 w-full text-white outline-none focus:border-indigo-500">
-                                            <input type="text" inputmode="numeric" id="add-b-comision" placeholder="%" class="col-span-4 p-3 text-[10px] sm:text-xs rounded-xl font-bold text-center text-indigo-400 bg-[#050505] border border-zinc-800 w-full outline-none focus:border-indigo-500">
-                                            <button type="button" onclick="configAddBarbero()" class="col-span-3 bg-indigo-600 text-white rounded-xl font-black btn-press transition-colors">+</button>
-                                        </div>
+    <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" class="col-span-4 p-3 text-[10px] rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 w-full text-white outline-none focus:border-indigo-500">
+    <input type="text" inputmode="numeric" id="add-b-comision" placeholder="%" class="col-span-3 p-3 text-[10px] rounded-xl font-bold text-center text-indigo-400 bg-[#050505] border border-zinc-800 w-full outline-none focus:border-indigo-500">
+    <div class="col-span-5 flex gap-1">
+        <input type="time" id="add-b-inicio" title="Hora Inicio" class="p-2 text-[9px] rounded-lg bg-zinc-900 border border-zinc-800 text-white w-full">
+        <input type="time" id="add-b-fin" title="Hora Fin" class="p-2 text-[9px] rounded-lg bg-zinc-900 border border-zinc-800 text-white w-full">
+    </div>
+    <button type="button" onclick="configAddBarbero()" class="col-span-12 bg-indigo-600 text-white py-3 rounded-xl font-black uppercase text-[10px] btn-press transition-colors mt-1">GUARDAR BARBERO 👤</button>
+</div>
+
                                     </div>
                                     <div id="cfg-lista-b" class="space-y-2 max-h-48 overflow-y-auto pr-1 scroll-safe"></div>
                                 </div>
@@ -1825,8 +1836,21 @@
             const iBox = document.getElementById('admin-iva-recaudado');
             if (iBox) { if (iA && totalIva > 0) { iBox.innerText = `IMPUESTO Recaudado: ${fMoney(totalIva)}`; iBox.classList.remove('hidden'); } else { iBox.classList.add('hidden'); } }
 
+
+
+            // 🚀 ACTUALIZACIÓN DE MÉTRICAS INTELIGENTES
             document.getElementById('metric-total-clientes').innerText = Object.keys(b.clientes || {}).length;
-            document.getElementById('metric-atendidos-hoy').innerText = ventasHoy.filter(v => !v.esProducto).length;
+            
+            // Cuenta las citas que ya se marcaron como LISTO ✔
+            const citasListas = (b.citas || []).filter(c => c.fecha === hoyYMD && c.estado === 'COMPLETADA').length;
+            // Cuenta los cortes que se cobraron en el Punto de Venta
+            const cortesPagados = ventasHoy.filter(v => !v.esProducto).length;
+            
+            // Muestra el número mayor para que siempre se vea reflejado el trabajo
+            document.getElementById('metric-atendidos-hoy').innerText = Math.max(citasListas, cortesPagados);
+
+
+
 
             document.getElementById('admin-nomina').innerHTML = (b.barberos || []).map(bar => {
                 const cB = bar.comision !== undefined ? bar.comision : 50;
@@ -2098,7 +2122,9 @@
             }
         }
 
-        function guardarCita() {
+
+
+       function guardarCita() {
             const f = document.getElementById('agenda-fecha').value; const h = document.getElementById('agenda-hora').value;
             const cli = cleanStr(document.getElementById('agenda-cli').value).toUpperCase(); const cel = cleanNum(document.getElementById('agenda-cel').value);
             const barb = document.getElementById('agenda-barbero').value;
@@ -2115,9 +2141,24 @@
             if (!b.citas) b.citas = [];
             b.citas.push({ id: Date.now().toString(), nombre: cli, celular: cel, barbero: barb, servicio: tempServicios.join(' + '), fecha: f, hora: h, estado: 'PENDIENTE' });
 
-            saveDB(true); document.getElementById('agenda-cli').value = ""; document.getElementById('agenda-cel').value = ""; tempServicios = []; renderServiciosTemp('agenda');
-            renderAgendaList(); renderAdmin(); Swal.fire({ title: '¡Cita Guardada!', icon: 'success', background: '#0a0a0a', color: '#fff', timer: 1500 });
+            // 🚀 NUEVA MAGIA: Agregamos al cliente al directorio automáticamente
+            const idCli = cel || cli;
+            if (!b.clientes) b.clientes = {};
+            if (!b.clientes[idCli]) b.clientes[idCli] = { nombre: cli, celular: cel, pts: 0, visitas: 0 };
+
+            saveDB(true); 
+            document.getElementById('agenda-cli').value = ""; document.getElementById('agenda-cel').value = ""; tempServicios = []; renderServiciosTemp('agenda');
+            
+            // Refrescamos todo para que los números suban de inmediato
+            renderAgendaList(); 
+            renderAdmin(); 
+            actualizarBadgesCitas();
+            
+            Swal.fire({ title: '¡Cita Guardada!', icon: 'success', background: '#0a0a0a', color: '#fff', timer: 1500 });
         }
+
+
+
 
         function completarCita(id) {
             const c = db.barberias[bIdx].citas.find(x => x.id === id);
@@ -2130,6 +2171,9 @@
                 }
             });
         }
+
+
+
 
         function borrarCita(id) {
             const b = db.barberias[bIdx]; const c = b.citas.find(x => x.id === id); if (!c) return;
@@ -2353,10 +2397,16 @@
             // 🚀 AQUÍ ESTÁ LA MAGIA: Buscamos las citas de ese día y ese barbero, PERO IGNORAMOS LAS CANCELADAS
             const citasDia = (b.citas || []).filter(c => c.fecha === fecha && c.barbero === barbero && c.estado !== 'CANCELADA');
 
-            let act = timeToMins(b.horaApertura || "08:00");
-            const fin = timeToMins(b.horaCierre || "20:00");
-            const int = b.intervaloCitas || 60;
+            // 🚀 LÓGICA DE HORARIOS POR BARBERO
+            const barberoInfo = b.barberos.find(x => x.nom === barbero);
+            
+            // Si el barbero tiene horario propio lo usamos, si no, usamos el del local
+            let hEntrada = (barberoInfo && barberoInfo.horaInicio) ? barberoInfo.horaInicio : (b.horaApertura || "08:00");
+            let hSalida = (barberoInfo && barberoInfo.horaFin) ? barberoInfo.horaFin : (b.horaCierre || "20:00");
 
+            let act = timeToMins(hEntrada);
+            const fin = timeToMins(hSalida);
+            const int = b.intervaloCitas || 60; // Mantenemos el intervalo de tiempo intacto
             let html = '';
             const ahora = new Date();
             const esHoy = fecha === getTodayYMD();
@@ -3017,21 +3067,50 @@
 
 
         function editarBarbero(i) {
-            const b = db.barberias[bIdx].barberos[i]; document.getElementById('edit-b-id').value = i; document.getElementById('add-b-nom').value = b.nom; document.getElementById('add-b-pin').value = b.pin; document.getElementById('add-b-comision').value = b.comision;
-            if (b.foto) { fotoBarberoTemp = b.foto; const preview = document.getElementById('preview-b-foto'); preview.src = b.foto; preview.classList.remove('hidden'); document.getElementById('icon-b-foto').classList.add('hidden'); }
-        }
+    const b = db.barberias[bIdx].barberos[i];
+    document.getElementById('edit-b-id').value = i;
+    document.getElementById('add-b-nom').value = b.nom;
+    document.getElementById('add-b-pin').value = b.pin;
+    document.getElementById('add-b-comision').value = b.comision;
+    document.getElementById('add-b-inicio').value = b.horaInicio || "08:00";
+    document.getElementById('add-b-fin').value = b.horaFin || "20:00";
+
+    if (b.foto) {
+        fotoBarberoTemp = b.foto;
+        const preview = document.getElementById('preview-b-foto');
+        preview.src = b.foto;
+        preview.classList.remove('hidden');
+        document.getElementById('icon-b-foto').classList.add('hidden');
+    }
+}
+
+
 
         function configAddBarbero() {
-            const idXEl = document.getElementById('edit-b-id'); const idX = idXEl.value;
-            const nEl = document.getElementById('add-b-nom'); const n = cleanStr(nEl.value).toUpperCase();
-            const pEl = document.getElementById('add-b-pin'); const p = cleanNum(pEl.value);
-            const cEl = document.getElementById('add-b-comision'); let c = parseInt(cleanNum(cEl.value)) || 50;
-            if (!n || esPinInseguro(p)) return Swal.fire('Error', 'PIN inseguro o faltan datos', 'error');
-            if (idX !== "") { db.barberias[bIdx].barberos[idX] = { ...db.barberias[bIdx].barberos[idX], nom: n, pin: p, comision: c, foto: fotoBarberoTemp }; } else { db.barberias[bIdx].barberos.push({ nom: n, pin: p, comision: c, estado: 'LIBRE', foto: fotoBarberoTemp }); }
-            saveDB(true);
-            idXEl.value = ""; nEl.value = ""; pEl.value = ""; cEl.value = ""; fotoBarberoTemp = null; document.getElementById('preview-b-foto').classList.add('hidden'); document.getElementById('icon-b-foto').classList.remove('hidden'); renderConfigLists();
-        }
+    const idXEl = document.getElementById('edit-b-id'); const idX = idXEl.value;
+    const nEl = document.getElementById('add-b-nom'); const n = cleanStr(nEl.value).toUpperCase();
+    const pEl = document.getElementById('add-b-pin'); const p = cleanNum(pEl.value);
+    const cEl = document.getElementById('add-b-comision'); let c = parseInt(cleanNum(cEl.value)) || 50;
+    
+    // Capturamos las horas
+    const hInicio = document.getElementById('add-b-inicio').value || "08:00";
+    const hFin = document.getElementById('add-b-fin').value || "20:00";
 
+    if (!n || esPinInseguro(p)) return Swal.fire('Error', 'PIN inseguro o faltan datos', 'error');
+
+    if (idX !== "") { 
+        db.barberias[bIdx].barberos[idX] = { ...db.barberias[bIdx].barberos[idX], nom: n, pin: p, comision: c, foto: fotoBarberoTemp, horaInicio: hInicio, horaFin: hFin }; 
+    } else { 
+        db.barberias[bIdx].barberos.push({ nom: n, pin: p, comision: c, estado: 'LIBRE', foto: fotoBarberoTemp, horaInicio: hInicio, horaFin: hFin }); 
+    }
+
+    saveDB(true);
+    // Limpiamos todo
+    idXEl.value = ""; nEl.value = ""; pEl.value = ""; cEl.value = ""; 
+    document.getElementById('add-b-inicio').value = ""; document.getElementById('add-b-fin').value = "";
+    fotoBarberoTemp = null; document.getElementById('preview-b-foto').classList.add('hidden'); document.getElementById('icon-b-foto').classList.remove('hidden'); 
+    renderConfigLists();
+}
         function editarServicio(i) {
             const s = db.barberias[bIdx].servicios[i]; document.getElementById('edit-s-id').value = i; document.getElementById('add-s-nom').value = s.nom; document.getElementById('add-s-pre').value = s.pre;
             const premEl = document.getElementById('add-s-premium'); if (premEl) premEl.checked = s.premium || false;
@@ -3560,7 +3639,7 @@
 
             let tv = document.createElement('div');
             tv.id = 'view-smart-tv';
-            tv.className = 'fixed inset-0 bg-[#050508] text-white flex flex-col z-[999999] overflow-hidden font-sans p-4 sm:p-5';
+            tv.className = 'fixed inset-0 w-screen h-screen bg-[#050508] text-white flex flex-col z-[999999] overflow-hidden font-sans p-2 sm:p-4 max-w-none';
             
             tv.innerHTML = `
                 <div id="tv-audio-unlock" onclick="unlockAudioTV()" class="absolute inset-0 z-[9999999] bg-black/95 flex flex-col items-center justify-center cursor-pointer backdrop-blur-md transition-opacity duration-500">
@@ -3763,7 +3842,7 @@
                             }
                         } catch(e) {}
                     }
-                }, 30000); 
+                }, 5000); 
             }
         } // FIN DE LA FUNCIÓN iniciarSmartTVDescentralizado
 
@@ -3941,14 +4020,6 @@
         }
 
 
-
-
-
-
-
-
-
-
         function toggleFullScreenTV() {
             let elem = document.documentElement;
             if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
@@ -4083,6 +4154,7 @@
             }
             if (typeof startClock === 'function') startClock();
         }
+        
         // ==========================================
         // 17. SISTEMA DE NOTIFICACIONES Y PUNTOS ROJOS
         // ==========================================
@@ -4146,11 +4218,9 @@
                 
                 // Siempre actualiza los botones rojos visualmente
                 actualizarBadgesCitas();
-            }, 30000); // 10000ms = 10 segundos
+            }, 5000); // 10000ms = 10 segundos
         }
-         // ==========================================
-        // 🛡️ TRAMPA ANTI-ESCAPE (BOTÓN ATRÁS DEL CELULAR)
-        // ==========================================
+
         // ==========================================
         // 🛡️ TRAMPA ANTI-ESCAPE (VERSIÓN BLINDADA)
         // ==========================================
@@ -4223,7 +4293,30 @@
 
         // Encendemos el vigilante al iniciar
         window.addEventListener('load', activarVigilanteActualizaciones);
-
+// 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES
+function comprobarVersionNube() {
+    // Definimos la versión actual de nuestro código (¡Cámbiala cada vez que subas a GitHub!)
+    const VERSION_ACTUAL = "1.5"; 
+    
+    const versionGuardada = localStorage.getItem('zeus_version');
+    
+    if (versionGuardada !== VERSION_ACTUAL) {
+        console.log("¡Actualización detectada! Limpiando caché en silencio...");
+        localStorage.setItem('zeus_version', VERSION_ACTUAL);
+        
+        // Vaciamos cachés del navegador a la fuerza
+        if ('caches' in window) {
+            caches.keys().then((names) => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+        
+        // Recargamos la página forzando traer los archivos frescos de GitHub
+        setTimeout(() => { window.location.reload(true); }, 500);
+    }
+}
+// Ejecutamos esto apenas se abra la página
+comprobarVersionNube();
 
 
         // Ejecutar inmediatamente
