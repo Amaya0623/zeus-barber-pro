@@ -3620,10 +3620,15 @@
             const pb = document.getElementById('pantalla-bloqueo'); if(pb) pb.style.display = 'none';
             let tvV = document.getElementById('view-smart-tv'); if(tvV) tvV.remove();
 
-            // 🔊 Función para desbloquear el audio en Tablets y Celulares
+           // 🔊 Función para desbloquear el audio en Tablets y Celulares
             window.unlockAudioTV = function() {
                 const synth = window.speechSynthesis;
-                if (synth) { let msg = new SpeechSynthesisUtterance(''); msg.volume = 0; synth.speak(msg); }
+                if (synth) { 
+                    synth.cancel(); // 🚀 MAGIA: Destraba el motor de voz
+                    let msg = new SpeechSynthesisUtterance(' '); 
+                    msg.volume = 0; 
+                    synth.speak(msg); 
+                }
                 const snd = document.getElementById('snd-alerta');
                 if(snd) { snd.play().then(() => snd.pause()).catch(()=>{}); }
                 
@@ -3636,6 +3641,8 @@
                 let elem = document.documentElement;
                 if (!document.fullscreenElement) { elem.requestFullscreen().catch(err => {}); }
             };
+
+
 
             let tv = document.createElement('div');
             tv.id = 'view-smart-tv';
@@ -3679,7 +3686,7 @@
                     </div>
                 </div>
 
-                <div class="flex flex-row flex-1 gap-3 sm:gap-5 relative z-10 overflow-hidden min-h-0 pb-10">
+                <div class="flex flex-row w-full flex-1 gap-3 sm:gap-5 relative z-10 overflow-hidden min-h-0 pb-20">
                     
                     <div class="w-[30%] lg:w-[25%] flex flex-col gap-3 sm:gap-4 min-h-0">
                         <div class="flex-1 bg-black/40 border border-indigo-500/20 rounded-[1.5rem] p-3 sm:p-4 flex flex-col shadow-[0_0_20px_rgba(99,102,241,0.05)] min-h-0">
@@ -3848,6 +3855,12 @@
 
         function actualizarSmartTVUI() {
             const b = db.barberias[bIdx]; if(!b) return;
+            
+            // 🚀 LIMPIEZA INICIAL: Si no hay internet o está cargando, no mostramos fantasmas
+            if (b.citas && b.citas.length > 0 && !navigator.onLine) {
+                console.log("Cargando caché local...");
+            }
+
             const hoy = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
             const citasHoy = (b.citas || []).filter(c => c.fecha === hoy && c.estado !== 'CANCELADA' && c.estado !== 'COMPLETADA').sort((a,b) => a.hora.localeCompare(b.hora));
             
@@ -4020,6 +4033,14 @@
         }
 
 
+
+
+
+
+
+
+
+
         function toggleFullScreenTV() {
             let elem = document.documentElement;
             if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
@@ -4154,7 +4175,6 @@
             }
             if (typeof startClock === 'function') startClock();
         }
-        
         // ==========================================
         // 17. SISTEMA DE NOTIFICACIONES Y PUNTOS ROJOS
         // ==========================================
@@ -4221,6 +4241,8 @@
             }, 5000); // 10000ms = 10 segundos
         }
 
+
+
         // ==========================================
         // 🛡️ TRAMPA ANTI-ESCAPE (VERSIÓN BLINDADA)
         // ==========================================
@@ -4254,6 +4276,11 @@
                 }
             });
         }
+
+
+
+
+
 
         // Activamos la trampa cuando cargue la página
         window.addEventListener('load', activarTrampaBotonAtras);
@@ -4291,31 +4318,41 @@
             });
         }
 
-        // Encendemos el vigilante al iniciar
-        window.addEventListener('load', activarVigilanteActualizaciones);
-// 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES
-function comprobarVersionNube() {
-    // Definimos la versión actual de nuestro código (¡Cámbiala cada vez que subas a GitHub!)
-    const VERSION_ACTUAL = "1.5"; 
+
+
+        // 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES
+       function comprobarVersionNube() {
+    // ⚠️ CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS ALGO A GITHUB (Ej: 1.6, 1.7, 1.8)
+    const VERSION_ACTUAL = "1.6"; 
     
     const versionGuardada = localStorage.getItem('zeus_version');
     
     if (versionGuardada !== VERSION_ACTUAL) {
-        console.log("¡Actualización detectada! Limpiando caché en silencio...");
+        console.log("¡Actualización detectada! Destruyendo caché...");
         localStorage.setItem('zeus_version', VERSION_ACTUAL);
         
-        // Vaciamos cachés del navegador a la fuerza
+        // 1. Matamos los Service Workers (La PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+
+        // 2. Vaciamos cachés profundos del navegador
         if ('caches' in window) {
             caches.keys().then((names) => {
                 names.forEach(name => caches.delete(name));
             });
         }
         
-        // Recargamos la página forzando traer los archivos frescos de GitHub
-        setTimeout(() => { window.location.reload(true); }, 500);
+        // 3. Forzamos recarga desde el servidor (no desde memoria)
+        setTimeout(() => { 
+            window.location.href = window.location.href.split('?')[0] + "?v=" + new Date().getTime(); 
+        }, 1000);
     }
 }
-// Ejecutamos esto apenas se abra la página
 comprobarVersionNube();
 
 
