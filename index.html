@@ -591,7 +591,7 @@
 
 
 
-                            <div class="bg-indigo-900/10 p-6 rounded-[1.5rem] border border-indigo-900/30">
+                            </div><div class="bg-indigo-900/10 p-6 rounded-[1.5rem] border border-indigo-900/30">
                                 <p class="text-[10px] font-black text-indigo-400 mb-4 uppercase tracking-widest">💳 Datos para QR en POS y TV</p>
                                 
                                 <div class="mb-4">
@@ -3216,6 +3216,11 @@
 
         function forzarAccesoAdmin(idx) { bIdx = idx; session = { rol: 'admin', nom: 'SUPERADMIN' }; saveDB(true); saveSession(); showScreen('view-admin'); }
 
+
+
+
+
+
         async function saCrearBarberia() {
             const n = document.getElementById('sa-nombre').value.trim().toUpperCase(); const p = cleanNum(document.getElementById('sa-pin').value);
             if (!n || esPinInseguro(p)) return Swal.fire('Error', 'Nombre vacío o PIN inseguro (muy fácil)', 'error');
@@ -3229,6 +3234,52 @@
                 saveDB(true); renderSuperAdmin(); Swal.fire('Éxito', '', 'success');
             } catch (e) { Swal.fire('Error', e.message, 'error'); }
         }
+
+         // ==========================================
+        // 📸 FUNCIONES DE BRANDING GLOBAL Y LOGO (MASTER CONTROL)
+        // ==========================================
+        function saSubirLogo(input) {
+            if (input.files && input.files[0]) {
+                Swal.fire({ title: 'Procesando...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
+                
+                // Usamos tu compresor que es 100% compatible con iPhone/Safari
+                compressImage(input.files[0], 400, (comp) => {
+                    saLogoTemp = comp; // Guardamos en la variable temporal
+                    const logoBox = document.getElementById('sa-logo-box');
+                    if (logoBox) {
+                        logoBox.innerHTML = `<img src="${comp}" class="w-full h-full object-cover absolute inset-0 rounded-[1rem]"><span class="relative z-10 text-[8px] bg-black/70 font-bold px-1.5 py-0.5 rounded text-green-400">LISTO</span>`;
+                    }
+                    Swal.close();
+                });
+            }
+        }
+
+        function saGuardarLogo() {
+            if (!saLogoTemp) return Swal.fire({title: 'Aviso', text: 'Toca el cuadro y sube una foto primero.', icon: 'warning', background: '#0a0a0a', color: '#fff'});
+            
+            db.mainLogo = saLogoTemp;
+            saveDB(true); // Forzamos subida a la nube
+            
+            Swal.fire({ title: '¡Logo Maestro Guardado!', text: 'Este logo aparecerá en el inicio de los locales que no tengan logo propio.', icon: 'success', background: '#0a0a0a', color: '#fff', timer: 2000 });
+        }
+
+        function saGuardarBranding() {
+            const activo = document.getElementById('sa-brand-activo').checked;
+            const texto = document.getElementById('sa-brand-text').value.trim();
+            
+            if (!db.masterConfig) db.masterConfig = {};
+            db.masterConfig.brandingActive = activo;
+            db.masterConfig.brandingText = texto;
+            
+            saveDB(true);
+            Swal.fire({ title: '¡Textos Guardados!', icon: 'success', background: '#0a0a0a', color: '#fff', timer: 1500 });
+        }
+
+
+
+
+
+
 
         async function saSincronizarNube() {
             if (!isOnline) return Swal.fire('Error', 'Sin conexión a internet.', 'error');
@@ -4323,7 +4374,7 @@
         // 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES
        function comprobarVersionNube() {
     // ⚠️ CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS ALGO A GITHUB (Ej: 1.6, 1.7, 1.8)
-    const VERSION_ACTUAL = "1.6"; 
+    const VERSION_ACTUAL = "1.7"; 
     
     const versionGuardada = localStorage.getItem('zeus_version');
     
