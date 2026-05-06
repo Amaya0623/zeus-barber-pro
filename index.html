@@ -2359,6 +2359,7 @@
         }
 
 
+
         function renderSemaforoKiosko() {
             const b = db.barberias[kiosko_bIdx];
             const barberosActivos = (b.barberos || []).filter(barb => barb.estado !== 'ALMUERZO' && barb.estado !== 'DESCANSO');
@@ -2379,6 +2380,8 @@
             let prevS = document.getElementById('kio-servicio').value; document.getElementById('kio-servicio').innerHTML = '<option value="">-- ELIGE UN SERVICIO --</option>' + (b.servicios || []).map(s => `<option value="${s.nom}">${s.premium ? '👑 ' : ''}${s.nom} - ${fMoney(s.pre)}</option>`).join(''); document.getElementById('kio-servicio').value = prevS;
             renderKioskoSlots();
         }
+
+
 
         function renderKioskoSlots() {
             const fEl = document.getElementById('kio-fecha');
@@ -2844,6 +2847,15 @@
         }
 
 
+
+
+
+
+
+
+
+
+
        // --- CEREBRO PARA CARGAR LA CONFIGURACIÓN (A PRUEBA DE ERRORES) ---
        function renderConfig() {
             const b = db.barberias[bIdx]; if(!b) return;
@@ -3079,6 +3091,8 @@
     }
 }
 
+
+
         function configAddBarbero() {
     const idXEl = document.getElementById('edit-b-id'); const idX = idXEl.value;
     const nEl = document.getElementById('add-b-nom'); const n = cleanStr(nEl.value).toUpperCase();
@@ -3162,6 +3176,10 @@
                     
                     <button type="button" onclick="forzarAccesoAdmin(${i})" class="w-full bg-indigo-600 text-white py-4 rounded-xl text-xs font-black uppercase mb-4 btn-press shadow-lg shadow-indigo-600/20">INGRESAR COMO DUEÑO</button>
 
+
+
+
+                    
                     <div class="bg-black/50 p-4 rounded-2xl border border-zinc-800 mb-4">
                         <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Agencias Tiempo (Cobro)</p>
                         <div class="grid grid-cols-4 gap-2 mb-3">
@@ -3188,6 +3206,12 @@
                             </div>
                         </div>
                     </div>
+
+
+
+
+
+
                     <div class="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-900">
                         <button type="button" onclick="sa_ForzarBloqueo('${b.id_nube}')" class="bg-red-900/20 text-red-500 py-3 rounded-xl text-[10px] font-black uppercase btn-press">${b.bloqueado ? "DESBLOQUEAR" : "FORZAR BLOQUEO"}</button>
                         <button type="button" onclick="sa_BorrarInstancia('${b.id_nube}')" class="bg-black text-zinc-500 border border-red-900/50 py-3 rounded-xl text-[10px] font-black uppercase btn-press hover:bg-red-600 hover:text-white transition-colors">BORRAR INSTANCIA</button>
@@ -3198,6 +3222,12 @@
         }
 
         function forzarAccesoAdmin(idx) { bIdx = idx; session = { rol: 'admin', nom: 'SUPERADMIN' }; saveDB(true); saveSession(); showScreen('view-admin'); }
+
+
+
+
+
+
         async function saCrearBarberia() {
             const n = document.getElementById('sa-nombre').value.trim().toUpperCase(); const p = cleanNum(document.getElementById('sa-pin').value);
             if (!n || esPinInseguro(p)) return Swal.fire('Error', 'Nombre vacío o PIN inseguro (muy fácil)', 'error');
@@ -3517,12 +3547,16 @@
             window.tempClientesDormidos = [];
             renderIsiIaDashboard(); 
         }
+
+
+
         function enviarMensajeIsi() {
             const input = document.getElementById('isi-chat-input'); const msg = input.value.trim().toLowerCase(); if (!msg) return;
             const chatHistory = document.getElementById('isi-chat-history-list'); if (!chatHistory) return;
             chatHistory.innerHTML += `<div class="msg-user">${input.value}</div>`; input.value = "";
             setTimeout(() => { let respuesta = procesarRespuestaIA(msg); chatHistory.innerHTML += `<div class="msg-ai">${respuesta}</div>`; const scrollBox = document.getElementById('isi-ia-content-scroll'); if (scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight; }, 600);
         }
+
         function procesarRespuestaIA(msg) {
             const b = db.barberias[bIdx];
             const rol = session.rol;
@@ -3666,6 +3700,8 @@
                 if (!document.fullscreenElement) { elem.requestFullscreen().catch(err => {}); }
             };
 
+
+
             let tv = document.createElement('div');
             tv.id = 'view-smart-tv';
             tv.className = 'fixed inset-0 w-screen h-screen bg-[#050508] text-white flex flex-col z-[999999] overflow-hidden font-sans p-2 sm:p-4 max-w-none';
@@ -3803,6 +3839,10 @@
                         </div>
                     </div>
                 </div>
+
+
+
+
                         <div class="bg-indigo-900/10 border border-indigo-500/30 rounded-[1.5rem] p-3 flex flex-col xl:flex-row items-center gap-3 shadow-[0_0_15px_rgba(99,102,241,0.15)] shrink-0 text-center xl:text-left">
                             <div class="bg-white p-1 rounded-xl shrink-0">
                                 <div id="tv-qr-pago" class="w-12 h-12 bg-gray-200 flex items-center justify-center text-[7px] text-black font-bold">QR</div>
@@ -3815,6 +3855,10 @@
                         </div>
                     </div>
                 </div>
+
+
+
+
                 <div class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-r from-[#020202] via-[#050505] to-[#020202] border-t border-indigo-900/50 flex justify-between items-center px-6 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.8)]">
                     <div class="flex items-center gap-3 h-full">
                         <div class="h-14 w-14 bg-black rounded-full border border-indigo-500 flex items-center justify-center -mt-4 shadow-[0_0_15px_rgba(99,102,241,0.3)] overflow-hidden">
@@ -4045,6 +4089,16 @@
                 }
             }
         }
+
+
+
+
+
+
+
+
+
+
         function toggleFullScreenTV() {
             let elem = document.documentElement;
             if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
@@ -4244,7 +4298,9 @@
                 actualizarBadgesCitas();
             }, 5000); // 10000ms = 10 segundos
         }
-        
+
+
+
         // ==========================================
         // 🛡️ TRAMPA ANTI-ESCAPE (VERSIÓN BLINDADA)
         // ==========================================
@@ -4278,6 +4334,11 @@
                 }
             });
         }
+
+
+
+
+
 
         // Activamos la trampa cuando cargue la página
         window.addEventListener('load', activarTrampaBotonAtras);
