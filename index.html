@@ -125,6 +125,7 @@
                     <button type="button" onclick="abrirKioskoPublico()" class="w-full glass bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-black uppercase text-indigo-400 border border-indigo-500/30 btn-press transition-all duration-300 shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]">📅 Kiosko</button>
                     <button type="button" onclick="abrirMapaLocales()" class="w-full glass bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-black uppercase text-blue-400 border border-blue-500/30 btn-press transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]">📍 Locales</button>
                </div>
+</div>
         </div>
 
         <div class="mt-10 flex flex-col items-center gap-4">
@@ -132,6 +133,9 @@
             <p class="text-[9px] text-zinc-500 cursor-pointer hover:text-indigo-400 uppercase font-bold tracking-widest transition-colors" onclick="Swal.fire({title: 'Políticas de Privacidad', text: 'Tus datos están protegidos y encriptados en nuestra base de datos. No compartimos tu información con terceros.', icon: 'info', confirmButtonText: 'ENTENDIDO', confirmButtonColor: '#4f46e5', background: '#111', color: '#fff', customClass: { popup: 'rounded-[2rem] border border-zinc-800' }})">📄 Políticas de Privacidad</p>
         </div>
         </section>
+
+        
+
 
         <section id="view-kiosko" class="view-section p-4 max-w-md mx-auto mt-6">
             <div class="glass p-8 rounded-[3rem] border border-indigo-500/30 shadow-2xl text-left">
@@ -552,9 +556,7 @@
                                             <input type="file" id="add-b-foto" class="hidden" accept="image/*" onchange="previewFotoBarbero(this)">
                                             <input type="text" id="add-b-nom" placeholder="NOMBRE BARBERO" class="w-full bg-transparent text-xs font-bold uppercase text-white outline-none">
                                         </div>
-
-
-                                       <div class="flex flex-col gap-3">
+<div class="flex flex-col gap-3">
     <div class="flex gap-2">
         <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" class="w-1/2 p-4 text-xs rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 text-white outline-none focus:border-indigo-500">
         <input type="text" inputmode="numeric" id="add-b-comision" placeholder="% Comisión" class="w-1/2 p-4 text-xs rounded-xl font-bold text-center text-indigo-400 bg-[#050505] border border-zinc-800 outline-none focus:border-indigo-500">
@@ -567,6 +569,9 @@
     </div>
     <button type="button" onclick="configAddBarbero()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest btn-press transition-colors shadow-lg shadow-indigo-600/20">GUARDAR BARBERO 👤</button>
 </div>
+
+
+                                       
                                     </div>
                                     <div id="cfg-lista-b" class="space-y-2 max-h-48 overflow-y-auto pr-1 scroll-safe"></div>
                                 </div>
@@ -4381,7 +4386,7 @@
         // 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES
        function comprobarVersionNube() {
     // ⚠️ CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS ALGO A GITHUB (Ej: 1.6, 1.7, 1.8)
-    const VERSION_ACTUAL = "1.11"; 
+    const VERSION_ACTUAL = "1.12"; 
     
     const versionGuardada = localStorage.getItem('zeus_version');
     
