@@ -124,9 +124,13 @@
                 <div class="grid grid-cols-2 gap-3 mt-4">
                     <button type="button" onclick="abrirKioskoPublico()" class="w-full glass bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-black uppercase text-indigo-400 border border-indigo-500/30 btn-press transition-all duration-300 shadow-[0_0_15px_rgba(99,102,241,0.1)] hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]">📅 Kiosko</button>
                     <button type="button" onclick="abrirMapaLocales()" class="w-full glass bg-white/5 hover:bg-white/10 py-4 rounded-2xl text-[10px] font-black uppercase text-blue-400 border border-blue-500/30 btn-press transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]">📍 Locales</button>
-                </div>
-            </div>
-            <p class="text-[9px] text-zinc-600 mt-10 cursor-pointer hover:text-red-500 uppercase font-bold tracking-widest transition-colors" onclick="hardReset()">🔄 Limpiar Sistema (Reset)</p>
+               </div>
+        </div>
+
+        <div class="mt-10 flex flex-col items-center gap-4">
+            <p class="text-[9px] text-zinc-600 cursor-pointer hover:text-red-500 uppercase font-bold tracking-widest transition-colors" onclick="hardReset()">🔄 Limpiar Sistema (Reset)</p>
+            <p class="text-[9px] text-zinc-500 cursor-pointer hover:text-indigo-400 uppercase font-bold tracking-widest transition-colors" onclick="Swal.fire({title: 'Políticas de Privacidad', text: 'Tus datos están protegidos y encriptados en nuestra base de datos. No compartimos tu información con terceros.', icon: 'info', confirmButtonText: 'ENTENDIDO', confirmButtonColor: '#4f46e5', background: '#111', color: '#fff', customClass: { popup: 'rounded-[2rem] border border-zinc-800' }})">📄 Políticas de Privacidad</p>
+        </div>
         </section>
 
         <section id="view-kiosko" class="view-section p-4 max-w-md mx-auto mt-6">
@@ -550,16 +554,19 @@
                                         </div>
 
 
-                                        <div class="grid grid-cols-12 gap-2">
-    <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" class="col-span-4 p-3 text-[10px] rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 w-full text-white outline-none focus:border-indigo-500">
-    <input type="text" inputmode="numeric" id="add-b-comision" placeholder="%" class="col-span-3 p-3 text-[10px] rounded-xl font-bold text-center text-indigo-400 bg-[#050505] border border-zinc-800 w-full outline-none focus:border-indigo-500">
-    <div class="col-span-5 flex gap-1">
-        <input type="time" id="add-b-inicio" title="Hora Inicio" class="p-2 text-[9px] rounded-lg bg-zinc-900 border border-zinc-800 text-white w-full">
-        <input type="time" id="add-b-fin" title="Hora Fin" class="p-2 text-[9px] rounded-lg bg-zinc-900 border border-zinc-800 text-white w-full">
+                                       <div class="flex flex-col gap-3">
+    <div class="flex gap-2">
+        <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" class="w-1/2 p-4 text-xs rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 text-white outline-none focus:border-indigo-500">
+        <input type="text" inputmode="numeric" id="add-b-comision" placeholder="% Comisión" class="w-1/2 p-4 text-xs rounded-xl font-bold text-center text-indigo-400 bg-[#050505] border border-zinc-800 outline-none focus:border-indigo-500">
     </div>
-    <button type="button" onclick="configAddBarbero()" class="col-span-12 bg-indigo-600 text-white py-3 rounded-xl font-black uppercase text-[10px] btn-press transition-colors mt-1">GUARDAR BARBERO 👤</button>
+    <div class="flex gap-2 items-center bg-[#050505] border border-zinc-800 p-2 rounded-xl">
+        <span class="text-[9px] text-zinc-500 font-bold ml-2 uppercase tracking-widest">Turno:</span>
+        <input type="time" id="add-b-inicio" class="w-full bg-transparent text-white text-xs font-bold outline-none text-center cursor-pointer">
+        <span class="text-zinc-600 font-bold px-1">a</span>
+        <input type="time" id="add-b-fin" class="w-full bg-transparent text-white text-xs font-bold outline-none text-center cursor-pointer">
+    </div>
+    <button type="button" onclick="configAddBarbero()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest btn-press transition-colors shadow-lg shadow-indigo-600/20">GUARDAR BARBERO 👤</button>
 </div>
-
                                     </div>
                                     <div id="cfg-lista-b" class="space-y-2 max-h-48 overflow-y-auto pr-1 scroll-safe"></div>
                                 </div>
@@ -2352,7 +2359,6 @@
         }
 
 
-
         function renderSemaforoKiosko() {
             const b = db.barberias[kiosko_bIdx];
             const barberosActivos = (b.barberos || []).filter(barb => barb.estado !== 'ALMUERZO' && barb.estado !== 'DESCANSO');
@@ -2373,8 +2379,6 @@
             let prevS = document.getElementById('kio-servicio').value; document.getElementById('kio-servicio').innerHTML = '<option value="">-- ELIGE UN SERVICIO --</option>' + (b.servicios || []).map(s => `<option value="${s.nom}">${s.premium ? '👑 ' : ''}${s.nom} - ${fMoney(s.pre)}</option>`).join(''); document.getElementById('kio-servicio').value = prevS;
             renderKioskoSlots();
         }
-
-
 
         function renderKioskoSlots() {
             const fEl = document.getElementById('kio-fecha');
@@ -2840,15 +2844,6 @@
         }
 
 
-
-
-
-
-
-
-
-
-
        // --- CEREBRO PARA CARGAR LA CONFIGURACIÓN (A PRUEBA DE ERRORES) ---
        function renderConfig() {
             const b = db.barberias[bIdx]; if(!b) return;
@@ -3084,8 +3079,6 @@
     }
 }
 
-
-
         function configAddBarbero() {
     const idXEl = document.getElementById('edit-b-id'); const idX = idXEl.value;
     const nEl = document.getElementById('add-b-nom'); const n = cleanStr(nEl.value).toUpperCase();
@@ -3169,10 +3162,6 @@
                     
                     <button type="button" onclick="forzarAccesoAdmin(${i})" class="w-full bg-indigo-600 text-white py-4 rounded-xl text-xs font-black uppercase mb-4 btn-press shadow-lg shadow-indigo-600/20">INGRESAR COMO DUEÑO</button>
 
-
-
-
-                    
                     <div class="bg-black/50 p-4 rounded-2xl border border-zinc-800 mb-4">
                         <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Agencias Tiempo (Cobro)</p>
                         <div class="grid grid-cols-4 gap-2 mb-3">
@@ -3199,12 +3188,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
-
-
-
                     <div class="grid grid-cols-2 gap-3 pt-3 border-t border-zinc-900">
                         <button type="button" onclick="sa_ForzarBloqueo('${b.id_nube}')" class="bg-red-900/20 text-red-500 py-3 rounded-xl text-[10px] font-black uppercase btn-press">${b.bloqueado ? "DESBLOQUEAR" : "FORZAR BLOQUEO"}</button>
                         <button type="button" onclick="sa_BorrarInstancia('${b.id_nube}')" class="bg-black text-zinc-500 border border-red-900/50 py-3 rounded-xl text-[10px] font-black uppercase btn-press hover:bg-red-600 hover:text-white transition-colors">BORRAR INSTANCIA</button>
@@ -3215,12 +3198,6 @@
         }
 
         function forzarAccesoAdmin(idx) { bIdx = idx; session = { rol: 'admin', nom: 'SUPERADMIN' }; saveDB(true); saveSession(); showScreen('view-admin'); }
-
-
-
-
-
-
         async function saCrearBarberia() {
             const n = document.getElementById('sa-nombre').value.trim().toUpperCase(); const p = cleanNum(document.getElementById('sa-pin').value);
             if (!n || esPinInseguro(p)) return Swal.fire('Error', 'Nombre vacío o PIN inseguro (muy fácil)', 'error');
@@ -3540,16 +3517,12 @@
             window.tempClientesDormidos = [];
             renderIsiIaDashboard(); 
         }
-
-
-
         function enviarMensajeIsi() {
             const input = document.getElementById('isi-chat-input'); const msg = input.value.trim().toLowerCase(); if (!msg) return;
             const chatHistory = document.getElementById('isi-chat-history-list'); if (!chatHistory) return;
             chatHistory.innerHTML += `<div class="msg-user">${input.value}</div>`; input.value = "";
             setTimeout(() => { let respuesta = procesarRespuestaIA(msg); chatHistory.innerHTML += `<div class="msg-ai">${respuesta}</div>`; const scrollBox = document.getElementById('isi-ia-content-scroll'); if (scrollBox) scrollBox.scrollTop = scrollBox.scrollHeight; }, 600);
         }
-
         function procesarRespuestaIA(msg) {
             const b = db.barberias[bIdx];
             const rol = session.rol;
@@ -3693,8 +3666,6 @@
                 if (!document.fullscreenElement) { elem.requestFullscreen().catch(err => {}); }
             };
 
-
-
             let tv = document.createElement('div');
             tv.id = 'view-smart-tv';
             tv.className = 'fixed inset-0 w-screen h-screen bg-[#050508] text-white flex flex-col z-[999999] overflow-hidden font-sans p-2 sm:p-4 max-w-none';
@@ -3832,10 +3803,6 @@
                         </div>
                     </div>
                 </div>
-
-
-
-
                         <div class="bg-indigo-900/10 border border-indigo-500/30 rounded-[1.5rem] p-3 flex flex-col xl:flex-row items-center gap-3 shadow-[0_0_15px_rgba(99,102,241,0.15)] shrink-0 text-center xl:text-left">
                             <div class="bg-white p-1 rounded-xl shrink-0">
                                 <div id="tv-qr-pago" class="w-12 h-12 bg-gray-200 flex items-center justify-center text-[7px] text-black font-bold">QR</div>
@@ -3848,10 +3815,6 @@
                         </div>
                     </div>
                 </div>
-
-
-
-
                 <div class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-r from-[#020202] via-[#050505] to-[#020202] border-t border-indigo-900/50 flex justify-between items-center px-6 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.8)]">
                     <div class="flex items-center gap-3 h-full">
                         <div class="h-14 w-14 bg-black rounded-full border border-indigo-500 flex items-center justify-center -mt-4 shadow-[0_0_15px_rgba(99,102,241,0.3)] overflow-hidden">
@@ -4082,16 +4045,6 @@
                 }
             }
         }
-
-
-
-
-
-
-
-
-
-
         function toggleFullScreenTV() {
             let elem = document.documentElement;
             if (!document.fullscreenElement) elem.requestFullscreen().catch(err => {});
@@ -4291,9 +4244,7 @@
                 actualizarBadgesCitas();
             }, 5000); // 10000ms = 10 segundos
         }
-
-
-
+        
         // ==========================================
         // 🛡️ TRAMPA ANTI-ESCAPE (VERSIÓN BLINDADA)
         // ==========================================
@@ -4327,11 +4278,6 @@
                 }
             });
         }
-
-
-
-
-
 
         // Activamos la trampa cuando cargue la página
         window.addEventListener('load', activarTrampaBotonAtras);
@@ -4374,7 +4320,7 @@
         // 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES
        function comprobarVersionNube() {
     // ⚠️ CAMBIA ESTE NÚMERO CADA VEZ QUE SUBAS ALGO A GITHUB (Ej: 1.6, 1.7, 1.8)
-    const VERSION_ACTUAL = "1.8"; 
+    const VERSION_ACTUAL = "1.11"; 
     
     const versionGuardada = localStorage.getItem('zeus_version');
     
