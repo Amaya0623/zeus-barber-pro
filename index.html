@@ -86,6 +86,7 @@
     <div id="app-content">
         <audio id="snd-cash"><source src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" type="audio/mpeg"></audio>
         <audio id="snd-alerta"><source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/mpeg"></audio>
+<div id="alerta-global" class="hidden w-full bg-gradient-to-r from-red-600 to-orange-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-widest text-center py-3 px-4 z-50 sticky top-0 shadow-lg shadow-red-900/50"></div>
 
         <nav id="app-nav" class="hidden glass p-4 flex justify-between items-center sticky top-0 z-40 border-b border-zinc-900">
             <div class="flex items-center gap-3">
@@ -555,21 +556,28 @@
                                             <input type="file" id="add-b-foto" class="hidden" accept="image/*" onchange="previewFotoBarbero(this)">
                                             <input type="text" id="add-b-nom" placeholder="NOMBRE BARBERO" class="w-full bg-transparent text-xs font-bold uppercase text-white outline-none">
                                         </div>
+
+
+
 <div class="flex flex-col gap-3">
     <div class="flex gap-2">
         <input type="password" inputmode="numeric" id="add-b-pin" placeholder="PIN" class="w-1/2 p-4 text-xs rounded-xl font-bold text-center bg-[#050505] border border-zinc-800 text-white outline-none focus:border-indigo-500">
         <input type="text" inputmode="numeric" id="add-b-comision" placeholder="% Comisión" class="w-1/2 p-4 text-xs rounded-xl font-bold text-center text-indigo-400 bg-[#050505] border border-zinc-800 outline-none focus:border-indigo-500">
     </div>
-    <div class="flex gap-2 items-center bg-[#050505] border border-zinc-800 p-2 rounded-xl">
-        <span class="text-[9px] text-zinc-500 font-bold ml-2 uppercase tracking-widest">Turno:</span>
-        <input type="time" id="add-b-inicio" class="w-full bg-transparent text-white text-xs font-bold outline-none text-center cursor-pointer">
-        <span class="text-zinc-600 font-bold px-1">a</span>
-        <input type="time" id="add-b-fin" class="w-full bg-transparent text-white text-xs font-bold outline-none text-center cursor-pointer">
+
+    <div class="grid grid-cols-2 gap-2">
+        <div class="bg-[#050505] border border-zinc-800 p-3 rounded-xl flex flex-col items-center justify-center transition-colors focus-within:border-indigo-500">
+            <span class="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Entrada</span>
+            <input type="time" id="add-b-inicio" class="w-full bg-transparent text-white text-sm font-black outline-none text-center cursor-pointer appearance-none">
+        </div>
+        <div class="bg-[#050505] border border-zinc-800 p-3 rounded-xl flex flex-col items-center justify-center transition-colors focus-within:border-indigo-500">
+            <span class="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Salida</span>
+            <input type="time" id="add-b-fin" class="w-full bg-transparent text-white text-sm font-black outline-none text-center cursor-pointer appearance-none">
+        </div>
     </div>
+
     <button type="button" onclick="configAddBarbero()" class="w-full bg-indigo-600 text-white py-4 rounded-xl font-black uppercase text-[10px] tracking-widest btn-press transition-colors shadow-lg shadow-indigo-600/20">GUARDAR BARBERO 👤</button>
 </div>
-
-
                                        
                                     </div>
                                     <div id="cfg-lista-b" class="space-y-2 max-h-48 overflow-y-auto pr-1 scroll-safe"></div>
@@ -694,6 +702,11 @@
             </div>
         </section>
 
+
+
+
+
+
         <section id="view-superadmin" class="view-section p-6 max-w-5xl mx-auto space-y-6 text-left">
             <div class="flex justify-between items-center mb-2 border-b border-zinc-800 pb-4">
                 <h1 class="text-3xl font-black italic text-indigo-500 uppercase tracking-tighter">MASTER CONTROL</h1>
@@ -750,6 +763,29 @@
                     <button type="button" onclick="saCrearBarberia()" class="w-full bg-indigo-600 py-4 rounded-xl font-black text-[11px] uppercase btn-press text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-colors">🚀 Crear Instancia en Nube</button>
                 </div>
             </div>
+
+<div class="bg-[#0a0a0a] p-6 rounded-[2rem] border border-orange-900/30 mb-6 mt-6 shadow-inner">
+                <h3 class="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-4 flex items-center gap-2"><span class="text-xl">🛠️</span> Centro de Mantenimiento Dinámico</h3>
+                <textarea id="sa-alerta-msg" rows="2" placeholder="Escribe tu mensaje aquí. Ej: Hoy actualizaremos de 9pm a 11pm. Si dejas esto vacío, el letrero desaparece..." class="w-full p-4 rounded-xl bg-[#111] border border-zinc-800 text-xs font-bold text-orange-400 mb-3 resize-none focus:border-orange-500 outline-none transition-colors"></textarea>
+                <div class="flex items-center gap-3 mb-4 bg-orange-900/10 p-4 rounded-xl border border-orange-900/20">
+                    <input type="checkbox" id="sa-alerta-block" class="w-6 h-6 accent-orange-600 cursor-pointer flex-shrink-0">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-black text-orange-500 uppercase">BLOQUEO TOTAL (Salvar Kiosko)</span>
+                        <span class="text-[9px] text-zinc-400 font-bold uppercase mt-1 leading-tight">Si activas esto, admin y barberos serán bloqueados por mantenimiento. Solo Kiosko y TV seguirán vivos.</span>
+                    </div>
+                </div>
+                <button type="button" onclick="saGuardarAlerta()" class="w-full bg-orange-600 text-black py-4 rounded-xl font-black text-[11px] uppercase btn-press hover:bg-orange-500 transition-colors shadow-lg">🚀 PUBLICAR ALERTA EN LA NUBE</button>
+            </div>
+
+
+
+
+
+
+
+
+
+
 
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 mt-6 gap-3 border-t border-zinc-800 pt-6">
                 <h3 class="text-[11px] font-black text-zinc-500 uppercase tracking-widest pl-2">Locales Activos</h3>
@@ -4381,51 +4417,111 @@
         }
 
 
+        // =======================================================
+        // 🛠️ MOTOR DE MANTENIMIENTO DINÁMICO (MASTER CONTROL)
+        // =======================================================
+        function saGuardarAlerta() {
+            const msg = document.getElementById('sa-alerta-msg').value.trim();
+            const block = document.getElementById('sa-alerta-block').checked;
+            
+            if (!db.masterConfig) db.masterConfig = {};
+            db.masterConfig.alertaMsg = msg;
+            db.masterConfig.alertaBlock = block;
+
+            Swal.fire({ title: 'Enviando a la Nube...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0a0a0a', color: '#fff' });
+
+            db.barberias.forEach(b => {
+                b.alertaMsg = msg;
+                b.alertaBlock = block;
+                if (navigator.onLine && b.id_nube) {
+                    supabaseClient.from('stores').update({ json_data: b }).eq('id', b.id_nube);
+                }
+            });
+
+            saveDB(false);
+            verificarAlertasGlobales(); 
+            
+            setTimeout(() => {
+                Swal.fire({ title: '¡Alerta Publicada!', text: 'Todos los dispositivos están recibiendo la orden.', icon: 'success', background: '#0a0a0a', color: '#fff', timer: 2500 });
+            }, 1500);
+        }
+
+        function verificarAlertasGlobales() {
+            const alertaBox = document.getElementById('alerta-global');
+            if (!alertaBox) return;
+
+            let msg = ""; let block = false;
+
+            if (session && session.rol === 'superadmin' && db.masterConfig) {
+                msg = db.masterConfig.alertaMsg || ""; block = db.masterConfig.alertaBlock || false;
+                const saMsg = document.getElementById('sa-alerta-msg'); const saBlock = document.getElementById('sa-alerta-block');
+                if (saMsg && document.getElementById('view-superadmin').classList.contains('active')) { saMsg.value = msg; saBlock.checked = block; }
+            } else {
+                let idx = bIdx !== -1 ? bIdx : kiosko_bIdx;
+                if (idx !== -1 && db.barberias[idx]) { msg = db.barberias[idx].alertaMsg || ""; block = db.barberias[idx].alertaBlock || false; }
+            }
+
+            if (msg !== "") { alertaBox.innerHTML = msg; alertaBox.classList.remove('hidden'); } 
+            else { alertaBox.classList.add('hidden'); }
+
+            if (block) {
+                const esKiosko = kiosko_bIdx !== -1;
+                const esTV = window.location.href.includes('screen=tv');
+                const esSuper = session && session.rol === 'superadmin';
+                const estaEnLogin = document.getElementById('view-login') && document.getElementById('view-login').classList.contains('active');
+
+                if (!esKiosko && !esTV && !esSuper && !estaEnLogin) {
+                    document.getElementById('pantalla-bloqueo').classList.remove('hidden');
+                    document.getElementById('app-content').classList.add('hidden');
+                    
+                    document.getElementById('pantalla-bloqueo').innerHTML = `
+                    <div class="glass p-10 rounded-[3rem] border border-orange-900/50 shadow-2xl max-w-md w-full">
+                        <span class="text-7xl mb-4 block animate-bounce drop-shadow-[0_0_15px_rgba(249,115,22,0.8)]">🛠️</span>
+                        <h1 class="text-3xl font-black text-orange-500 mb-2 uppercase italic">MANTENIMIENTO</h1>
+                        <p class="text-zinc-300 text-sm mb-6 font-bold leading-relaxed">${msg}</p>
+                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest mb-6 border-t border-zinc-800 pt-4">El Kiosko público sigue funcionando normal para tus clientes.</p>
+                        <button type="button" onclick="window.location.reload();" class="w-full bg-orange-900/20 hover:bg-orange-900/40 text-orange-500 border border-orange-900/50 py-4 rounded-2xl font-black uppercase btn-press transition-colors">INTENTAR DE NUEVO</button>
+                    </div>`;
+                }
+            }
+        }
+        setInterval(verificarAlertasGlobales, 3000);
 
         // =======================================================
         // 📄 POLÍTICAS DE PRIVACIDAD REDISEÑO DE ÉLITE 🔥
-        // Recopilado y modernizado de las imágenes de Isi Control
         // =======================================================
         window.verPoliticas = function() {
             Swal.fire({
                 title: `<span class="text-[18px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2">📄 Compromiso de Privacidad Zeus Barber</span>`,
                 html: `
                     <p class="text-[9px] text-zinc-600 mt-2 text-left">Última actualización: 19 de Abril de 2026</p>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mt-6 max-h-[60vh] overflow-y-auto pr-2">
-                        
                         <div class="bg-[#0a0a0a] border border-zinc-800 p-5 rounded-2xl flex flex-col gap-2 shadow-inner">
                             <span class="text-3xl">👤</span>
                             <p class="text-[10px] font-black text-white uppercase tracking-wider">Tu Información Básica</p>
                             <p class="text-[9px] text-zinc-400 leading-relaxed">Nombres, números (WhatsApp), fechas de cumpleaños y registros de tus servicios.</p>
                         </div>
-
                         <div class="bg-[#0a0a0a] border border-zinc-800 p-5 rounded-2xl flex flex-col gap-2 shadow-inner">
                             <span class="text-3xl">📱</span>
                             <p class="text-[10px] font-black text-white uppercase tracking-wider">Uso Exclusivo para Agendar</p>
                             <p class="text-[9px] text-zinc-400 leading-relaxed">Solo usada para gestionar tus citas, enviarte recordatorios en WhatsApp y generar métricas privadas para la barbería.</p>
                         </div>
-
                         <div class="bg-[#0a0a0a] border border-zinc-800 p-5 rounded-2xl col-span-1 md:col-span-2 flex flex-col gap-2 shadow-inner border-l-2 border-l-green-900">
                             <span class="text-3xl">🔒</span>
                             <p class="text-[10px] font-black text-green-400 uppercase tracking-wider">Sincronización Segura</p>
                             <p class="text-[9px] text-zinc-400 leading-relaxed">Utilizamos LocalStorage del dispositivo y sincronización segura en la nube vía <strong class="text-gray-300">Supabase</strong>. No vendemos ni compartimos tus datos con terceros.</p>
                         </div>
-
                         <div class="bg-[#0a0a0a] border border-zinc-800 p-5 rounded-2xl flex flex-col gap-2 shadow-inner">
                             <span class="text-3xl">🛠️</span>
                             <p class="text-[10px] font-black text-white uppercase tracking-wider">Tú Eres el Dueño</p>
                             <p class="text-[9px] text-zinc-400 leading-relaxed">El administrador puede eliminar, modificar o exportar tus datos. Solicítalo directamente en el local.</p>
                         </div>
-
                         <div class="bg-[#0a0a0a] border border-zinc-800 p-5 rounded-2xl flex flex-col gap-2 shadow-inner">
                             <span class="text-3xl">📞</span>
                             <p class="text-[10px] font-black text-white uppercase tracking-wider">Soporte Técnico</p>
                             <p class="text-[9px] text-zinc-400 leading-relaxed">Preguntas sobre tus datos: contacta al desarrollador de <strong class="text-indigo-400">Isi Control</strong>.</p>
                         </div>
-
                     </div>
-
                     <div class="mt-8 pt-6 border-t border-zinc-900 text-center">
                         <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Permisos del Dispositivo (APK)</p>
                         <div class="flex items-center justify-center gap-6 mt-4 text-[9px] text-zinc-400">
@@ -4434,41 +4530,57 @@
                         </div>
                     </div>
                 `,
-                background: '#111',
-                color: '#fff',
-                showConfirmButton: true,
-                confirmButtonText: 'ENTENDIDO 🤝',
-                confirmButtonColor: '#4f46e5',
-                customClass: {
-                    popup: 'rounded-[3rem] border-2 border-zinc-800 shadow-2xl p-6',
-                    confirmButton: 'w-full py-5 rounded-[1.5rem] font-black uppercase tracking-widest btn-press shadow-lg shadow-indigo-600/30'
-                }
+                background: '#111', color: '#fff', showConfirmButton: true, confirmButtonText: 'ENTENDIDO 🤝', confirmButtonColor: '#4f46e5',
+                customClass: { popup: 'rounded-[3rem] border-2 border-zinc-800 shadow-2xl p-6', confirmButton: 'w-full py-5 rounded-[1.5rem] font-black uppercase tracking-widest btn-press shadow-lg shadow-indigo-600/30' }
+            });
+        };
+
+        // =======================================================
+        // 📲 GUÍA DE INSTALACIÓN MANUAL PWA
+        // =======================================================
+        window.guiaInstalacion = function() {
+            Swal.fire({
+                title: '<span class="text-indigo-400 font-black uppercase text-xl">Instalar App</span>',
+                html: `
+                <div class="text-left text-sm text-zinc-300 space-y-4 mt-4">
+                    <div class="bg-[#0a0a0a] p-4 rounded-2xl border border-zinc-800">
+                        <p class="font-black text-green-400 mb-2 uppercase text-[10px] tracking-widest flex items-center gap-2"><span class="text-lg">🤖</span> En Android (Chrome)</p>
+                        <ol class="list-decimal pl-4 space-y-2 text-xs font-bold text-zinc-400">
+                            <li>Toca los <b>3 puntitos (⋮)</b> arriba a la derecha.</li>
+                            <li>Selecciona <b class="text-white">"Instalar aplicación"</b> o <b class="text-white">"Agregar a la pantalla principal"</b>.</li>
+                        </ol>
+                    </div>
+                    <div class="bg-[#0a0a0a] p-4 rounded-2xl border border-zinc-800">
+                        <p class="font-black text-blue-400 mb-2 uppercase text-[10px] tracking-widest flex items-center gap-2"><span class="text-lg">🍎</span> En iPhone (Safari)</p>
+                        <ol class="list-decimal pl-4 space-y-2 text-xs font-bold text-zinc-400">
+                            <li>Toca el botón <b>Compartir</b> (el cuadrado con la flecha).</li>
+                            <li>Baja en el menú y selecciona <b class="text-white">"Agregar a Inicio"</b>.</li>
+                        </ol>
+                    </div>
+                </div>
+                `,
+                background: '#111', color: '#fff', confirmButtonText: '¡ENTENDIDO!', confirmButtonColor: '#4f46e5',
+                customClass: { popup: 'rounded-[2rem] border border-zinc-800 shadow-2xl', confirmButton: 'w-full py-4 rounded-[1.5rem] font-black uppercase btn-press' }
             });
         };
 
         // 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES
         function comprobarVersionNube() {
-            // ⚠️ CAMBIAMOS A 1.13 PARA FORZAR EL NUEVO DISEÑO
-            const VERSION_ACTUAL = "1.14"; 
-            
+            const VERSION_ACTUAL = "1.15"; 
             const versionGuardada = localStorage.getItem('zeus_version');
-            
             if (versionGuardada !== VERSION_ACTUAL) {
                 console.log("¡Actualización detectada! Destruyendo caché...");
                 localStorage.setItem('zeus_version', VERSION_ACTUAL);
-                
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) { registration.unregister(); }
                     });
                 }
-
                 if ('caches' in window) {
                     caches.keys().then((names) => {
                         names.forEach(name => caches.delete(name));
                     });
                 }
-                
                 setTimeout(() => { 
                     window.location.href = window.location.href.split('?')[0] + "?v=" + new Date().getTime(); 
                 }, 1000);
