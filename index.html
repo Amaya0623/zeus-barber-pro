@@ -10768,7 +10768,7 @@ function abrirOnboardingManual() {
 
 // 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES (GitHub)
         function comprobarVersionNube() {
-            const VERSION_ACTUAL = "1.87"; // 👈 Asegúrate de que esta sea tu versión actual
+            const VERSION_ACTUAL = "1.88"; // 👈 Sube a la versión 1.88
             
             // 🏷️ INYECTAR VERSIÓN EN LA PANTALLA
             const vLogin = document.getElementById('display-version-login');
@@ -10780,38 +10780,29 @@ function abrirOnboardingManual() {
             
             if (versionGuardada !== VERSION_ACTUAL) {
                 console.log("¡Actualización de Código detectada! Destruyendo caché...");
-                localStorage.setItem('zeus_version', VERSION_ACTUAL);
                 
+                // Borramos los Service Workers (PWA)
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) { registration.unregister(); }
                     });
                 }
+                
+                // Vaciamos la caché de archivos
                 if ('caches' in window) {
                     caches.keys().then((names) => {
                         names.forEach(name => caches.delete(name));
                     });
                 }
                 
-                // 🛑 LA MAGIA SILENCIOSA: 
-                // Añadimos un parámetro 'updated=true' a la URL para saber que ya recargamos
-                const urlActual = new URL(window.location.href);
-                if (!urlActual.searchParams.has('updated')) {
-                     // Solo recargamos si NO tiene el parámetro 'updated'
-                     setTimeout(() => { 
-                        urlActual.searchParams.set('v', new Date().getTime()); 
-                        urlActual.searchParams.set('updated', 'true'); // Marca de actualización
-                        window.location.replace(urlActual.href); // Usa replace en lugar de href para no afectar el historial
-                    }, 500);
-                }
-            } else {
-                 // Si la versión es correcta, limpiamos la URL (quitamos el 'updated' y 'v')
-                 const urlActual = new URL(window.location.href);
-                 if (urlActual.searchParams.has('updated') || urlActual.searchParams.has('v')) {
-                     urlActual.searchParams.delete('updated');
-                     urlActual.searchParams.delete('v');
-                     window.history.replaceState({}, document.title, urlActual.pathname + urlActual.search);
-                 }
+                // 🛑 LA MAGIA: Guardamos la nueva versión ANTES de recargar
+                localStorage.setItem('zeus_version', VERSION_ACTUAL);
+
+                // Esperamos un segundo para asegurar que todo se borró y forzamos la recarga limpia
+                // Al tener ya la versión en localStorage, cuando recargue, NO volverá a entrar aquí.
+                setTimeout(() => { 
+                    window.location.reload(true); // reload(true) fuerza ignorar la caché del navegador
+                }, 1000);
             }
         }
 
