@@ -163,11 +163,11 @@
 
 
     <!-- ✨ SPLASH SCREEN UNIVERSAL REDONDEADO (iOS / Android / Web) ✨ -->
-   <div id="splash-screen" class="fixed inset-0 z-[9999] bg-[#050505] flex items-center justify-center transition-opacity duration-700 ease-in-out backdrop-blur-sm">
+   <div id="splash-screen" class="fixed inset-0 z-[9999] w-screen h-screen bg-[#050505] flex items-center justify-center transition-opacity duration-700 ease-in-out overflow-hidden">
         
-        <div class="relative w-[90%] max-w-[400px] aspect-[3/5] rounded-[3rem] overflow-hidden shadow-[0_0_50px_rgba(0,240,255,0.15)] border border-zinc-800 bg-[#090b14] flex items-center justify-center transform transition-transform duration-700">
+        <div class="relative w-[85%] max-w-[320px] aspect-[9/16] max-h-[85vh] rounded-[2.5rem] overflow-hidden shadow-[0_0_40px_rgba(0,240,255,0.15)] border border-zinc-800 bg-[#050505] flex items-center justify-center">
             
-            <video id="splash-video" class="absolute inset-0 w-full h-full object-cover scale-[1.12] -translate-y-2 pointer-events-none" autoplay muted playsinline preload="auto">
+            <video id="splash-video" class="absolute inset-0 w-full h-full object-cover pointer-events-none" autoplay muted playsinline preload="auto">
                 <source src="video.mp4" type="video/mp4">
             </video>
 
@@ -189,6 +189,7 @@
                 }
 
                 if (vid && splash) {
+                    // EL CORTE CINEMATOGRÁFICO
                     vid.addEventListener('timeupdate', () => {
                         if (vid.currentTime > 0 && vid.duration > 0 && (vid.duration - vid.currentTime) <= 0.2) {
                             ocultarSplashScreen();
@@ -203,7 +204,7 @@
                     let playPromise = vid.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(error => {
-                            console.warn("⚠️ Autoplay bloqueado por el navegador local.");
+                            console.warn("⚠️ Autoplay bloqueado.");
                             setTimeout(ocultarSplashScreen, 4000);
                         });
                     }
@@ -10767,7 +10768,7 @@ function abrirOnboardingManual() {
 
 // 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES (GitHub)
         function comprobarVersionNube() {
-            const VERSION_ACTUAL = "1.85"; // 👈 Tu nueva versión
+            const VERSION_ACTUAL = "1.86"; // 👈 Tu nueva versión
             
             // 🏷️ INYECTAR VERSIÓN EN LA PANTALLA (Magia visual)
             const vLogin = document.getElementById('display-version-login');
