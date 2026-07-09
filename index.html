@@ -10768,9 +10768,9 @@ function abrirOnboardingManual() {
 
 // 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES (GitHub)
         function comprobarVersionNube() {
-            const VERSION_ACTUAL = "1.86"; // 👈 Tu nueva versión
+            const VERSION_ACTUAL = "1.87"; // 👈 Asegúrate de que esta sea tu versión actual
             
-            // 🏷️ INYECTAR VERSIÓN EN LA PANTALLA (Magia visual)
+            // 🏷️ INYECTAR VERSIÓN EN LA PANTALLA
             const vLogin = document.getElementById('display-version-login');
             if (vLogin) vLogin.innerText = VERSION_ACTUAL;
             const vNav = document.getElementById('display-version-nav');
@@ -10793,12 +10793,25 @@ function abrirOnboardingManual() {
                     });
                 }
                 
-                setTimeout(() => { 
-                    // Rescatamos el link original y le inyectamos la versión limpia
-                    let urlActual = new URL(window.location.href);
-                    urlActual.searchParams.set('v', new Date().getTime()); 
-                    window.location.href = urlActual.href; 
-                }, 1000);
+                // 🛑 LA MAGIA SILENCIOSA: 
+                // Añadimos un parámetro 'updated=true' a la URL para saber que ya recargamos
+                const urlActual = new URL(window.location.href);
+                if (!urlActual.searchParams.has('updated')) {
+                     // Solo recargamos si NO tiene el parámetro 'updated'
+                     setTimeout(() => { 
+                        urlActual.searchParams.set('v', new Date().getTime()); 
+                        urlActual.searchParams.set('updated', 'true'); // Marca de actualización
+                        window.location.replace(urlActual.href); // Usa replace en lugar de href para no afectar el historial
+                    }, 500);
+                }
+            } else {
+                 // Si la versión es correcta, limpiamos la URL (quitamos el 'updated' y 'v')
+                 const urlActual = new URL(window.location.href);
+                 if (urlActual.searchParams.has('updated') || urlActual.searchParams.has('v')) {
+                     urlActual.searchParams.delete('updated');
+                     urlActual.searchParams.delete('v');
+                     window.history.replaceState({}, document.title, urlActual.pathname + urlActual.search);
+                 }
             }
         }
 
