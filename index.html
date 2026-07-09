@@ -10766,9 +10766,9 @@ function abrirOnboardingManual() {
         }
 
 
-// 🔥 DESTRUCTOR NUCLEAR DE CACHÉ PARA ACTUALIZACIONES INVISIBLES (GitHub)
+// 🔥 ACTUALIZACIÓN SILENCIOSA (SIN DOBLE CARGA)
         function comprobarVersionNube() {
-            const VERSION_ACTUAL = "1.88"; // 👈 Sube a la versión 1.88
+            const VERSION_ACTUAL = "1.89"; // 👈 Subimos a 1.89 para aplicar el cambio
             
             // 🏷️ INYECTAR VERSIÓN EN LA PANTALLA
             const vLogin = document.getElementById('display-version-login');
@@ -10779,30 +10779,28 @@ function abrirOnboardingManual() {
             const versionGuardada = localStorage.getItem('zeus_version');
             
             if (versionGuardada !== VERSION_ACTUAL) {
-                console.log("¡Actualización de Código detectada! Destruyendo caché...");
+                console.log("¡Actualización detectada! Limpiando caché en segundo plano...");
                 
-                // Borramos los Service Workers (PWA)
+                // Borramos los Service Workers (PWA) en silencio
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.getRegistrations().then(function(registrations) {
                         for(let registration of registrations) { registration.unregister(); }
                     });
                 }
                 
-                // Vaciamos la caché de archivos
+                // Vaciamos la caché de archivos en silencio
                 if ('caches' in window) {
                     caches.keys().then((names) => {
                         names.forEach(name => caches.delete(name));
                     });
                 }
                 
-                // 🛑 LA MAGIA: Guardamos la nueva versión ANTES de recargar
+                // Guardamos la nueva versión
                 localStorage.setItem('zeus_version', VERSION_ACTUAL);
-
-                // Esperamos un segundo para asegurar que todo se borró y forzamos la recarga limpia
-                // Al tener ya la versión en localStorage, cuando recargue, NO volverá a entrar aquí.
-                setTimeout(() => { 
-                    window.location.reload(true); // reload(true) fuerza ignorar la caché del navegador
-                }, 1000);
+                
+                // 🛑 ¡MAGIA! ELIMINAMOS EL window.location.reload() POR COMPLETO.
+                // El sistema limpiará la basura en segundo plano, pero NO recargará la página.
+                // Tu video correrá 1 sola vez de forma perfecta.
             }
         }
 
