@@ -2740,23 +2740,20 @@ async function hashPIN(pin) {
             else { s.innerHTML = '🔴 OFFLINE'; s.className = 'text-[8px] text-red-500 font-bold uppercase tracking-widest bg-black px-1.5 py-0.5 rounded border border-red-900/50 animate-pulse'; }
         }
 
-        function saveDB(triggerCloudSync = true) {
+        function saveDB(triggerCloudSync = true, forceConfigUpload = false) {
             let idx = bIdx !== -1 ? bIdx : kiosko_bIdx;
 
-            // 🛡️ ESCUDO: Si guardamos sin internet, marcamos que tenemos datos pendientes de subir
+            // 🛡️ ESCUDO: Si guardamos sin internet, marcamos que tenemos datos pendientes
             if (idx !== -1 && db.barberias[idx]) {
-                if (!isOnline) {
-                    db.barberias[idx].pendientesSync = true;
-                }
+                if (!isOnline) db.barberias[idx].pendientesSync = true;
             }
 
-            // 1. Guardado local seguro
             if (!isLocalStorageBlocked) {
                 try { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
                 catch (e) { console.error("Error guardando local"); }
             }
 
-            // 2. Subida a la Nube Inteligente (ESCUDO AHORRADOR DE DATOS 99%)
+            // 2. Subida a la Nube Inteligente (ESCUDO AHORRADOR DE DATOS)
             if (triggerCloudSync && isOnline) {
                 clearTimeout(_cloudSyncDebounce);
                 _cloudSyncDebounce = setTimeout(async () => {
@@ -2768,29 +2765,24 @@ async function hashPIN(pin) {
                             let necesitaFusion = false;
                             let nubeData = null;
 
-                            // 🚀 ESCUDO DE PRIORIDADES (Fusión Absoluta): 
-                            // Siempre descargamos la nube si hay cambios, tengamos datos pendientes o no, para NO borrar las citas de los clientes.
                             if (vNube > 0 && db.barberias[idx].data_version !== vNube) {
                                 const { data } = await supabaseClient.from('stores').select('json_data').eq('id', db.barberias[idx].id_nube).single();
-                                if (data && data.json_data) {
-                                    nubeData = data.json_data;
-                                    necesitaFusion = true;
-                                }
+                                if (data && data.json_data) { nubeData = data.json_data; necesitaFusion = true; }
                             }
-                            db.barberias[idx].pendientesSync = false; // Ya no aplastamos la nube, ahora fusionamos 100% seguros
+                            db.barberias[idx].pendientesSync = false;
 
                             if (necesitaFusion && nubeData) {
                                 let localData = db.barberias[idx];
                                 
-                                // 🚀 AUTO-PARCHE SUPREMO: Protegemos los barberos y servicios
-const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asistencia', 'multas', 'citas', 'listaEspera', 'pendientesSync', 'data_version', 'barberos', 'servicios', 'productos', 'cajeros'];
-                                Object.keys(nubeData).forEach(key => {
-                                    if (!clavesTransaccionales.includes(key)) {
-                                        localData[key] = nubeData[key];
-                                    }
-                                });
+                                // 🚀 PROTECCIÓN DE CONFIGURACIONES DEL ADMIN
+                                if (!forceConfigUpload) {
+                                    const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asistencia', 'multas', 'citas', 'listaEspera', 'pendientesSync', 'data_version', 'barberos', 'servicios', 'productos', 'cajeros', 'pushSubscription'];
+                                    Object.keys(nubeData).forEach(key => {
+                                        if (!clavesTransaccionales.includes(key)) localData[key] = nubeData[key];
+                                    });
+                                }
 
-                                // ✨ MAGIA NIVEL DIOS: Fusión de Finanzas y Clientes sin aplastar datos
+                                // ✨ FUSIÓN DE TRANSACCIONES (Citas y Dinero jamás se pierden)
                                 localData.clientes = { ...(nubeData.clientes || {}), ...(localData.clientes || {}) };
 
                                 let mVentas = [...(nubeData.ventas || []), ...(localData.ventas || [])];
@@ -2806,8 +2798,6 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
                                 let mMultas = [...(nubeData.multas || []), ...(localData.multas || [])];
                                 localData.multas = Array.from(new Set(mMultas.map(a => a.id))).map(id => mMultas.find(a => a.id === id));
 
-                                // CÓDIGO VIEJO: let coincidencia = fusionCitas.find(cNube => cNube.id === cLocal.id);
-                                // CÓDIGO NUEVO Y BLINDADO:
                                 let fusionCitas = [...(nubeData.citas || [])];
                                 (localData.citas || []).forEach(cLocal => {
                                     let coincidencia = fusionCitas.find(cNube => String(cNube.id) === String(cLocal.id));
@@ -2824,21 +2814,20 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
                                 });
                                 localData.listaEspera = fusionEspera;
                                 
-                            } // 🔴🔴 ¡AQUÍ ESTÁ LA LLAVE QUE DESTRABA EL SISTEMA! 🔴🔴
+                                // Si no forzamos config, la antena de la nube sobrevive
+                                if (!forceConfigUpload && nubeData.pushSubscription !== undefined) {
+                                    localData.pushSubscription = nubeData.pushSubscription;
+                                }
+                            }
 
-                            // 💉 PASO C: INYECTAMOS LA NUEVA VERSIÓN AL GUARDAR
                             db.barberias[idx].data_version = Date.now();
 
-                            // AHORA SÍ, subimos la data protegida
-                            supabaseClient.from('stores')
-                                .update({ json_data: db.barberias[idx] })
-                                .eq('id', db.barberias[idx].id_nube)
-                                .then(({ error }) => {
-                                    if (!error) {
-                                        console.log("Nube sincronizada ✅");
-                                        if (document.getElementById('view-barbero')?.classList.contains('active')) renderBarbero();
-                                    }
-                                });
+                            supabaseClient.from('stores').update({ json_data: db.barberias[idx] }).eq('id', db.barberias[idx].id_nube).then(({ error }) => {
+                                if (!error) {
+                                    console.log("Nube sincronizada ✅");
+                                    if (document.getElementById('view-barbero')?.classList.contains('active')) renderBarbero();
+                                }
+                            });
                         } catch(e) { console.error("Error en Escudo de Sync:", e); }
                     }
                 }, 1500);
@@ -3207,6 +3196,7 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
         // 5. SESIÓN Y LOGIN (BLINDADO CON RETORNO WOMPI Y URL LIMPIA)
         // ==========================================
         function checkSession() {
+            // Guardamos los parámetros originales en memoria global para que el Kiosko los pueda leer después
             if (!window.MisParamsOriginales) {
                 window.MisParamsOriginales = new URLSearchParams(window.location.search);
             }
@@ -3218,13 +3208,18 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
             const wompiTxId = urlParams.get('id'); 
             const wompiEnv = urlParams.get('env'); 
 
+            // 🔒 ESCUDO ESTÉTICO SUPREMO: Limpiamos la URL de basura (v, ref, vip, index.html)
+            // SOLO si no estamos regresando de Wompi (Wompi necesita su ID primero)
+            // 🔒 ESCUDO ESTÉTICO SUPREMO (Con Paracaídas Local)
             if (!wompiTxId) {
                 try {
+                    // Evitamos limpiar la URL si estamos abriendo el archivo localmente (doble clic)
                     if (window.location.protocol !== 'file:') {
                         let rutaLimpia = window.location.pathname;
                         if (rutaLimpia.toLowerCase().endsWith('index.html')) {
                             rutaLimpia = rutaLimpia.substring(0, rutaLimpia.length - 10); 
                         }
+                        
                         let paramsVitales = new URLSearchParams();
                         if (kioskId) paramsVitales.set('kiosk', kioskId);
                         if (screenMode) paramsVitales.set('screen', screenMode);
@@ -3232,11 +3227,11 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
                         
                         let queryLimpio = paramsVitales.toString();
                         if (queryLimpio) rutaLimpia += '?' + queryLimpio;
+                        
                         window.history.replaceState({}, document.title, rutaLimpia);
                     }
-                } catch(e) {}
+                } catch(e) { console.log("Omitiendo limpieza de URL en modo local."); }
             }
-
             if (screenMode === 'tv' && localIdCloud) {
                 bIdx = db.barberias.findIndex(b => b.id_nube === localIdCloud);
                 if(bIdx === -1) {
@@ -3250,8 +3245,10 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
             }
             
             if (kioskId) { 
+                // 🚀 LÓGICA WOMPI: Si el cliente viene regresando del banco, detenemos TODO y validamos
                 if (wompiTxId) {
                     kiosko_bIdx = db.barberias.findIndex(b => b.id_nube === kioskId || b.id === kioskId);
+                    
                     if (kiosko_bIdx === -1 && navigator.onLine) {
                         Swal.fire({ title: 'Recuperando sesión...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }, background: '#0a0a0a', color: '#fff' });
                         supabaseClient.from('stores').select('id, name, json_data').eq('id', kioskId).single().then(({data, error}) => {
@@ -3271,6 +3268,7 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
                     }
                 }
 
+                // 🚀 SOLUCIÓN KIOSKO NORMAL: Descargar siempre el estado REAL de la nube
                 if (navigator.onLine && typeof supabaseClient !== 'undefined') {
                     const esVip = urlParams.get('vip') === 'true';
                     Swal.fire({ title: esVip ? 'Abriendo Club VIP...' : 'Abriendo Kiosko...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }, background: '#0a0a0a', color: '#fff' });
@@ -3286,35 +3284,41 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
                                 let localB = db.barberias[lIdx];
                                 
                                 // 🛡️ FUSIÓN ÉLITE KIOSKO: Protege las citas locales que aún no subieron
-                                const clavesTransaccionales = ['citas', 'listaEspera'];
+                                const clavesTransaccionales = ['citas', 'listaEspera', 'ventas', 'clientes', 'tickets', 'asistencia', 'multas', 'gastos'];
                                 Object.keys(cloudB).forEach(key => {
                                     if (!clavesTransaccionales.includes(key)) {
                                         localB[key] = cloudB[key];
                                     }
                                 });
 
-                                // Fusiona sin aplastar la cita fantasma
+                                // Fusiona sin aplastar la cita fantasma local
                                 let mergedCitas = [...(localB.citas || [])];
                                 (cloudB.citas || []).forEach(cC => {
                                     let lMatch = mergedCitas.find(lC => String(lC.id) === String(cC.id));
-                                    if (!lMatch) mergedCitas.push(cC);
-                                    else lMatch.estado = cC.estado;
+                                    if (!lMatch) {
+                                        mergedCitas.push(cC); // Si la nube tiene una cita nueva, la agregamos
+                                    } else {
+                                        lMatch.estado = cC.estado; // Actualizamos el estado si ya existía
+                                    }
                                 });
                                 localB.citas = mergedCitas;
 
                                 let mergedEspera = [...(localB.listaEspera || [])];
                                 (cloudB.listaEspera || []).forEach(eC => {
                                     let eMatch = mergedEspera.find(lE => String(lE.id) === String(eC.id));
-                                    if (!eMatch) mergedEspera.push(eC);
-                                    else eMatch.estado = eC.estado;
+                                    if (!eMatch) {
+                                        mergedEspera.push(eC);
+                                    } else {
+                                        eMatch.estado = eC.estado;
+                                    }
                                 });
                                 localB.listaEspera = mergedEspera;
 
                                 db.barberias[lIdx] = localB;
                                 
-                                // 🔥 Disparamos guardado forzoso para asegurar que la cita suba a la nube
-                                db.barberias[lIdx].pendientesSync = true;
-                                saveDB(true);
+                                // 🔥 GUARDAMOS EN LOCAL SOLAMENTE. 
+                                // EL KIOSKO JAMÁS DEBE FORZAR UNA SUBIDA AL ABRIR LA PÁGINA.
+                                saveDB(false);
                             } else {
                                 db.barberias.push(cloudB);
                                 lIdx = db.barberias.length - 1;
@@ -3341,11 +3345,15 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
             if (!isLocalStorageBlocked) { try { s = sessionStorage.getItem(SESSION_KEY); } catch (e) { } }
             if (s) {
                 const d = JSON.parse(s); bIdx = d.bIdx; session = d.session;
+                
                 if (bIdx !== -1 && db.barberias[bIdx] && session.rol !== 'superadmin') {
                     const bVerif = db.barberias[bIdx];
                     const diffDays = Math.floor((Date.now() - (bVerif.creadoEn || Date.now())) / (1000 * 60 * 60 * 24));
+                    
                     if ((bVerif.lastActiveClock && Date.now() < bVerif.lastActiveClock) || (bVerif.diasSuscripcion || 15) - diffDays < 0 || bVerif.bloqueado) {
-                        sessionStorage.removeItem(SESSION_KEY); bIdx = -1; session = null;
+                        sessionStorage.removeItem(SESSION_KEY);
+                        bIdx = -1;
+                        session = null;
                         document.getElementById('pantalla-bloqueo').classList.remove('hidden'); 
                         document.getElementById('app-content').classList.add('hidden'); 
                         return;
@@ -3357,6 +3365,7 @@ const clavesTransaccionales = ['clientes', 'ventas', 'gastos', 'tickets', 'asist
                 else { showScreen('view-login'); }
             } else { showScreen('view-login'); }
         }
+
 
          // ==========================================
 // 🌐 MOTOR DE VERIFICACIÓN WOMPI AUTOMÁTICA (OPTIMIZADO PWA)
@@ -7374,14 +7383,15 @@ function calcularPrecioIA(precioBase, idLocal) {
                 const permiso = await Notification.requestPermission();
                 if (permiso !== 'granted') throw new Error('PERMISO_DENEGADO');
 
-                Swal.fire({ title: 'Vinculando dispositivo...', text: 'Generando llaves de seguridad...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, background: '#0a0a0a', color: '#fff' });
+                Swal.fire({ title: 'Vinculando dispositivo...', text: 'Actualizando protocolos...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, background: '#0a0a0a', color: '#fff' });
 
                 const reg = await navigator.serviceWorker.ready;
+                await reg.update(); // 🚀 MAGIA: Fuerza al celular a bajar el sw.js nuevo sin borrar caché a mano
+
                 const PUBLIC_VAPID_KEY = "BHKFJnWSHmcY2Q4o-J93NiUq8SeARR9oDFYLmtaSnud4bBFXiZC4VZzvmCnA5MypqXY-rZdvHwudBGb_mnafQj4";
 
-                // 🚀 REGLA DE ORO ANTI-ERRORES: NO DESUSCRIBIRSE. Reutilizamos la suscripción si existe.
+                // 🚀 REGLA DE ORO ANTI-BLOQUEOS: No desuscribir. Reutilizar si ya existe.
                 let subscription = await reg.pushManager.getSubscription();
-
                 if (!subscription) {
                     subscription = await reg.pushManager.subscribe({
                         userVisibleOnly: true,
@@ -7392,11 +7402,9 @@ function calcularPrecioIA(precioBase, idLocal) {
                 const tokenPuro = subscription.toJSON();
                 const b = db.barberias[bIdx];
                 b.pushSubscription = tokenPuro;
-                saveDB(false); 
 
-                if (isOnline && typeof supabaseClient !== 'undefined' && b.id_nube) {
-                    await supabaseClient.from('stores').update({ json_data: b }).eq('id', b.id_nube);
-                }
+                // 🚀 GUARDADO ÉLITE: Forzamos la subida de la antena sin aplastar citas del Kiosko
+                saveDB(true, true); 
 
                 const txtStatus = document.getElementById('push-status-txt');
                 if(txtStatus) {
@@ -7408,15 +7416,9 @@ function calcularPrecioIA(precioBase, idLocal) {
             } catch (e) {
                 console.error("Fallo Push:", e);
                 if (e.message === 'PERMISO_DENEGADO' || e.message.includes('denied')) {
-                    Swal.fire('Permiso Bloqueado 🔕', 'Tu navegador tiene las notificaciones bloqueadas para esta página. Ve a "Configuración del sitio" en tu navegador y cambia Notificaciones a "Permitir".', 'warning');
+                    Swal.fire('Permiso Bloqueado 🔕', 'Ve a la configuración de Chrome y permite las notificaciones para esta página.', 'warning');
                 } else {
-                    // Parche elegante en caso de que Google Chrome siga terco
-                    Swal.fire({
-                        title: 'Bloqueo del Navegador',
-                        text: 'Google Chrome rechazó la conexión. Para solucionarlo: Ve a Configuración de Chrome > Privacidad > Borrar datos de navegación (Solo imágenes y archivos en caché). Luego recarga la página.',
-                        icon: 'warning',
-                        background: '#0a0a0a', color: '#fff'
-                    });
+                    Swal.fire('Reintenta', 'Estamos purgiendo la caché vieja automáticamente. Por favor, toca el botón de Activar de nuevo en 3 segundos.', 'info');
                 }
             }
         }
@@ -7434,11 +7436,9 @@ function calcularPrecioIA(precioBase, idLocal) {
 
                 const b = db.barberias[bIdx];
                 b.pushSubscription = null;
-                saveDB(true);
-
-                if (isOnline && typeof supabaseClient !== 'undefined' && b.id_nube) {
-                    await supabaseClient.from('stores').update({ json_data: b }).eq('id', b.id_nube);
-                }
+                
+                // 🚀 GUARDADO ÉLITE: Forzamos la subida sin aplastar citas
+                saveDB(true, true);
 
                 if(statusTxt) {
                     statusTxt.innerText = "Estado: Esperando activación... 🔕";
@@ -7447,8 +7447,7 @@ function calcularPrecioIA(precioBase, idLocal) {
 
                 Swal.fire({ title: '¡Desactivado!', text: 'Ya no recibirás alertas en este dispositivo.', icon: 'success', background: '#0a0a0a', color: '#fff' });
             } catch (err) {
-                console.error("Error desactivando Push: ", err);
-                Swal.fire('Error Técnico', 'No pudimos desactivarlo automáticamente.', 'error');
+                Swal.fire('Error Técnico', 'No pudimos desactivarlo.', 'error');
             }
         }
 
@@ -7457,9 +7456,7 @@ function calcularPrecioIA(precioBase, idLocal) {
             const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
             const rawData = window.atob(base64);
             const outputArray = new Uint8Array(rawData.length);
-            for (let i = 0; i < rawData.length; ++i) {
-                outputArray[i] = rawData.charCodeAt(i);
-            }
+            for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
             return outputArray;
         }
 
@@ -11884,7 +11881,7 @@ function abrirOnboardingManual() {
 
 // 🔥 MOTOR DE ACTUALIZACIÓN (MODO KAMIKAZE - DESTRUYE CACHÉ VIEJA AL INSTANTE)
         async function comprobarVersionNube() {
-            const VERSION_ACTUAL = "1.153"; // 👈 Sube este número solo para guiarte tú visualmente
+            const VERSION_ACTUAL = "1.155"; // 👈 Sube este número solo para guiarte tú visualmente
             
             const vLogin = document.getElementById('display-version-login'); if (vLogin) vLogin.innerText = VERSION_ACTUAL;
             const vNav = document.getElementById('display-version-nav'); if (vNav) vNav.innerText = VERSION_ACTUAL;
@@ -12146,18 +12143,21 @@ function cargarTurnoACaja(idCita) {
 
 
 
-        // ==========================================
-        // 🚀 MOTOR PWA (ANDROID, IOS, MAC Y WINDOWS)
+    // ==========================================
+        // 🚀 MOTOR PWA Y PURGADOR DE CACHÉ
         // ==========================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                .then((reg) => console.log('PWA Lista: Service Worker Registrado.', reg.scope))
+                .then((reg) => {
+                    console.log('PWA Lista: Service Worker Registrado.', reg.scope);
+                    reg.update(); // 👈 Obliga al navegador a purgar el caché del SW en cada carga
+                })
                 .catch((err) => console.warn('PWA Aviso: Error al registrar sw.js.', err));
             });
         }
 
-        // ⚡ LLAVES DE ENCENDIDO DEL SISTEMA (¡NO BORRAR!)
+        // ⚡ LLAVES DE ENCENDIDO DEL SISTEMA MULTIPLATAFORMA (¡NO BORRAR!)
         if (typeof initDB === 'function') initDB(); 
         window.onload = checkSession;
 
