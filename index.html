@@ -20831,7 +20831,7 @@ async function rescatarSuscripcionLocal() {
                                 nData.alertaMsg = msg;
                                 nData.alertaBlock = block;
                                 nData.data_version = Date.now();
-                                await supabaseClient.from('stores').update({ json_data: nData }).eq('id', b.id_nube);
+                                await saEscribirTienda('guardar', { id: b.id_nube, json_data: nData });
                             }
                         }
                         b.alertaMsg = msg;
@@ -20924,7 +20924,7 @@ async function rescatarSuscripcionLocal() {
                                 let nData = data.json_data;
                                 nData.alertaBlock = false;
                                 nData.alertaMsg = "";
-                                await supabaseClient.from('stores').update({ json_data: nData }).eq('id', b.id_nube);
+                                await saEscribirTienda('guardar', { id: b.id_nube, json_data: nData });
                             }
                         }
                     }
@@ -22634,7 +22634,7 @@ function abrirOnboardingManual() {
 
 // 🔥 MOTOR DE ACTUALIZACIÓN (MODO KAMIKAZE - DESTRUYE CACHÉ VIEJA AL INSTANTE)
         async function comprobarVersionNube() {
-            const VERSION_ACTUAL = "1.186"; // 👈 Sube este número solo para guiarte tú visualmente
+            const VERSION_ACTUAL = "1.187"; // 👈 Sube este número solo para guiarte tú visualmente
             
             const vLogin = document.getElementById('display-version-login'); if (vLogin) vLogin.innerText = VERSION_ACTUAL;
             const vNav = document.getElementById('display-version-nav'); if (vNav) vNav.innerText = VERSION_ACTUAL;
@@ -22742,7 +22742,7 @@ function abrirOnboardingManual() {
                 bNube.alertaBlock = false;
 
                 // 3. Subimos de vuelta
-                const { error: errUpdate } = await supabaseClient.from('stores').update({ json_data: bNube }).eq('id', idNube);
+                const { error: errUpdate } = await saEscribirTienda('guardar', { id: idNube, json_data: bNube });
                 if (errUpdate) throw errUpdate;
 
                 // 4. Actualizamos el caché local del Master Control
@@ -22794,7 +22794,7 @@ function abrirOnboardingManual() {
                     }
 
                     // 2. Subimos los datos protegidos
-                    const { error: errUpdate } = await supabaseClient.from('stores').update({ json_data: bNube }).eq('id', idNube);
+                    const { error: errUpdate } = await saEscribirTienda('guardar', { id: idNube, json_data: bNube });
                     if (errUpdate) throw errUpdate;
 
                     // 3. Actualizamos memoria local
@@ -22815,7 +22815,7 @@ function abrirOnboardingManual() {
             }
         }
 
-        // ==========================================
+    // ==========================================
         // 💵 PUENTE AGENDA -> CAJA CON VALIDACIÓN BOLD (OPTIMIZADO PWA)
         // ==========================================
         function cargarTurnoACaja(idCita) {
